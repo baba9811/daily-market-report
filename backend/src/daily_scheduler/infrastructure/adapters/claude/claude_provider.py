@@ -115,8 +115,14 @@ class ClaudeNewsProvider(NewsProviderPort):
             s.claude_model,
             "--effort",
             "max",
+            "--output-format",
+            "text",
+            "--permission-mode",
+            "bypassPermissions",
             "--tools",
             "WebSearch,WebFetch",
+            "--disallowed-tools",
+            "Write,Edit,Bash,ExitPlanMode,EnterPlanMode,TodoWrite",
         ]
         cwd = str(s.db_path.parent.parent)
 

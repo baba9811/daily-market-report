@@ -2,11 +2,167 @@
 
 from __future__ import annotations
 
+import json
+
 from daily_scheduler.infrastructure.adapters.claude.parser import (
     extract_html_report,
     extract_recommendations,
+    extract_report_json,
     extract_summary,
+    parse_report_content,
+    recommendations_from_content,
 )
+
+# ── JSON-based parsing tests ────────────────────────────────
+
+
+SAMPLE_JSON = {
+    "report_date": "2026-03-17",
+    "market_summary": "Markets rallied on tech earnings.",
+    "alert_banner": "",
+    "news_items": [
+        {
+            "category": "tech",
+            "headline": "NVIDIA GTC 2026",
+            "source": "CNBC",
+            "published_at": "2026-03-17 10:00",
+            "summary": "AI infrastructure expansion announced.",
+            "impact_level": "high",
+            "affected_sectors": ["Semiconductor"],
+        }
+    ],
+    "causal_chains": [
+        {
+            "title": "AI Boom",
+            "trigger": "GTC announcement",
+            "chain": ["AI capex up", "Memory demand up", "SK Hynix benefits"],
+            "trading_implication": "Long semiconductors",
+        }
+    ],
+    "risk_matrix": [
+        {"risk": "War escalation", "probability": "medium", "impact": "high", "mitigation": "Hedge"}
+    ],
+    "sector_analysis": [
+        {
+            "sector": "Tech",
+            "etf_ticker": "XLK",
+            "change_percent": 1.5,
+            "volume_vs_avg": 1.3,
+            "signal": "bullish",
+        }
+    ],
+    "sentiment": [{"name": "VIX", "value": 22.5, "interpretation": "fear", "trend": "rising"}],
+    "technicals": [
+        {
+            "ticker": "NVDA",
+            "name": "NVIDIA",
+            "rsi_14": 55.0,
+            "macd_signal": "bullish_cross",
+            "above_50d_ma": True,
+            "above_200d_ma": True,
+            "volume_ratio": 1.2,
+            "week_52_high": 210.0,
+            "week_52_low": 80.0,
+            "pct_from_52w_high": -14.0,
+        }
+    ],
+    "recommendations": [
+        {
+            "ticker": "NVDA",
+            "name": "NVIDIA",
+            "market": "NASDAQ",
+            "direction": "LONG",
+            "timeframe": "SWING",
+            "entry_price": 181.0,
+            "target_price": 196.0,
+            "stop_loss": 174.0,
+            "sector": "AI",
+            "rationale": "GTC catalyst",
+            "causal_chain_summary": "GTC → capex → NVDA",
+            "risk_reward_ratio": 2.14,
+            "confidence": "high",
+        }
+    ],
+    "upcoming_events": [
+        {
+            "date": "2026-03-18",
+            "event": "FOMC",
+            "expected_impact": "high",
+            "details": "Rate decision",
+        }
+    ],
+    "past_performance_commentary": "First report",
+    "disclaimer": "Not investment advice.",
+}
+
+
+class TestExtractReportJson:
+    def test_extracts_json_from_code_block(self):
+        raw = f"```json\n{json.dumps(SAMPLE_JSON)}\n```"
+        result = extract_report_json(raw)
+        assert result is not None
+        assert result["report_date"] == "2026-03-17"
+
+    def test_extracts_raw_json(self):
+        raw = json.dumps(SAMPLE_JSON)
+        result = extract_report_json(raw)
+        assert result is not None
+        assert result["report_date"] == "2026-03-17"
+
+    def test_returns_none_on_invalid(self):
+        result = extract_report_json("This is not JSON at all")
+        assert result is None
+
+    def test_returns_none_on_malformed_json(self):
+        result = extract_report_json('```json\n{"broken": \n```')
+        assert result is None
+
+    def test_ignores_preamble_around_code_block(self):
+        raw = f"Here is the report:\n```json\n{json.dumps(SAMPLE_JSON)}\n```\nDone."
+        result = extract_report_json(raw)
+        assert result is not None
+
+
+class TestParseReportContent:
+    def test_full_parse(self):
+        raw = f"```json\n{json.dumps(SAMPLE_JSON)}\n```"
+        content = parse_report_content(raw)
+        assert content is not None
+        assert content.report_date == "2026-03-17"
+        assert len(content.news_items) == 1
+        assert content.news_items[0].headline == "NVIDIA GTC 2026"
+        assert len(content.causal_chains) == 1
+        assert len(content.causal_chains[0].chain) == 3
+        assert len(content.recommendations) == 1
+        assert content.recommendations[0].entry_price == 181.0
+        assert content.sentiment[0].value == 22.5
+        assert content.technicals[0].rsi_14 == 55.0
+
+    def test_returns_none_on_invalid(self):
+        content = parse_report_content("not json")
+        assert content is None
+
+    def test_handles_missing_optional_fields(self):
+        minimal = {"report_date": "2026-03-17"}
+        raw = f"```json\n{json.dumps(minimal)}\n```"
+        content = parse_report_content(raw)
+        assert content is not None
+        assert content.news_items == []
+        assert content.recommendations == []
+
+
+class TestRecommendationsFromContent:
+    def test_converts_to_dicts(self):
+        raw = f"```json\n{json.dumps(SAMPLE_JSON)}\n```"
+        content = parse_report_content(raw)
+        assert content is not None
+        recs = recommendations_from_content(content)
+        assert len(recs) == 1
+        assert recs[0]["ticker"] == "NVDA"
+        assert recs[0]["entry_price"] == 181.0
+
+
+# ── Legacy parsing tests ────────────────────────────────────
 
 
 class TestExtractRecommendations:
@@ -67,10 +223,7 @@ class TestExtractRecommendations:
 
 class TestExtractHtmlReport:
     def test_extracts_full_html_document(self):
-        raw = (
-            "preamble\n<!DOCTYPE html><html>"
-            "<body>c</body></html>\nmore"
-        )
+        raw = "preamble\n<!DOCTYPE html><html><body>c</body></html>\nmore"
         html = extract_html_report(raw)
         assert html.startswith("<!DOCTYPE html>")
         assert html.endswith("</html>")

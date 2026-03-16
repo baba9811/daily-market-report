@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="{{ language }}" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>Daily News &amp; Trading Report - {{ report.report_date }}</title>
+<!--[if mso]><style>table{border-collapse:collapse;}td{font-family:Arial,sans-serif;}</style><![endif]-->
+</head>
+<body style="margin:0;padding:0;background-color:#0f172a;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Noto Sans KR',sans-serif;color:#e2e8f0;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;">
+
+{# ═══ Outer wrapper table ═══ #}
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#0f172a;">
+<tr><td align="center" style="padding:16px 8px;">
+
+{# ═══ Main content (max 640px) ═══ #}
+<table role="presentation" width="640" cellpadding="0" cellspacing="0" border="0" style="max-width:640px;width:100%;">
+
+{# ─── HEADER ─── #}
+<tr><td style="background:linear-gradient(135deg,#1e293b,#0f172a);border-bottom:2px solid #3b82f6;padding:20px 24px;border-radius:12px 12px 0 0;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr>
+    <td style="font-size:22px;font-weight:800;color:#e2e8f0;letter-spacing:-0.5px;">Daily News &amp; <span style="color:#3b82f6;">Trading Report</span></td>
+  </tr>
+  <tr>
+    <td style="font-size:13px;color:#94a3b8;padding-top:4px;">{{ report.report_date }}{% if language == 'ko' %} · KST 기준{% endif %}</td>
+  </tr>
+  </table>
+</td></tr>
+
+{# ─── ALERT BANNER ─── #}
+{% if report.alert_banner %}
+<tr><td style="padding:12px 24px 0;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr><td style="background-color:rgba(245,158,11,0.12);border:1px solid #f59e0b;border-radius:8px;padding:12px 16px;">
+    <span style="font-size:14px;font-weight:700;color:#f59e0b;">{{ report.alert_banner }}</span>
+  </td></tr>
+  </table>
+</td></tr>
+{% endif %}
+
+{# ─── MARKET SNAPSHOT ─── #}
+{% if market %}
+<tr><td style="padding:16px 24px 0;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#1e293b;border-radius:8px;">
+  <tr><td style="padding:16px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="font-size:13px;color:#e2e8f0;">
+    {# Indices row #}
+    {% for idx in market.indices %}
+    {% if loop.index0 % 3 == 0 %}<tr>{% endif %}
+    <td width="33%" style="padding:6px 4px;text-align:center;">
+      <span style="color:#94a3b8;font-size:11px;display:block;">{{ idx.name }}</span>
+      <span style="font-weight:700;font-size:14px;">{{ "{:,.0f}".format(idx.price) if idx.price > 100 else "{:,.2f}".format(idx.price) }}</span>
+      <span style="font-size:11px;color:{{ '#10b981' if idx.change_percent >= 0 else '#ef4444' }};font-weight:600;">
+        {{ '+' if idx.change_percent >= 0 else '' }}{{ "{:.2f}".format(idx.change_percent) }}%
+      </span>
+    </td>
+    {% if loop.index0 % 3 == 2 or loop.last %}</tr>{% endif %}
+    {% endfor %}
+    </table>
+
+    {# FX / Commodities row #}
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="font-size:12px;color:#94a3b8;margin-top:8px;border-top:1px solid #334155;padding-top:8px;">
+    <tr>
+    {% for pair, rate in market.fx_rates.items() %}
+      <td style="padding:4px;text-align:center;">
+        <span style="display:block;font-size:10px;">{{ pair }}</span>
+        <span style="color:#e2e8f0;font-weight:600;font-size:12px;">{{ "{:,.2f}".format(rate) }}</span>
+      </td>
+    {% endfor %}
+    {% for name, price in market.commodities.items() %}
+      <td style="padding:4px;text-align:center;">
+        <span style="display:block;font-size:10px;">{{ name.split(' ')[0] }}</span>
+        <span style="color:#e2e8f0;font-weight:600;font-size:12px;">${{ "{:,.0f}".format(price) if price > 100 else "{:,.2f}".format(price) }}</span>
+      </td>
+    {% endfor %}
+    </tr>
+    </table>
+
+    {# VIX #}
+    {% if market.vix is not none %}
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:8px;border-top:1px solid #334155;padding-top:8px;">
+    <tr>
+      <td style="font-size:12px;color:#94a3b8;">VIX</td>
+      <td style="font-size:14px;font-weight:700;color:{{ '#ef4444' if market.vix >= 30 else '#f59e0b' if market.vix >= 20 else '#10b981' }};text-align:right;">
+        {{ "{:.2f}".format(market.vix) }}
+        {% if market.vix >= 30 %} (Extreme Fear){% elif market.vix >= 20 %} (Elevated){% else %} (Low Vol){% endif %}
+      </td>
+    </tr>
+    </table>
+    {% endif %}
+  </td></tr>
+  </table>
+</td></tr>
+{% endif %}
+
+{# ─── MARKET SUMMARY ─── #}
+{% if report.market_summary %}
+<tr><td style="padding:16px 24px 0;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#1e293b;border-radius:8px;">
+  <tr><td style="padding:16px;">
+    <div style="font-size:13px;line-height:1.6;color:#cbd5e1;">{{ report.market_summary }}</div>
+  </td></tr>
+  </table>
+</td></tr>
+{% endif %}
+
+{# ─── SECTOR ETF HEATMAP ─── #}
+{% if market and market.sector_etfs %}
+<tr><td style="padding:16px 24px 0;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#1e293b;border-radius:8px;">
+  <tr><td style="padding:12px 16px 8px;font-size:15px;font-weight:700;color:#e2e8f0;">{% if language == 'ko' %}섹터 ETF{% else %}Sector ETFs{% endif %}</td></tr>
+  <tr><td style="padding:0 16px 12px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="2" border="0" style="font-size:11px;">
+    {% for etf in market.sector_etfs %}
+    {% if loop.index0 % 3 == 0 %}<tr>{% endif %}
+    <td width="33%" style="background-color:{{ 'rgba(16,185,129,0.15)' if etf.change_percent > 0.3 else 'rgba(239,68,68,0.15)' if etf.change_percent < -0.3 else 'rgba(100,116,139,0.15)' }};padding:6px;text-align:center;border-radius:4px;">
+      <span style="color:#94a3b8;display:block;">{{ etf.name }}</span>
+      <span style="font-weight:700;color:{{ '#10b981' if etf.change_percent > 0 else '#ef4444' if etf.change_percent < 0 else '#e2e8f0' }};">
+        {{ '+' if etf.change_percent > 0 else '' }}{{ "{:.2f}".format(etf.change_percent) }}%
+      </span>
+    </td>
+    {% if loop.index0 % 3 == 2 or loop.last %}</tr>{% endif %}
+    {% endfor %}
+    </table>
+  </td></tr>
+  </table>
+</td></tr>
+{% endif %}
+
+{# ─── SENTIMENT ─── #}
+{% if report.sentiment %}
+<tr><td style="padding:16px 24px 0;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#1e293b;border-radius:8px;">
+  <tr><td style="padding:12px 16px 8px;font-size:15px;font-weight:700;color:#e2e8f0;">{% if language == 'ko' %}시장 심리{% else %}Market Sentiment{% endif %}</td></tr>
+  <tr><td style="padding:0 16px 12px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="font-size:13px;">
+    {% for s in report.sentiment %}
+    <tr>
+      <td style="padding:4px 0;color:#94a3b8;">{{ s.name }}</td>
+      <td style="padding:4px 8px;font-weight:700;text-align:center;color:{{ '#ef4444' if 'fear' in s.interpretation else '#10b981' if 'greed' in s.interpretation else '#f59e0b' }};">{{ "{:.1f}".format(s.value) }}</td>
+      <td style="padding:4px 0;font-size:12px;color:#94a3b8;text-align:right;">{{ s.interpretation | replace('_', ' ') | title }} · {{ s.trend | title }}</td>
+    </tr>
+    {% endfor %}
+    </table>
+  </td></tr>
+  </table>
+</td></tr>
+{% endif %}
+
+{# ─── NEWS ─── #}
+{% if report.news_items %}
+<tr><td style="padding:16px 24px 0;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr><td style="font-size:17px;font-weight:700;color:#e2e8f0;padding-bottom:8px;">{% if language == 'ko' %}주요 뉴스{% else %}Top News{% endif %}</td></tr>
+  </table>
+  {% for news in report.news_items %}
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#1e293b;border-radius:8px;margin-bottom:8px;{% if news.impact_level == 'high' %}border-left:3px solid #ef4444;{% elif news.impact_level == 'medium' %}border-left:3px solid #f59e0b;{% else %}border-left:3px solid #3b82f6;{% endif %}">
+  <tr><td style="padding:12px 16px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+    <tr>
+      <td>
+        <span style="display:inline-block;background-color:{{ '#7c3aed20' if news.category in ['tech','ai'] else '#dc262620' if news.category in ['geopolitics','war'] else '#f59e0b20' if news.category in ['policy','monetary'] else '#3b82f620' }};color:{{ '#a78bfa' if news.category in ['tech','ai'] else '#fca5a5' if news.category in ['geopolitics','war'] else '#fcd34d' if news.category in ['policy','monetary'] else '#93c5fd' }};font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;">{{ news.category }}</span>
+      </td>
+    </tr>
+    <tr><td style="padding-top:6px;font-size:14px;font-weight:600;color:#e2e8f0;">{{ news.headline }}</td></tr>
+    <tr><td style="padding-top:4px;font-size:12px;line-height:1.5;color:#94a3b8;">{{ news.summary }}</td></tr>
+    <tr><td style="padding-top:4px;font-size:10px;color:#64748b;">{{ news.source }} · {{ news.published_at }}</td></tr>
+    </table>
+  </td></tr>
+  </table>
+  {% endfor %}
+</td></tr>
+{% endif %}
+
+{# ─── CAUSAL CHAINS ─── #}
+{% if report.causal_chains %}
+<tr><td style="padding:16px 24px 0;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr><td style="font-size:17px;font-weight:700;color:#e2e8f0;padding-bottom:8px;">{% if language == 'ko' %}인과 분석{% else %}Causal Analysis{% endif %}</td></tr>
+  </table>
+  {% for chain in report.causal_chains %}
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#1e293b;border-radius:8px;margin-bottom:8px;">
+  <tr><td style="padding:12px 16px;">
+    <div style="font-size:14px;font-weight:700;color:#3b82f6;margin-bottom:6px;">{{ chain.title }}</div>
+    <div style="font-size:12px;color:#f59e0b;margin-bottom:6px;">{{ chain.trigger }}</div>
+    {% for link in chain.chain %}
+    <div style="font-size:12px;color:#94a3b8;padding:2px 0 2px 12px;border-left:2px solid #334155;">→ {{ link.step }}</div>
+    {% endfor %}
+    {% if chain.trading_implication %}
+    <div style="font-size:12px;font-weight:600;color:#10b981;margin-top:6px;padding-top:6px;border-top:1px solid #334155;">{{ chain.trading_implication }}</div>
+    {% endif %}
+  </td></tr>
+  </table>
+  {% endfor %}
+</td></tr>
+{% endif %}
+
+{# ─── TECHNICALS ─── #}
+{% if report.technicals %}
+<tr><td style="padding:16px 24px 0;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#1e293b;border-radius:8px;">
+  <tr><td style="padding:12px 16px 8px;font-size:15px;font-weight:700;color:#e2e8f0;">{% if language == 'ko' %}기술적 분석{% else %}Technical Analysis{% endif %}</td></tr>
+  <tr><td style="padding:0 16px 12px;">
+    <table role="presentation" width="100%" cellpadding="4" cellspacing="0" border="0" style="font-size:11px;">
+    <tr style="color:#64748b;">
+      <td style="border-bottom:1px solid #334155;padding-bottom:4px;">{% if language == 'ko' %}종목{% else %}Stock{% endif %}</td>
+      <td style="border-bottom:1px solid #334155;text-align:center;">RSI</td>
+      <td style="border-bottom:1px solid #334155;text-align:center;">MACD</td>
+      <td style="border-bottom:1px solid #334155;text-align:center;">50D MA</td>
+      <td style="border-bottom:1px solid #334155;text-align:center;">200D MA</td>
+      <td style="border-bottom:1px solid #334155;text-align:right;">52W High %</td>
+    </tr>
+    {% for t in report.technicals %}
+    <tr>
+      <td style="color:#e2e8f0;font-weight:600;padding:4px 0;">{{ t.name }}</td>
+      <td style="text-align:center;color:{{ '#ef4444' if t.rsi_14 and t.rsi_14 > 70 else '#10b981' if t.rsi_14 and t.rsi_14 < 30 else '#e2e8f0' }};">{{ "{:.0f}".format(t.rsi_14) if t.rsi_14 else '-' }}</td>
+      <td style="text-align:center;color:{{ '#10b981' if t.macd_signal == 'bullish_cross' else '#ef4444' if t.macd_signal == 'bearish_cross' else '#94a3b8' }};">{{ '▲' if t.macd_signal == 'bullish_cross' else '▼' if t.macd_signal == 'bearish_cross' else '—' }}</td>
+      <td style="text-align:center;color:{{ '#10b981' if t.above_50d_ma else '#ef4444' }};">{{ '✓' if t.above_50d_ma else '✗' }}</td>
+      <td style="text-align:center;color:{{ '#10b981' if t.above_200d_ma else '#ef4444' }};">{{ '✓' if t.above_200d_ma else '✗' }}</td>
+      <td style="text-align:right;color:#94a3b8;">{{ "{:.1f}%".format(t.pct_from_52w_high) if t.pct_from_52w_high is not none else '-' }}</td>
+    </tr>
+    {% endfor %}
+    </table>
+  </td></tr>
+  </table>
+</td></tr>
+{% endif %}
+
+{# ─── RECOMMENDATIONS ─── #}
+{% if report.recommendations %}
+<tr><td style="padding:16px 24px 0;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr><td style="font-size:17px;font-weight:700;color:#e2e8f0;padding-bottom:8px;">{% if language == 'ko' %}트레이딩 추천{% else %}Trading Recommendations{% endif %}</td></tr>
+  </table>
+
+  {% if report.past_performance_commentary %}
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:8px;">
+  <tr><td style="background-color:rgba(59,130,246,0.1);border-radius:8px;padding:10px 16px;font-size:12px;color:#93c5fd;">
+    {{ report.past_performance_commentary }}
+  </td></tr>
+  </table>
+  {% endif %}
+
+  {% for rec in report.recommendations %}
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#1e293b;border-radius:8px;margin-bottom:8px;">
+  <tr><td style="padding:14px 16px;">
+    {# Header: name + badges #}
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+    <tr>
+      <td>
+        <span style="font-size:16px;font-weight:700;color:#e2e8f0;">{{ rec.name }}</span>
+        <span style="font-size:12px;color:#64748b;margin-left:4px;">{{ rec.ticker }} · {{ rec.market }}</span>
+      </td>
+      <td style="text-align:right;">
+        <span style="display:inline-block;background-color:{{ '#10b98120' if rec.direction == 'LONG' else '#ef444420' }};color:{{ '#10b981' if rec.direction == 'LONG' else '#ef4444' }};font-size:11px;font-weight:700;padding:2px 10px;border-radius:4px;">{{ rec.direction }}</span>
+        <span style="display:inline-block;background-color:#3b82f620;color:#93c5fd;font-size:10px;font-weight:600;padding:2px 8px;border-radius:4px;margin-left:4px;">{{ rec.timeframe }}</span>
+        {% if rec.confidence == 'high' %}
+        <span style="display:inline-block;background-color:#f59e0b20;color:#fcd34d;font-size:10px;font-weight:600;padding:2px 8px;border-radius:4px;margin-left:4px;">HIGH CONF</span>
+        {% endif %}
+      </td>
+    </tr>
+    </table>
+
+    {# Prices #}
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:10px;">
+    <tr>
+      <td width="33%" style="text-align:center;padding:8px;background-color:#0f172a;border-radius:6px;">
+        <span style="display:block;font-size:10px;color:#94a3b8;">{% if language == 'ko' %}진입{% else %}Entry{% endif %}</span>
+        <span style="font-size:15px;font-weight:700;color:#e2e8f0;">{{ "{:,.0f}".format(rec.entry_price) if rec.entry_price > 1000 else "{:,.2f}".format(rec.entry_price) }}</span>
+      </td>
+      <td width="4px"></td>
+      <td width="33%" style="text-align:center;padding:8px;background-color:#0f172a;border-radius:6px;">
+        <span style="display:block;font-size:10px;color:#94a3b8;">{% if language == 'ko' %}목표{% else %}Target{% endif %}</span>
+        <span style="font-size:15px;font-weight:700;color:#10b981;">{{ "{:,.0f}".format(rec.target_price) if rec.target_price > 1000 else "{:,.2f}".format(rec.target_price) }}</span>
+      </td>
+      <td width="4px"></td>
+      <td width="33%" style="text-align:center;padding:8px;background-color:#0f172a;border-radius:6px;">
+        <span style="display:block;font-size:10px;color:#94a3b8;">{% if language == 'ko' %}손절{% else %}Stop{% endif %}</span>
+        <span style="font-size:15px;font-weight:700;color:#ef4444;">{{ "{:,.0f}".format(rec.stop_loss) if rec.stop_loss > 1000 else "{:,.2f}".format(rec.stop_loss) }}</span>
+      </td>
+    </tr>
+    </table>
+
+    {# R:R ratio + sector #}
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:8px;">
+    <tr>
+      <td style="font-size:11px;color:#64748b;">{{ rec.sector }}</td>
+      <td style="font-size:11px;color:#94a3b8;text-align:right;">R:R {{ "{:.1f}".format(rec.risk_reward_ratio) if rec.risk_reward_ratio else '-' }}</td>
+    </tr>
+    </table>
+
+    {# Rationale #}
+    <div style="margin-top:8px;padding-top:8px;border-top:1px solid #334155;font-size:12px;line-height:1.5;color:#94a3b8;">{{ rec.rationale }}</div>
+    {% if rec.causal_chain_summary %}
+    <div style="margin-top:4px;font-size:11px;color:#3b82f6;">{{ rec.causal_chain_summary }}</div>
+    {% endif %}
+  </td></tr>
+  </table>
+  {% endfor %}
+</td></tr>
+{% endif %}
+
+{# ─── RISK MATRIX ─── #}
+{% if report.risk_matrix %}
+<tr><td style="padding:16px 24px 0;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#1e293b;border-radius:8px;">
+  <tr><td style="padding:12px 16px 8px;font-size:15px;font-weight:700;color:#e2e8f0;">{% if language == 'ko' %}리스크 매트릭스{% else %}Risk Matrix{% endif %}</td></tr>
+  <tr><td style="padding:0 16px 12px;">
+    <table role="presentation" width="100%" cellpadding="6" cellspacing="0" border="0" style="font-size:12px;">
+    <tr style="color:#64748b;font-size:11px;">
+      <td style="border-bottom:1px solid #334155;">{% if language == 'ko' %}리스크{% else %}Risk{% endif %}</td>
+      <td style="border-bottom:1px solid #334155;text-align:center;width:60px;">{% if language == 'ko' %}확률{% else %}Prob.{% endif %}</td>
+      <td style="border-bottom:1px solid #334155;text-align:center;width:60px;">{% if language == 'ko' %}영향{% else %}Impact{% endif %}</td>
+      <td style="border-bottom:1px solid #334155;">{% if language == 'ko' %}대응{% else %}Mitigation{% endif %}</td>
+    </tr>
+    {% for r in report.risk_matrix %}
+    <tr>
+      <td style="color:#e2e8f0;padding:6px 4px 6px 0;">{{ r.risk }}</td>
+      <td style="text-align:center;color:{{ '#ef4444' if r.probability == 'high' else '#f59e0b' if r.probability == 'medium' else '#10b981' }};">{{ r.probability | upper }}</td>
+      <td style="text-align:center;color:{{ '#ef4444' if r.impact == 'high' else '#f59e0b' if r.impact == 'medium' else '#10b981' }};">{{ r.impact | upper }}</td>
+      <td style="color:#94a3b8;font-size:11px;">{{ r.mitigation }}</td>
+    </tr>
+    {% endfor %}
+    </table>
+  </td></tr>
+  </table>
+</td></tr>
+{% endif %}
+
+{# ─── UPCOMING EVENTS ─── #}
+{% if report.upcoming_events %}
+<tr><td style="padding:16px 24px 0;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#1e293b;border-radius:8px;">
+  <tr><td style="padding:12px 16px 8px;font-size:15px;font-weight:700;color:#e2e8f0;">{% if language == 'ko' %}향후 주요 이벤트{% else %}Upcoming Catalysts{% endif %}</td></tr>
+  <tr><td style="padding:0 16px 12px;">
+    <table role="presentation" width="100%" cellpadding="4" cellspacing="0" border="0" style="font-size:12px;">
+    {% for ev in report.upcoming_events %}
+    <tr>
+      <td style="color:#64748b;white-space:nowrap;width:80px;vertical-align:top;">{{ ev.date }}</td>
+      <td style="color:#e2e8f0;">
+        {{ ev.event }}
+        {% if ev.details %}<br><span style="color:#94a3b8;font-size:11px;">{{ ev.details }}</span>{% endif %}
+      </td>
+      <td style="text-align:right;width:50px;vertical-align:top;">
+        <span style="display:inline-block;background-color:{{ '#ef444420' if ev.expected_impact == 'high' else '#f59e0b20' if ev.expected_impact == 'medium' else '#3b82f620' }};color:{{ '#ef4444' if ev.expected_impact == 'high' else '#f59e0b' if ev.expected_impact == 'medium' else '#93c5fd' }};font-size:9px;font-weight:700;padding:1px 6px;border-radius:3px;">{{ ev.expected_impact | upper }}</td>
+    </tr>
+    {% endfor %}
+    </table>
+  </td></tr>
+  </table>
+</td></tr>
+{% endif %}
+
+{# ─── DISCLAIMER ─── #}
+<tr><td style="padding:24px 24px 8px;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr><td style="border-top:1px solid #334155;padding-top:16px;font-size:10px;line-height:1.5;color:#475569;text-align:center;">
+    {{ report.disclaimer or 'This report is AI-generated and does not constitute investment advice. All investment decisions should be made at your own judgment and risk.' }}
+  </td></tr>
+  <tr><td style="font-size:9px;color:#334155;text-align:center;padding-top:8px;padding-bottom:16px;">
+    Powered by Claude AI · Generated {{ report.report_date }}
+  </td></tr>
+  </table>
+</td></tr>
+
+</table>
+</td></tr>
+</table>
+
+</body>
+</html>

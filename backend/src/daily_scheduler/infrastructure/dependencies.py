@@ -38,6 +38,9 @@ from daily_scheduler.infrastructure.adapters.persistence.recommendation_reposito
 from daily_scheduler.infrastructure.adapters.persistence.report_repository import (
     SQLAlchemyReportRepository,
 )
+from daily_scheduler.infrastructure.adapters.template.renderer import (
+    Jinja2ReportRenderer,
+)
 
 
 def get_report_repo(
@@ -76,6 +79,11 @@ def get_email_sender() -> SmtpEmailSender:
     return SmtpEmailSender(get_settings())
 
 
+def get_renderer() -> Jinja2ReportRenderer:
+    """Create a report renderer."""
+    return Jinja2ReportRenderer()
+
+
 def get_daily_pipeline(db: Session) -> RunDailyPipeline:
     """Wire all adapters into the daily pipeline use case."""
     return RunDailyPipeline(
@@ -85,6 +93,7 @@ def get_daily_pipeline(db: Session) -> RunDailyPipeline:
         finance=get_finance_provider(),
         news=get_news_provider(),
         email=get_email_sender(),
+        renderer=get_renderer(),
     )
 
 

@@ -19,6 +19,7 @@ from daily_scheduler.application.use_cases.fetch_market_data import (
 from daily_scheduler.application.use_cases.update_prices import (
     UpdatePrices,
 )
+from daily_scheduler.domain.entities.market_context import MarketContext
 from daily_scheduler.domain.entities.recommendation import (
     Recommendation,
 )
@@ -34,6 +35,9 @@ from daily_scheduler.domain.ports.price_repository import (
 from daily_scheduler.domain.ports.recommendation_repository import (
     RecommendationRepositoryPort,
 )
+from daily_scheduler.domain.ports.report_renderer import (
+    ReportRendererPort,
+)
 from daily_scheduler.domain.ports.report_repository import (
     ReportRepositoryPort,
 )
@@ -41,6 +45,8 @@ from daily_scheduler.infrastructure.adapters.claude.parser import (
     extract_html_report,
     extract_recommendations,
     extract_summary,
+    parse_report_content,
+    recommendations_from_content,
 )
 
 logger = logging.getLogger(__name__)
@@ -49,7 +55,7 @@ logger = logging.getLogger(__name__)
 class RunDailyPipeline:
     """Orchestrate the full daily report generation pipeline."""
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments
         self,
         report_repo: ReportRepositoryPort,
         rec_repo: RecommendationRepositoryPort,
@@ -57,6 +63,7 @@ class RunDailyPipeline:
         finance: FinanceProviderPort,
         news: NewsProviderPort,
         email: EmailSenderPort,
+        renderer: ReportRendererPort,
     ) -> None:
         self._report_repo = report_repo
         self._rec_repo = rec_repo
@@ -64,6 +71,7 @@ class RunDailyPipeline:
         self._finance = finance
         self._news = news
         self._email = email
+        self._renderer = renderer
 
     def execute(self) -> bool:
         """Run the full pipeline. Returns True on success."""
@@ -127,13 +135,16 @@ class RunDailyPipeline:
         market_ctx = market_fetcher.execute()
         market_data_text = market_ctx.to_prompt_text()
         logger.info(
-            "Market data: %d indices, %d FX, %d commodities",
+            "Market data: %d indices, %d FX, %d commodities, %d futures, VIX=%s, %d sector ETFs",
             len(market_ctx.indices),
             len(market_ctx.fx_rates),
             len(market_ctx.commodities),
+            len(market_ctx.futures),
+            market_ctx.vix,
+            len(market_ctx.sector_etfs),
         )
 
-        # Step 5: Generate report via Claude
+        # Step 5: Generate report via Claude (JSON output)
         logger.info("Step 5/8: Generating report via Claude...")
         raw_response, gen_time = self._news.generate_daily_report(
             today,
@@ -147,14 +158,62 @@ class RunDailyPipeline:
             self._email.send_error("Claude CLI returned empty response for daily report.")
             return False
 
-        # Step 6: Parse response
+        # Step 6: Parse response (JSON → HTML, with legacy fallback)
         logger.info("Step 6/8: Parsing report...")
-        html_content = extract_html_report(raw_response)
-        summary = extract_summary(raw_response)
-        rec_data = extract_recommendations(raw_response)
+        html_content, summary, rec_data = self._parse_response(raw_response, market_ctx)
 
         # Step 7: Save report + recommendations
         logger.info("Step 7/8: Saving report...")
+        saved_report = self._save_report(today, html_content, summary, raw_response, gen_time)
+        self._save_recommendations(saved_report.id, rec_data)  # type: ignore[arg-type]
+        self._save_html(today, html_content)
+
+        # Step 8: Send email
+        logger.info("Step 8/8: Sending email...")
+        email_sent = self._email.send(
+            f"[{today}] Daily News & Trading Report",
+            html_content,
+        )
+        if not email_sent:
+            logger.warning("Email sending failed, but report was saved successfully")
+
+        logger.info("Daily pipeline completed successfully!")
+        return True
+
+    def _parse_response(
+        self,
+        raw_response: str,
+        market_ctx: MarketContext,
+    ) -> tuple[str, str, list[dict]]:
+        """Parse Claude response into (html, summary, rec_data)."""
+        report_content = parse_report_content(raw_response)
+        if report_content is not None:
+            logger.info("JSON parse succeeded — rendering HTML from template")
+            from daily_scheduler.config import get_settings
+
+            html_content = self._renderer.render_daily_report(
+                report_content,
+                market=market_ctx,
+                language=get_settings().report_language,
+            )
+            summary = report_content.market_summary[:200]
+            rec_data = recommendations_from_content(report_content)
+        else:
+            logger.warning("JSON parse failed — falling back to legacy HTML extraction")
+            html_content = extract_html_report(raw_response)
+            summary = extract_summary(raw_response)
+            rec_data = extract_recommendations(raw_response)
+        return html_content, summary, rec_data
+
+    def _save_report(
+        self,
+        today: date,
+        html_content: str,
+        summary: str,
+        raw_response: str,
+        gen_time: float,
+    ) -> Report:
+        """Save report to the database and return the saved report."""
         report = Report(
             report_date=today,
             report_type="daily",
@@ -167,10 +226,13 @@ class RunDailyPipeline:
         saved_report = self._report_repo.save(report)
         if saved_report.id is None:
             raise RuntimeError("Report save did not return an ID")
+        return saved_report
 
+    def _save_recommendations(self, report_id: int, rec_data: list[dict]) -> None:
+        """Build Recommendation entities from dicts and persist them."""
         recs = [
             Recommendation(
-                report_id=saved_report.id,
+                report_id=report_id,
                 ticker=r.get("ticker", ""),
                 name=r.get("name", ""),
                 market=r.get("market", ""),
@@ -186,25 +248,7 @@ class RunDailyPipeline:
         ]
         if recs:
             self._rec_repo.save_many(recs)
-
-        logger.info(
-            "Saved report (id=%d) with %d recommendations",
-            saved_report.id,
-            len(recs),
-        )
-        self._save_html(today, html_content)
-
-        # Step 8: Send email
-        logger.info("Step 8/8: Sending email...")
-        email_sent = self._email.send(
-            f"[{today}] Daily News & Trading Report",
-            html_content,
-        )
-        if not email_sent:
-            logger.warning("Email sending failed, but report was saved successfully")
-
-        logger.info("Daily pipeline completed successfully!")
-        return True
+        logger.info("Saved report (id=%d) with %d recommendations", report_id, len(recs))
 
     @staticmethod
     def _save_html(today: date, html_content: str) -> None:
