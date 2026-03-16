@@ -20,9 +20,10 @@ Open-source (Apache 2.0) monorepo with Python backend and Next.js frontend.
 - Frontend tests use Playwright for E2E scenarios
 - Run `make test` before committing
 
-### Code Quality
-- Backend: ruff (lint + format, line-length 100), mypy (strict)
-- Frontend: TypeScript strict mode, ESLint
+### Code Quality & Static Analysis
+- Backend: ruff (lint + format, line-length 100), pyrefly (type checking), mypy (strict)
+- Frontend: ESLint (Next.js rules), oxlint (additional bug detection), TypeScript strict
+- All static analysis runs automatically via PostToolUse hooks on file edit
 - All code must be in English (comments, variable names, UI strings)
 - Report/email language is controlled by REPORT_LANGUAGE env var
 
@@ -30,6 +31,15 @@ Open-source (Apache 2.0) monorepo with Python backend and Next.js frontend.
 - No Co-Authored-By lines in commit messages
 - Conventional commits (feat:, fix:, refactor:, test:, docs:, chore:)
 - Secrets (.env, *.db) must NEVER be committed
+
+### Development Methodology (SDD + TDD)
+- **Schema-Driven Design**: Define schemas/types/interfaces BEFORE implementation
+  - Domain entities → Ports → DTOs → API schemas → Frontend types
+- **Test-Driven Development**: Write tests BEFORE code
+  - Red → Green → Refactor cycle
+  - Backend: pytest with in-memory SQLite
+  - Frontend: Playwright E2E via MCP tools
+- Run `make test` before committing — includes pytest, pyrefly, typecheck, oxlint
 
 ### Architecture Principles
 - Hexagonal Architecture: domain logic has no framework dependencies

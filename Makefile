@@ -27,14 +27,18 @@ dev-backend: ## Start FastAPI dev server (auto-reload)
 dev-frontend: ## Start Next.js dev server
 	cd frontend && yarn dev
 
-test: ## Run all tests (backend unit + frontend typecheck)
+test: ## Run all tests (backend unit + frontend typecheck + static analysis)
 	cd backend && uv run pytest tests/ -v
+	cd backend && uv run pyrefly check src/
 	cd frontend && yarn typecheck
+	cd frontend && yarn oxlint
 
 lint: ## Run linting and static analysis
 	cd backend && uv run ruff check src/
 	cd backend && uv run ruff format --check src/
+	cd backend && uv run pyrefly check src/
 	cd frontend && yarn lint
+	cd frontend && yarn oxlint
 
 format: ## Auto-format all code
 	cd backend && uv run ruff check --fix src/

@@ -27,6 +27,7 @@ dev = [
     "pytest-cov>=5.0",
     "ruff>=0.8",
     "mypy>=1.13",
+    "pyrefly>=0.56",
 ]
 
 [project.scripts]
@@ -51,6 +52,10 @@ python_version = "3.11"
 strict = true
 warn_return_any = true
 warn_unused_configs = true
+
+[tool.pyrefly]
+project_includes = ["src/"]
+python_version = "3.11"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
