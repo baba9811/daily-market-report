@@ -16,7 +16,15 @@ if [[ "$filepath" == */backend/* && "$filepath" == *.py ]]; then
   uv run ruff check --fix "$filepath"
   uv run pyrefly check "$filepath" --warn "implicit-any,unannotated-return"
   uv run pylint "$filepath"
-  exit $?
+  lint_exit=$?
+
+  # Auto-regenerate OpenAPI types when schema files change
+  if [[ "$filepath" == */schemas/*.py ]] || [[ "$filepath" == */routes/*.py ]]; then
+    cd "$PROJECT_ROOT" || exit 0
+    make generate-types 2>/dev/null &
+  fi
+
+  exit $lint_exit
 fi
 
 # TypeScript/JavaScript files in frontend

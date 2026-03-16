@@ -8,7 +8,7 @@ from pathlib import Path
 from pydantic import SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-PROJECT_ROOT = Path(__file__).resolve().parents[4]  # daily-scheduler/
+PROJECT_ROOT = Path(__file__).resolve().parents[3]  # daily-scheduler/
 ENV_FILE = PROJECT_ROOT / ".env"
 
 
