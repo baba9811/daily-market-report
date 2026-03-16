@@ -1,4 +1,5 @@
-.PHONY: all setup dev dev-backend dev-frontend test lint format generate-types build run serve check install-scheduler clean help
+.PHONY: all setup dev dev-backend dev-frontend test lint format generate-types build run serve check \
+	scheduler-install scheduler-uninstall scheduler-status scheduler-start scheduler-stop clean help
 
 # ============================================================
 # Daily Scheduler - Development Commands
@@ -15,10 +16,16 @@ setup: ## Initial project setup (run once)
 	@echo ""
 	@echo "Setup complete! Edit .env with your credentials, then run: make"
 
-dev: ## Start backend + frontend dev servers
+dev: ## Start backend + frontend + scheduler
 	@echo "Starting backend on http://localhost:8000"
 	@echo "Starting frontend on http://localhost:3000"
-	@$(MAKE) -j2 dev-backend dev-frontend
+	@echo "Starting scheduler (launchd)..."
+	@bash scheduler/install.sh
+	@trap 'echo ""; echo "Stopping scheduler..."; \
+		launchctl unload $(HOME)/Library/LaunchAgents/com.dailyscheduler.report.plist 2>/dev/null; \
+		echo "All services stopped."' INT TERM; \
+		$(MAKE) -j2 dev-backend dev-frontend; \
+		wait
 
 dev-backend: ## Start FastAPI dev server (auto-reload)
 	cd backend && uv run uvicorn daily_scheduler.main:app \
@@ -62,8 +69,24 @@ serve: ## Start production server (API + built frontend)
 check: ## Verify configuration and dependencies
 	cd backend && uv run daily-scheduler check
 
-install-scheduler: ## Install macOS launchd scheduler
+scheduler-install: ## Install & load launchd scheduler
 	bash scheduler/install.sh
+
+scheduler-uninstall: ## Unload & remove launchd scheduler
+	launchctl unload $(HOME)/Library/LaunchAgents/com.dailyscheduler.report.plist 2>/dev/null || true
+	rm -f $(HOME)/Library/LaunchAgents/com.dailyscheduler.report.plist
+	@echo "Scheduler uninstalled."
+
+scheduler-status: ## Show scheduler status
+	@launchctl list | grep dailyscheduler || echo "Scheduler is not loaded."
+
+scheduler-start: ## Manually trigger scheduler now
+	launchctl start com.dailyscheduler.report
+	@echo "Scheduler triggered."
+
+scheduler-stop: ## Unload scheduler (stop scheduled runs)
+	launchctl unload $(HOME)/Library/LaunchAgents/com.dailyscheduler.report.plist 2>/dev/null || true
+	@echo "Scheduler stopped."
 
 clean: ## Remove all generated files
 	rm -rf backend/.venv frontend/node_modules frontend/.next

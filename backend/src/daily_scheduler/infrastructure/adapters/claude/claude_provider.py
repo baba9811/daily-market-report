@@ -37,12 +37,14 @@ class ClaudeNewsProvider(NewsProviderPort):
         report_date: date,
         retrospective_context: str,
         weekly_lessons: str = "",
+        market_data: str = "",
     ) -> tuple[str, float]:
         """Generate a daily report via Claude CLI."""
         prompt = self._build_daily_prompt(
             report_date,
             retrospective_context,
             weekly_lessons,
+            market_data,
         )
         return self._call_claude(prompt)
 
@@ -65,6 +67,7 @@ class ClaudeNewsProvider(NewsProviderPort):
         report_date: date,
         retrospective_context: str,
         weekly_lessons: str,
+        market_data: str,
     ) -> str:
         template = self._jinja.get_template(
             "daily_report.j2",
@@ -73,6 +76,7 @@ class ClaudeNewsProvider(NewsProviderPort):
             date=report_date.isoformat(),
             retrospective=retrospective_context,
             weekly_lessons=weekly_lessons,
+            market_data=market_data,
             language=self._settings.report_language,
         )
 
@@ -103,6 +107,12 @@ class ClaudeNewsProvider(NewsProviderPort):
             s.claude_cli_path,
             "-p",
             prompt,
+            "--model",
+            s.claude_model,
+            "--effort",
+            "max",
+            "--permission-mode",
+            "bypassPermissions",
             "--allowedTools",
             "WebSearch,WebFetch",
         ]

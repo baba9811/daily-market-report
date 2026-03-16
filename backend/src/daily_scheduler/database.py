@@ -17,6 +17,11 @@ class Base(DeclarativeBase):
 def get_engine(database_url: str | None = None) -> Engine:
     """Create a SQLAlchemy engine."""
     url = database_url or get_settings().database_url
+    if url.startswith("sqlite:///") and not url.startswith("sqlite:////"):
+        from daily_scheduler.config import PROJECT_ROOT
+
+        relative_path = url.replace("sqlite:///", "")
+        url = f"sqlite:///{PROJECT_ROOT / relative_path}"
     return create_engine(url, echo=False, connect_args={"check_same_thread": False})
 
 

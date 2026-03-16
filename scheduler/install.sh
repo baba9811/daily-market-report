@@ -4,47 +4,58 @@ set -euo pipefail
 # ============================================================
 # Daily Scheduler - Install macOS launchd Job
 # ============================================================
+# Reads SCHEDULE_TIME from .env (default: 07:30)
+# Converts KST target time to local system timezone automatically.
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 PLIST_TEMPLATE="$SCRIPT_DIR/com.dailyscheduler.report.plist"
 PLIST_NAME="com.dailyscheduler.report.plist"
 PLIST_DEST="$HOME/Library/LaunchAgents/$PLIST_NAME"
+ENV_FILE="$PROJECT_DIR/.env"
 
 echo "=== Daily Scheduler - Installer ==="
 echo ""
 
-# Detect timezone and calculate hour
-SYSTEM_TZ=$(date +%Z)
-echo "System timezone: $SYSTEM_TZ"
+# Read SCHEDULE_TIME from .env (format: HH:MM, in KST)
+SCHEDULE_TIME="07:30"
+if [ -f "$ENV_FILE" ]; then
+    FOUND=$(grep -E '^SCHEDULE_TIME=' "$ENV_FILE" | tail -1 | cut -d'=' -f2 | sed 's/#.*//' | tr -d '"' | tr -d "'" | xargs)
+    if [ -n "$FOUND" ]; then
+        SCHEDULE_TIME="$FOUND"
+    fi
+fi
 
-# Default: 7:30 AM KST
+KST_HOUR="${SCHEDULE_TIME%%:*}"
+KST_MINUTE="${SCHEDULE_TIME##*:}"
+# Remove leading zeros for arithmetic
+KST_HOUR=$((10#$KST_HOUR))
+KST_MINUTE=$((10#$KST_MINUTE))
+
+echo "Target time: ${KST_HOUR}:$(printf '%02d' $KST_MINUTE) KST (from .env SCHEDULE_TIME)"
+
+# Convert KST time to local system timezone
 # KST = UTC+9
-HOUR=7
-case "$SYSTEM_TZ" in
-    KST|JST)
-        HOUR=7
-        ;;
-    UTC|GMT)
-        HOUR=22  # 22:30 UTC = 07:30 KST (next day)
-        ;;
-    PST|PDT)
-        HOUR=14  # 14:30 PST = 07:30 KST (next day)
-        ;;
-    EST|EDT)
-        HOUR=17  # 17:30 EST = 07:30 KST (next day)
-        ;;
-    CST|CDT)
-        HOUR=16  # 16:30 CST = 07:30 KST (next day)
-        ;;
-    *)
-        echo "Unknown timezone: $SYSTEM_TZ"
-        echo "Defaulting to Hour=7. You may need to adjust manually."
-        HOUR=7
-        ;;
-esac
+SYSTEM_UTC_OFFSET=$(date +%z)  # e.g., +0900, -0500
+OFFSET_SIGN="${SYSTEM_UTC_OFFSET:0:1}"
+OFFSET_HH=$((10#${SYSTEM_UTC_OFFSET:1:2}))
+if [ "$OFFSET_SIGN" = "-" ]; then
+    LOCAL_OFFSET_H=$(( -OFFSET_HH ))
+else
+    LOCAL_OFFSET_H=$OFFSET_HH
+fi
+KST_OFFSET_H=9
 
-echo "Scheduled hour: ${HOUR}:30 ($SYSTEM_TZ) = 07:30 KST"
+DIFF_H=$(( LOCAL_OFFSET_H - KST_OFFSET_H ))
+TOTAL_MINUTES=$(( (KST_HOUR + DIFF_H) * 60 + KST_MINUTE ))
+# Normalize to 0-1439 (minutes in a day)
+TOTAL_MINUTES=$(( (TOTAL_MINUTES % 1440 + 1440) % 1440 ))
+
+HOUR=$(( TOTAL_MINUTES / 60 ))
+MINUTE=$(( TOTAL_MINUTES % 60 ))
+
+SYSTEM_TZ=$(date +%Z)
+echo "Local time: ${HOUR}:$(printf '%02d' $MINUTE) $SYSTEM_TZ"
 echo ""
 
 # Unload existing job if present
@@ -58,6 +69,7 @@ echo "Generating plist..."
 sed -e "s|__PROJECT_DIR__|$PROJECT_DIR|g" \
     -e "s|__HOME__|$HOME|g" \
     -e "s|__HOUR__|$HOUR|g" \
+    -e "s|__MINUTE__|$MINUTE|g" \
     "$PLIST_TEMPLATE" > "$PLIST_DEST"
 
 # Make run script executable
@@ -75,8 +87,10 @@ echo ""
 if launchctl list | grep -q "com.dailyscheduler.report"; then
     echo "✅ Scheduler installed successfully!"
     echo "   Job: com.dailyscheduler.report"
-    echo "   Schedule: Every day at ${HOUR}:30 $SYSTEM_TZ (07:30 KST)"
+    echo "   Schedule: Every day at ${HOUR}:$(printf '%02d' $MINUTE) $SYSTEM_TZ (= ${KST_HOUR}:$(printf '%02d' $KST_MINUTE) KST)"
     echo "   Plist: $PLIST_DEST"
+    echo ""
+    echo "   To change schedule: edit SCHEDULE_TIME in .env, then re-run this script"
     echo ""
     echo "Commands:"
     echo "   Start now:  launchctl start com.dailyscheduler.report"

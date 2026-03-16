@@ -13,6 +13,9 @@ from daily_scheduler.application.use_cases.build_retrospective import (
 from daily_scheduler.application.use_cases.check_recommendations import (
     CheckRecommendations,
 )
+from daily_scheduler.application.use_cases.fetch_market_data import (
+    FetchMarketData,
+)
 from daily_scheduler.application.use_cases.update_prices import (
     UpdatePrices,
 )
@@ -125,12 +128,25 @@ class RunDailyPipeline:
                     analysis.week_start,
                 )
 
-        # Step 5: Generate report via Claude
-        logger.info("Step 4: Generating report via Claude...")
+        # Step 5: Fetch real-time market data
+        logger.info("Step 4: Fetching real-time market data...")
+        market_fetcher = FetchMarketData(self._finance)
+        market_ctx = market_fetcher.execute()
+        market_data_text = market_ctx.to_prompt_text()
+        logger.info(
+            "Market data: %d indices, %d FX, %d commodities",
+            len(market_ctx.indices),
+            len(market_ctx.fx_rates),
+            len(market_ctx.commodities),
+        )
+
+        # Step 6: Generate report via Claude
+        logger.info("Step 5: Generating report via Claude...")
         raw_response, gen_time = self._news.generate_daily_report(
             today,
             retro_context,
             weekly_lessons,
+            market_data=market_data_text,
         )
 
         if not raw_response:

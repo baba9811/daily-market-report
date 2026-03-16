@@ -11,6 +11,13 @@ from daily_scheduler.application.use_cases.run_daily_pipeline import (
 from daily_scheduler.domain.entities.report import Report
 
 
+def _make_finance_mock() -> MagicMock:
+    """Create a finance mock that returns None for all fetch_price calls."""
+    mock = MagicMock()
+    mock.fetch_price.return_value = None
+    return mock
+
+
 def _make_pipeline(
     report_repo: MagicMock | None = None,
     rec_repo: MagicMock | None = None,
@@ -23,7 +30,7 @@ def _make_pipeline(
         report_repo=report_repo or MagicMock(),
         rec_repo=rec_repo or MagicMock(),
         price_repo=price_repo or MagicMock(),
-        finance=finance or MagicMock(),
+        finance=finance or _make_finance_mock(),
         news=news or MagicMock(),
         email=email or MagicMock(),
     )
@@ -59,7 +66,7 @@ class TestSuccessfulRun:
         report_repo = MagicMock()
         rec_repo = MagicMock()
         price_repo = MagicMock()
-        finance = MagicMock()
+        finance = _make_finance_mock()
         news = MagicMock()
         email = MagicMock()
 

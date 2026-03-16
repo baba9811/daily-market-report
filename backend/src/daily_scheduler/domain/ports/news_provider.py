@@ -15,8 +15,15 @@ class NewsProviderPort(ABC):
         report_date: date,
         retrospective_context: str,
         weekly_lessons: str = "",
+        market_data: str = "",
     ) -> tuple[str, float]:
         """Generate a daily report.
+
+        Args:
+            report_date: The date for the report.
+            retrospective_context: Past recommendation performance data.
+            weekly_lessons: Weekly analysis text (Mondays only).
+            market_data: Pre-fetched real-time market data text.
 
         Returns (raw_response, generation_time_seconds).
         """
