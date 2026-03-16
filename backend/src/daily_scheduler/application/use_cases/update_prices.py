@@ -5,6 +5,7 @@ from __future__ import annotations
 import logging
 from datetime import date
 
+from daily_scheduler import tz
 from daily_scheduler.domain.entities.price import PriceSnapshot
 from daily_scheduler.domain.ports.finance_provider import (
     FinanceProviderPort,
@@ -36,7 +37,7 @@ class UpdatePrices:
         """Update prices and return count of updated recs."""
         open_recs = self._rec_repo.get_open()
         updated = 0
-        today = date.today()
+        today = tz.today()
 
         for rec in open_recs:
             data = self._finance.fetch_price(rec.ticker)
@@ -55,11 +56,14 @@ class UpdatePrices:
         return updated
 
     def _save_snapshots(
-        self, tickers: set[str], snapshot_date: date,
+        self,
+        tickers: set[str],
+        snapshot_date: date,
     ) -> None:
         for ticker in tickers:
             existing = self._price_repo.get_by_ticker_and_date(
-                ticker, snapshot_date,
+                ticker,
+                snapshot_date,
             )
             if existing:
                 continue
@@ -75,6 +79,6 @@ class UpdatePrices:
                 open_price=data.get("open_price"),
                 high=data.get("high"),
                 low=data.get("low"),
-                volume=data.get("volume"),
+                volume=int(data["volume"]) if "volume" in data else None,
             )
             self._price_repo.save(snapshot)

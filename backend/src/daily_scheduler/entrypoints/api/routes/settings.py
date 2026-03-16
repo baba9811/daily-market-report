@@ -16,7 +16,8 @@ from daily_scheduler.infrastructure.dependencies import (
 )
 
 router = APIRouter(
-    prefix="/api/settings", tags=["settings"],
+    prefix="/api/settings",
+    tags=["settings"],
 )
 
 
@@ -43,7 +44,7 @@ def get_current_settings() -> SettingsOut:
 
 
 @router.put("")
-def update_settings(update: SettingsUpdate) -> dict:
+def update_settings(update: SettingsUpdate) -> dict[str, object]:
     """Update settings by writing to .env file."""
     from dotenv import set_key
 
@@ -65,38 +66,29 @@ def update_settings(update: SettingsUpdate) -> dict:
     for field_name, env_key in field_map.items():
         value = getattr(update, field_name)
         if value is not None:
-            str_value = (
-                str(value)
-                if not isinstance(value, list)
-                else str(value)
-            )
+            str_value = str(value) if not isinstance(value, list) else str(value)
             set_key(env_path, env_key, str_value)
             updated_fields.append(env_key)
 
     return {
         "updated": updated_fields,
-        "message": (
-            "Settings updated."
-            " Restart server to apply."
-        ),
+        "message": ("Settings updated. Restart server to apply."),
     }
 
 
 @router.post("/test-email")
-def test_email() -> dict:
+def test_email() -> dict[str, bool]:
     """Send a test email to verify SMTP config."""
     sender = get_email_sender()
     success = sender.send(
         "[Test] Daily Scheduler Email Test",
-        "<h1>Email Test</h1>"
-        "<p>If you see this, your email"
-        " configuration is working correctly!</p>",
+        "<h1>Email Test</h1><p>If you see this, your email configuration is working correctly!</p>",
     )
     return {"success": success}
 
 
 @router.get("/status")
-def health_check() -> dict:
+def health_check() -> dict[str, bool]:
     """Check system health: DB, Claude CLI, SMTP."""
     settings = get_settings()
     status: dict[str, bool] = {}
@@ -114,8 +106,7 @@ def health_check() -> dict:
         status["claude_cli"] = False
 
     status["smtp_configured"] = bool(
-        settings.smtp_user
-        and settings.smtp_password.get_secret_value()
+        settings.smtp_user and settings.smtp_password.get_secret_value()
     )
 
     status["all_ok"] = all(status.values())

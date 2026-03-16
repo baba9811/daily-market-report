@@ -22,21 +22,23 @@ class SQLAlchemyPriceRepository(PriceRepositoryPort):
         self._db = db
 
     def get_by_ticker_and_date(
-        self, ticker: str, snapshot_date: date,
+        self,
+        ticker: str,
+        snapshot_date: date,
     ) -> PriceSnapshot | None:
         model = (
             self._db.query(PriceSnapshotModel)
             .filter(
                 PriceSnapshotModel.ticker == ticker,
-                PriceSnapshotModel.snapshot_date
-                == snapshot_date,
+                PriceSnapshotModel.snapshot_date == snapshot_date,
             )
             .first()
         )
         return model.to_entity() if model else None
 
     def save(
-        self, snapshot: PriceSnapshot,
+        self,
+        snapshot: PriceSnapshot,
     ) -> PriceSnapshot:
         model = PriceSnapshotModel.from_entity(snapshot)
         self._db.add(model)

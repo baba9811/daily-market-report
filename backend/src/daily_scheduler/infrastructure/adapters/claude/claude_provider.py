@@ -18,11 +18,7 @@ from daily_scheduler.domain.ports.news_provider import (
 logger = logging.getLogger(__name__)
 
 TIMEOUT_SECONDS = 600
-TEMPLATES_DIR = (
-    Path(__file__).resolve().parent.parent.parent.parent
-    / "templates"
-    / "prompts"
-)
+TEMPLATES_DIR = Path(__file__).resolve().parent.parent.parent.parent / "templates" / "prompts"
 
 
 class ClaudeNewsProvider(NewsProviderPort):
@@ -58,7 +54,8 @@ class ClaudeNewsProvider(NewsProviderPort):
     ) -> tuple[str, float]:
         """Generate a weekly retrospective via Claude CLI."""
         prompt = self._build_weekly_prompt(
-            report_date, weekly_stats,
+            report_date,
+            weekly_stats,
             detailed_performance,
         )
         return self._call_claude(prompt)
@@ -96,7 +93,9 @@ class ClaudeNewsProvider(NewsProviderPort):
         )
 
     def _call_claude(
-        self, prompt: str, retry: bool = True,
+        self,
+        prompt: str,
+        retry: bool = True,
     ) -> tuple[str, float]:
         """Call Claude CLI and return (response, elapsed)."""
         s = self._settings
@@ -125,8 +124,7 @@ class ClaudeNewsProvider(NewsProviderPort):
                 )
                 elapsed = time.time() - start
                 logger.info(
-                    "Claude responded in %.1fs"
-                    " (exit code: %d)",
+                    "Claude responded in %.1fs (exit code: %d)",
                     elapsed,
                     result.returncode,
                 )

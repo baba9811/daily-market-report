@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import logging
 import re
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +17,7 @@ REC_PATTERN = re.compile(
 
 def extract_recommendations(
     raw_output: str,
-) -> list[dict]:
+) -> list[dict[str, Any]]:
     """Extract recommendation JSON from Claude output.
 
     Looks for <!-- REC_START --> ... <!-- REC_END -->.
@@ -24,10 +25,7 @@ def extract_recommendations(
     """
     match = REC_PATTERN.search(raw_output)
     if not match:
-        logger.warning(
-            "No REC_START/REC_END markers found"
-            " in Claude output"
-        )
+        logger.warning("No REC_START/REC_END markers found in Claude output")
         return []
 
     json_str = match.group(1).strip()
@@ -36,15 +34,18 @@ def extract_recommendations(
         if isinstance(data, list):
             return data
         logger.warning(
-            "Parsed JSON is not a list: %s", type(data),
+            "Parsed JSON is not a list: %s",
+            type(data),
         )
         return []
     except json.JSONDecodeError as e:
         logger.error(
-            "Failed to parse recommendation JSON: %s", e,
+            "Failed to parse recommendation JSON: %s",
+            e,
         )
         logger.debug(
-            "Raw JSON string: %s", json_str[:500],
+            "Raw JSON string: %s",
+            json_str[:500],
         )
         return []
 
@@ -69,7 +70,7 @@ def extract_html_report(raw_output: str) -> str:
     return (
         "<!DOCTYPE html>\n"
         '<html lang="en">\n'
-        "<head><meta charset=\"utf-8\">"
+        '<head><meta charset="utf-8">'
         "<title>Daily Report</title></head>\n"
         f"<body>{raw_output}</body>\n"
         "</html>"

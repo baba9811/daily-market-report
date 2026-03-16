@@ -22,9 +22,7 @@ def create_app() -> FastAPI:
     """Create and configure the FastAPI application."""
     app = FastAPI(
         title="Daily Scheduler",
-        description=(
-            "AI-powered daily news & trading report system"
-        ),
+        description=("AI-powered daily news & trading report system"),
         version="0.1.0",
     )
 
@@ -46,16 +44,13 @@ def create_app() -> FastAPI:
     app.include_router(settings.router)
     app.include_router(pipeline.router)
 
-    frontend_dist = (
-        Path(__file__).resolve().parents[5]
-        / "frontend"
-        / "dist"
-    )
+    frontend_dist = Path(__file__).resolve().parents[5] / "frontend" / "dist"
     if frontend_dist.exists():
         app.mount(
             "/",
             StaticFiles(
-                directory=str(frontend_dist), html=True,
+                directory=str(frontend_dist),
+                html=True,
             ),
             name="frontend",
         )

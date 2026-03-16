@@ -40,24 +40,31 @@ class ReportModel(Base):
     __tablename__ = "reports"
 
     id: Mapped[int] = mapped_column(
-        primary_key=True, autoincrement=True,
+        primary_key=True,
+        autoincrement=True,
     )
     report_date: Mapped[date] = mapped_column(
-        Date, nullable=False, index=True,
+        Date,
+        nullable=False,
+        index=True,
     )
     report_type: Mapped[str] = mapped_column(default="daily")
     html_content: Mapped[str] = mapped_column(
-        Text, default="",
+        Text,
+        default="",
     )
     summary: Mapped[str] = mapped_column(Text, default="")
     prompt_used: Mapped[str] = mapped_column(
-        Text, default="",
+        Text,
+        default="",
     )
     raw_response: Mapped[str] = mapped_column(
-        Text, default="",
+        Text,
+        default="",
     )
     generation_time_s: Mapped[float | None] = mapped_column(
-        Float, nullable=True,
+        Float,
+        nullable=True,
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime,
@@ -65,9 +72,7 @@ class ReportModel(Base):
         nullable=False,
     )
 
-    recommendations: Mapped[
-        list[RecommendationModel]
-    ] = relationship(
+    recommendations: Mapped[list[RecommendationModel]] = relationship(
         back_populates="report",
         cascade="all, delete-orphan",
     )
@@ -107,7 +112,8 @@ class RecommendationModel(Base):
     __tablename__ = "recommendations"
 
     id: Mapped[int] = mapped_column(
-        primary_key=True, autoincrement=True,
+        primary_key=True,
+        autoincrement=True,
     )
     report_id: Mapped[int] = mapped_column(
         Integer,
@@ -115,37 +121,46 @@ class RecommendationModel(Base):
         nullable=False,
     )
     ticker: Mapped[str] = mapped_column(
-        nullable=False, index=True,
+        nullable=False,
+        index=True,
     )
     name: Mapped[str] = mapped_column(nullable=False)
     market: Mapped[str] = mapped_column(nullable=False)
     direction: Mapped[str] = mapped_column(nullable=False)
     timeframe: Mapped[str] = mapped_column(nullable=False)
     entry_price: Mapped[float] = mapped_column(
-        Float, nullable=False,
+        Float,
+        nullable=False,
     )
     target_price: Mapped[float] = mapped_column(
-        Float, nullable=False,
+        Float,
+        nullable=False,
     )
     stop_loss: Mapped[float] = mapped_column(
-        Float, nullable=False,
+        Float,
+        nullable=False,
     )
     rationale: Mapped[str] = mapped_column(Text, default="")
     sector: Mapped[str] = mapped_column(default="")
     current_price: Mapped[float | None] = mapped_column(
-        Float, nullable=True,
+        Float,
+        nullable=True,
     )
     status: Mapped[str] = mapped_column(
-        default="OPEN", index=True,
+        default="OPEN",
+        index=True,
     )
     closed_at: Mapped[datetime | None] = mapped_column(
-        DateTime, nullable=True,
+        DateTime,
+        nullable=True,
     )
     closed_price: Mapped[float | None] = mapped_column(
-        Float, nullable=True,
+        Float,
+        nullable=True,
     )
     pnl_percent: Mapped[float | None] = mapped_column(
-        Float, nullable=True,
+        Float,
+        nullable=True,
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime,
@@ -217,28 +232,36 @@ class PriceSnapshotModel(Base):
     )
 
     id: Mapped[int] = mapped_column(
-        primary_key=True, autoincrement=True,
+        primary_key=True,
+        autoincrement=True,
     )
     ticker: Mapped[str] = mapped_column(
-        nullable=False, index=True,
+        nullable=False,
+        index=True,
     )
     snapshot_date: Mapped[date] = mapped_column(
-        Date, nullable=False,
+        Date,
+        nullable=False,
     )
     price: Mapped[float] = mapped_column(
-        Float, nullable=False,
+        Float,
+        nullable=False,
     )
     open_price: Mapped[float | None] = mapped_column(
-        Float, nullable=True,
+        Float,
+        nullable=True,
     )
     high: Mapped[float | None] = mapped_column(
-        Float, nullable=True,
+        Float,
+        nullable=True,
     )
     low: Mapped[float | None] = mapped_column(
-        Float, nullable=True,
+        Float,
+        nullable=True,
     )
     volume: Mapped[int | None] = mapped_column(
-        Integer, nullable=True,
+        Integer,
+        nullable=True,
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime,
@@ -283,25 +306,33 @@ class RetrospectiveModel(Base):
     __tablename__ = "retrospectives"
 
     id: Mapped[int] = mapped_column(
-        primary_key=True, autoincrement=True,
+        primary_key=True,
+        autoincrement=True,
     )
     report_date: Mapped[date] = mapped_column(
-        Date, nullable=False, unique=True,
+        Date,
+        nullable=False,
+        unique=True,
     )
     recommendations_checked: Mapped[int] = mapped_column(
-        Integer, default=0,
+        Integer,
+        default=0,
     )
     targets_hit: Mapped[int] = mapped_column(
-        Integer, default=0,
+        Integer,
+        default=0,
     )
     stops_hit: Mapped[int] = mapped_column(
-        Integer, default=0,
+        Integer,
+        default=0,
     )
     expired_count: Mapped[int] = mapped_column(
-        Integer, default=0,
+        Integer,
+        default=0,
     )
     context_block: Mapped[str] = mapped_column(
-        Text, default="",
+        Text,
+        default="",
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime,
@@ -313,9 +344,7 @@ class RetrospectiveModel(Base):
         return RetroEntity(
             id=self.id,
             report_date=self.report_date,
-            recommendations_checked=(
-                self.recommendations_checked
-            ),
+            recommendations_checked=(self.recommendations_checked),
             targets_hit=self.targets_hit,
             stops_hit=self.stops_hit,
             expired_count=self.expired_count,
@@ -329,9 +358,7 @@ class RetrospectiveModel(Base):
     ) -> RetrospectiveModel:
         model = RetrospectiveModel(
             report_date=entity.report_date,
-            recommendations_checked=(
-                entity.recommendations_checked
-            ),
+            recommendations_checked=(entity.recommendations_checked),
             targets_hit=entity.targets_hit,
             stops_hit=entity.stops_hit,
             expired_count=entity.expired_count,
@@ -348,25 +375,32 @@ class WeeklyAnalysisModel(Base):
     __tablename__ = "weekly_analyses"
 
     id: Mapped[int] = mapped_column(
-        primary_key=True, autoincrement=True,
+        primary_key=True,
+        autoincrement=True,
     )
     week_start: Mapped[date] = mapped_column(
-        Date, nullable=False,
+        Date,
+        nullable=False,
     )
     week_end: Mapped[date] = mapped_column(
-        Date, nullable=False,
+        Date,
+        nullable=False,
     )
     total_recommendations: Mapped[int] = mapped_column(
-        Integer, default=0,
+        Integer,
+        default=0,
     )
     win_count: Mapped[int] = mapped_column(
-        Integer, default=0,
+        Integer,
+        default=0,
     )
     loss_count: Mapped[int] = mapped_column(
-        Integer, default=0,
+        Integer,
+        default=0,
     )
     avg_return_pct: Mapped[float | None] = mapped_column(
-        Float, nullable=True,
+        Float,
+        nullable=True,
     )
     best_pick_ticker: Mapped[str] = mapped_column(
         default="",
@@ -375,13 +409,16 @@ class WeeklyAnalysisModel(Base):
         default="",
     )
     sector_breakdown: Mapped[str] = mapped_column(
-        Text, default="{}",
+        Text,
+        default="{}",
     )
     analysis_text: Mapped[str] = mapped_column(
-        Text, default="",
+        Text,
+        default="",
     )
     lessons: Mapped[str] = mapped_column(
-        Text, default="[]",
+        Text,
+        default="[]",
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime,
@@ -394,9 +431,7 @@ class WeeklyAnalysisModel(Base):
             id=self.id,
             week_start=self.week_start,
             week_end=self.week_end,
-            total_recommendations=(
-                self.total_recommendations
-            ),
+            total_recommendations=(self.total_recommendations),
             win_count=self.win_count,
             loss_count=self.loss_count,
             avg_return_pct=self.avg_return_pct,
@@ -415,9 +450,7 @@ class WeeklyAnalysisModel(Base):
         model = WeeklyAnalysisModel(
             week_start=entity.week_start,
             week_end=entity.week_end,
-            total_recommendations=(
-                entity.total_recommendations
-            ),
+            total_recommendations=(entity.total_recommendations),
             win_count=entity.win_count,
             loss_count=entity.loss_count,
             avg_return_pct=entity.avg_return_pct,

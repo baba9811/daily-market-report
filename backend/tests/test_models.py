@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
-from datetime import date, datetime
+from datetime import date
 
 from sqlalchemy.orm import Session
+
+from daily_scheduler import tz
 
 from daily_scheduler.infrastructure.adapters.persistence.models import (
     RecommendationModel,
@@ -107,7 +109,7 @@ class TestRecommendationModel:
         db.commit()
 
         rec.status = "TARGET_HIT"
-        rec.closed_at = datetime.now()
+        rec.closed_at = tz.now()
         rec.closed_price = 196.0
         rec.pnl_percent = 5.95
         db.commit()

@@ -3,11 +3,12 @@
 from __future__ import annotations
 
 from collections import defaultdict
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
+from daily_scheduler import tz
 from daily_scheduler.database import get_db
 from daily_scheduler.domain.entities.recommendation import (
     Recommendation,
@@ -25,12 +26,14 @@ from daily_scheduler.infrastructure.dependencies import (
 )
 
 router = APIRouter(
-    prefix="/api/performance", tags=["performance"],
+    prefix="/api/performance",
+    tags=["performance"],
 )
 
 
 @router.get(
-    "/summary", response_model=PerformanceSummary,
+    "/summary",
+    response_model=PerformanceSummary,
 )
 def get_summary(
     period: str = Query("30d", pattern=r"^\d+d$"),
@@ -38,37 +41,19 @@ def get_summary(
 ) -> PerformanceSummary:
     """Get aggregated performance summary."""
     days = int(period.replace("d", ""))
-    since = datetime.now() - timedelta(days=days)
+    since = tz.now() - timedelta(days=days)
     repo = get_rec_repo(db)
     recs = repo.get_by_period(since)
 
     total = len(recs)
-    open_count = sum(
-        1 for r in recs if r.status == "OPEN"
-    )
-    target_hit = sum(
-        1 for r in recs if r.status == "TARGET_HIT"
-    )
-    stop_hit = sum(
-        1 for r in recs if r.status == "STOP_HIT"
-    )
-    expired = sum(
-        1 for r in recs if r.status == "EXPIRED"
-    )
+    open_count = sum(1 for r in recs if r.status == "OPEN")
+    target_hit = sum(1 for r in recs if r.status == "TARGET_HIT")
+    stop_hit = sum(1 for r in recs if r.status == "STOP_HIT")
+    expired = sum(1 for r in recs if r.status == "EXPIRED")
 
-    closed = [
-        r for r in recs if r.pnl_percent is not None
-    ]
-    avg_pnl = (
-        sum(r.pnl_percent or 0.0 for r in closed) / len(closed)
-        if closed
-        else 0
-    )
-    win_rate = (
-        target_hit / (target_hit + stop_hit) * 100
-        if (target_hit + stop_hit) > 0
-        else 0
-    )
+    closed = [r for r in recs if r.pnl_percent is not None]
+    avg_pnl = sum(r.pnl_percent or 0.0 for r in closed) / len(closed) if closed else 0
+    win_rate = target_hit / (target_hit + stop_hit) * 100 if (target_hit + stop_hit) > 0 else 0
 
     best = max(
         closed,
@@ -90,13 +75,9 @@ def get_summary(
         win_rate=round(win_rate, 1),
         avg_pnl=round(avg_pnl, 2),
         best_ticker=best.ticker if best else "",
-        best_pnl=(
-            round(best.pnl_percent or 0.0, 2) if best else 0
-        ),
+        best_pnl=(round(best.pnl_percent or 0.0, 2) if best else 0),
         worst_ticker=worst.ticker if worst else "",
-        worst_pnl=(
-            round(worst.pnl_percent or 0.0, 2) if worst else 0
-        ),
+        worst_pnl=(round(worst.pnl_percent or 0.0, 2) if worst else 0),
     )
 
 
@@ -129,7 +110,7 @@ def get_recommendations(
             status=r.status,
             pnl_percent=r.pnl_percent,
             closed_at=r.closed_at,
-            created_at=r.created_at or datetime.now(),
+            created_at=r.created_at or tz.now(),
         )
         for r in recs
     ]
@@ -145,7 +126,7 @@ def get_sector_performance(
 ) -> list[SectorPerformance]:
     """Get per-sector performance breakdown."""
     days = int(period.replace("d", ""))
-    since = datetime.now() - timedelta(days=days)
+    since = tz.now() - timedelta(days=days)
     repo = get_rec_repo(db)
     closed = repo.get_closed_by_period(since)
 
@@ -203,7 +184,7 @@ def get_timeseries(
 ) -> list[TimeseriesPoint]:
     """Get time series performance data."""
     days = int(period.replace("d", ""))
-    since = datetime.now() - timedelta(days=days)
+    since = tz.now() - timedelta(days=days)
     repo = get_rec_repo(db)
     recs = repo.get_by_period(since)
 
@@ -219,32 +200,19 @@ def get_timeseries(
     cumulative_pnl = 0.0
     for dt in sorted(daily.keys()):
         day_recs = daily[dt]
-        closed = [
-            r for r in day_recs
-            if r.pnl_percent is not None
-        ]
-        wins = sum(
-            1 for r in closed
-            if r.status == "TARGET_HIT"
-        )
+        closed = [r for r in day_recs if r.pnl_percent is not None]
+        wins = sum(1 for r in closed if r.status == "TARGET_HIT")
         total_closed = len(closed)
-        wr = (
-            wins / total_closed * 100
-            if total_closed > 0
-            else 0
-        )
-        cumulative_pnl += sum(
-            r.pnl_percent
-            for r in closed
-            if r.pnl_percent
-        )
+        wr = wins / total_closed * 100 if total_closed > 0 else 0
+        cumulative_pnl += sum(r.pnl_percent for r in closed if r.pnl_percent)
 
         points.append(
             TimeseriesPoint(
                 date=dt,
                 win_rate=round(wr, 1),
                 cumulative_pnl=round(
-                    cumulative_pnl, 2,
+                    cumulative_pnl,
+                    2,
                 ),
                 recommendations_count=len(day_recs),
             )

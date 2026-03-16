@@ -16,14 +16,15 @@ logger = logging.getLogger(__name__)
 class YFinanceProvider(FinanceProviderPort):
     """Fetch stock prices via yfinance."""
 
-    def fetch_price(self, ticker: str) -> dict | None:
+    def fetch_price(self, ticker: str) -> dict[str, float | int] | None:
         """Fetch latest price data for a single ticker."""
         try:
             stock = yf.Ticker(ticker)
             hist = stock.history(period="2d")
             if hist.empty:
                 logger.warning(
-                    "No data returned for %s", ticker,
+                    "No data returned for %s",
+                    ticker,
                 )
                 return None
             latest = hist.iloc[-1]
@@ -36,6 +37,7 @@ class YFinanceProvider(FinanceProviderPort):
             }
         except Exception:
             logger.exception(
-                "Failed to fetch price for %s", ticker,
+                "Failed to fetch price for %s",
+                ticker,
             )
             return None

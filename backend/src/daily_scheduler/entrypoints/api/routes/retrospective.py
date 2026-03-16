@@ -12,7 +12,8 @@ from daily_scheduler.infrastructure.adapters.persistence.models import (
 )
 
 router = APIRouter(
-    prefix="/api/retrospective", tags=["retrospective"],
+    prefix="/api/retrospective",
+    tags=["retrospective"],
 )
 
 
@@ -21,7 +22,7 @@ def list_weekly_analyses(
     page: int = Query(1, ge=1),
     per_page: int = Query(10, ge=1, le=50),
     db: Session = Depends(get_db),
-) -> list[dict]:
+) -> list[dict[str, object]]:
     """List weekly analyses with pagination."""
     analyses = (
         db.query(WeeklyAnalysisModel)
@@ -35,9 +36,7 @@ def list_weekly_analyses(
             "id": a.id,
             "week_start": a.week_start.isoformat(),
             "week_end": a.week_end.isoformat(),
-            "total_recommendations": (
-                a.total_recommendations
-            ),
+            "total_recommendations": (a.total_recommendations),
             "win_count": a.win_count,
             "loss_count": a.loss_count,
             "avg_return_pct": a.avg_return_pct,
@@ -53,22 +52,16 @@ def list_weekly_analyses(
 def get_weekly_analysis(
     analysis_id: int,
     db: Session = Depends(get_db),
-) -> dict:
+) -> dict[str, object]:
     """Get a specific weekly analysis."""
-    a = (
-        db.query(WeeklyAnalysisModel)
-        .filter(WeeklyAnalysisModel.id == analysis_id)
-        .first()
-    )
+    a = db.query(WeeklyAnalysisModel).filter(WeeklyAnalysisModel.id == analysis_id).first()
     if not a:
         return {"error": "Not found"}
     return {
         "id": a.id,
         "week_start": a.week_start.isoformat(),
         "week_end": a.week_end.isoformat(),
-        "total_recommendations": (
-            a.total_recommendations
-        ),
+        "total_recommendations": (a.total_recommendations),
         "win_count": a.win_count,
         "loss_count": a.loss_count,
         "avg_return_pct": a.avg_return_pct,
@@ -84,7 +77,7 @@ def get_weekly_analysis(
 def list_daily_checks(
     limit: int = Query(14, ge=1, le=90),
     db: Session = Depends(get_db),
-) -> list[dict]:
+) -> list[dict[str, object]]:
     """List recent daily retrospective checks."""
     checks = (
         db.query(RetrospectiveModel)
@@ -96,9 +89,7 @@ def list_daily_checks(
         {
             "id": c.id,
             "report_date": c.report_date.isoformat(),
-            "recommendations_checked": (
-                c.recommendations_checked
-            ),
+            "recommendations_checked": (c.recommendations_checked),
             "targets_hit": c.targets_hit,
             "stops_hit": c.stops_hit,
             "expired_count": c.expired_count,

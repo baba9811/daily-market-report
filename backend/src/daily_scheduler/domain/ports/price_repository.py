@@ -13,10 +13,10 @@ class PriceRepositoryPort(ABC):
 
     @abstractmethod
     def get_by_ticker_and_date(
-        self, ticker: str, snapshot_date: date,
-    ) -> PriceSnapshot | None:
-        ...
+        self,
+        ticker: str,
+        snapshot_date: date,
+    ) -> PriceSnapshot | None: ...
 
     @abstractmethod
-    def save(self, snapshot: PriceSnapshot) -> PriceSnapshot:
-        ...
+    def save(self, snapshot: PriceSnapshot) -> PriceSnapshot: ...

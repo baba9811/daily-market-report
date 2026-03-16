@@ -5,6 +5,7 @@ from __future__ import annotations
 import logging
 from datetime import date
 
+from daily_scheduler import tz
 from daily_scheduler.application.use_cases.build_retrospective import (
     BuildRetrospective,
 )
@@ -40,18 +41,17 @@ class RunWeeklyPipeline:
         self._email = email
 
     def execute(
-        self, today: date | None = None,
+        self,
+        today: date | None = None,
     ) -> bool:
         """Run the weekly pipeline. Returns True on success."""
-        today = today or date.today()
+        today = today or tz.today()
 
         try:
             retro = BuildRetrospective(self._rec_repo)
             analysis = retro.build_weekly_analysis(today)
             if not analysis:
-                logger.info(
-                    "No data for weekly analysis. Skipping."
-                )
+                logger.info("No data for weekly analysis. Skipping.")
                 return True
 
             # Generate report
@@ -61,18 +61,13 @@ class RunWeeklyPipeline:
                 f" Avg return:"
                 f" {analysis.avg_return_pct:.1f}%"
             )
-            raw_response, _ = (
-                self._news.generate_weekly_report(
-                    today,
-                    weekly_stats,
-                    analysis.sector_breakdown,
-                )
+            raw_response, _ = self._news.generate_weekly_report(
+                today,
+                weekly_stats,
+                analysis.sector_breakdown,
             )
             if not raw_response:
-                logger.error(
-                    "Claude returned empty response"
-                    " for weekly report"
-                )
+                logger.error("Claude returned empty response for weekly report")
                 return False
 
             # Save weekly report
@@ -87,8 +82,7 @@ class RunWeeklyPipeline:
 
             # Send email
             self._email.send(
-                f"[{today}] Weekly Trading"
-                " Retrospective Report",
+                f"[{today}] Weekly Trading Retrospective Report",
                 html_content,
             )
 

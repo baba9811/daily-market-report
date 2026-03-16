@@ -27,14 +27,13 @@ class SQLAlchemyRecommendationRepository(
 
     def get_open(self) -> list[Recommendation]:
         models = (
-            self._db.query(RecommendationModel)
-            .filter(RecommendationModel.status == "OPEN")
-            .all()
+            self._db.query(RecommendationModel).filter(RecommendationModel.status == "OPEN").all()
         )
         return [m.to_entity() for m in models]
 
     def get_by_period(
-        self, since: datetime,
+        self,
+        since: datetime,
     ) -> list[Recommendation]:
         models = (
             self._db.query(RecommendationModel)
@@ -46,7 +45,8 @@ class SQLAlchemyRecommendationRepository(
         return [m.to_entity() for m in models]
 
     def get_closed_by_period(
-        self, since: datetime,
+        self,
+        since: datetime,
     ) -> list[Recommendation]:
         models = (
             self._db.query(RecommendationModel)
@@ -68,22 +68,17 @@ class SQLAlchemyRecommendationRepository(
         return model.to_entity()
 
     def save_many(
-        self, recs: list[Recommendation],
+        self,
+        recs: list[Recommendation],
     ) -> list[Recommendation]:
-        models = [
-            RecommendationModel.from_entity(r) for r in recs
-        ]
+        models = [RecommendationModel.from_entity(r) for r in recs]
         self._db.add_all(models)
         self._db.flush()
         self._db.commit()
         return [m.to_entity() for m in models]
 
     def update(self, rec: Recommendation) -> None:
-        model = (
-            self._db.query(RecommendationModel)
-            .filter(RecommendationModel.id == rec.id)
-            .first()
-        )
+        model = self._db.query(RecommendationModel).filter(RecommendationModel.id == rec.id).first()
         if model is None:
             return
 

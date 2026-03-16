@@ -9,7 +9,7 @@ class FinanceProviderPort(ABC):
     """Abstract interface for fetching stock prices."""
 
     @abstractmethod
-    def fetch_price(self, ticker: str) -> dict | None:
+    def fetch_price(self, ticker: str) -> dict[str, float | int] | None:
         """Fetch latest price data for a ticker.
 
         Returns dict with keys: price, open_price, high, low, volume.

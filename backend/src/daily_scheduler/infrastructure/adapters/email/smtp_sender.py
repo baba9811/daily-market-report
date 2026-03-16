@@ -26,26 +26,19 @@ class SmtpEmailSender(EmailSenderPort):
         self._settings = settings
 
     def send(
-        self, subject: str, html_content: str,
+        self,
+        subject: str,
+        html_content: str,
     ) -> bool:
         """Send an HTML email. Returns True on success."""
         s = self._settings
 
-        if (
-            not s.smtp_user
-            or not s.smtp_password.get_secret_value()
-        ):
-            logger.error(
-                "SMTP credentials not configured."
-                " Set SMTP_USER and SMTP_PASSWORD in .env"
-            )
+        if not s.smtp_user or not s.smtp_password.get_secret_value():
+            logger.error("SMTP credentials not configured. Set SMTP_USER and SMTP_PASSWORD in .env")
             return False
 
         if not s.email_to:
-            logger.error(
-                "No recipients configured."
-                " Set EMAIL_TO in .env"
-            )
+            logger.error("No recipients configured. Set EMAIL_TO in .env")
             return False
 
         msg = MIMEMultipart("alternative")
@@ -59,7 +52,9 @@ class SmtpEmailSender(EmailSenderPort):
         for attempt in range(MAX_RETRIES):
             try:
                 with smtplib.SMTP(
-                    s.smtp_host, s.smtp_port, timeout=30,
+                    s.smtp_host,
+                    s.smtp_port,
+                    timeout=30,
                 ) as server:
                     server.ehlo()
                     server.starttls()
@@ -81,8 +76,7 @@ class SmtpEmailSender(EmailSenderPort):
             except Exception:
                 wait = BACKOFF_BASE * (2**attempt)
                 logger.exception(
-                    "Email send failed (attempt %d/%d)."
-                    " Retrying in %ds...",
+                    "Email send failed (attempt %d/%d). Retrying in %ds...",
                     attempt + 1,
                     MAX_RETRIES,
                     wait,

@@ -7,7 +7,8 @@ import threading
 from fastapi import APIRouter
 
 router = APIRouter(
-    prefix="/api/pipeline", tags=["pipeline"],
+    prefix="/api/pipeline",
+    tags=["pipeline"],
 )
 
 _pipeline_status: dict[str, object] = {
@@ -17,7 +18,7 @@ _pipeline_status: dict[str, object] = {
 
 
 @router.post("/run")
-def trigger_pipeline() -> dict:
+def trigger_pipeline() -> dict[str, str]:
     """Trigger the daily report pipeline manually."""
     if _pipeline_status["running"]:
         return {
@@ -39,18 +40,15 @@ def trigger_pipeline() -> dict:
             with factory() as session:
                 pipeline = get_daily_pipeline(session)
                 success = pipeline.execute()
-                _pipeline_status["last_result"] = (
-                    "success" if success else "failed"
-                )
+                _pipeline_status["last_result"] = "success" if success else "failed"
         except Exception as e:
-            _pipeline_status["last_result"] = (
-                f"error: {e}"
-            )
+            _pipeline_status["last_result"] = f"error: {e}"
         finally:
             _pipeline_status["running"] = False
 
     thread = threading.Thread(
-        target=run_in_background, daemon=True,
+        target=run_in_background,
+        daemon=True,
     )
     thread.start()
 
@@ -61,6 +59,6 @@ def trigger_pipeline() -> dict:
 
 
 @router.get("/status")
-def get_pipeline_status() -> dict:
+def get_pipeline_status() -> dict[str, object]:
     """Return current pipeline status."""
     return dict(_pipeline_status)

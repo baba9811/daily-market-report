@@ -41,6 +41,9 @@ class Settings(BaseSettings):
     # Report
     report_language: str = "ko"
 
+    # Timezone (IANA format, e.g. Asia/Seoul, US/Eastern, UTC)
+    timezone: str = "Asia/Seoul"
+
     # Server
     host: str = "127.0.0.1"
     port: int = 8000

@@ -2,12 +2,11 @@
 
 from __future__ import annotations
 
-from datetime import datetime
-
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import HTMLResponse
 from sqlalchemy.orm import Session
 
+from daily_scheduler import tz
 from daily_scheduler.database import get_db
 from daily_scheduler.entrypoints.api.schemas.report import (
     ReportDetailOut,
@@ -41,7 +40,7 @@ def list_reports(
             report_type=r.report_type,
             summary=r.summary,
             generation_time_s=r.generation_time_s,
-            created_at=r.created_at or datetime.now(),
+            created_at=r.created_at or tz.now(),
         )
         for r in reports
     ]
@@ -56,7 +55,8 @@ def get_latest_report(
     report = repo.get_latest("daily")
     if not report:
         raise HTTPException(
-            status_code=404, detail="No reports found",
+            status_code=404,
+            detail="No reports found",
         )
     return ReportDetailOut(
         id=report.id or 0,
@@ -64,21 +64,23 @@ def get_latest_report(
         report_type=report.report_type,
         summary=report.summary,
         generation_time_s=report.generation_time_s,
-        created_at=report.created_at or datetime.now(),
+        created_at=report.created_at or tz.now(),
         html_content=report.html_content,
     )
 
 
 @router.get("/{report_id}", response_model=ReportDetailOut)
 def get_report(
-    report_id: int, db: Session = Depends(get_db),
+    report_id: int,
+    db: Session = Depends(get_db),
 ) -> ReportDetailOut:
     """Get a specific report by ID."""
     repo = get_report_repo(db)
     report = repo.get_by_id(report_id)
     if not report:
         raise HTTPException(
-            status_code=404, detail="Report not found",
+            status_code=404,
+            detail="Report not found",
         )
     return ReportDetailOut(
         id=report.id or 0,
@@ -86,22 +88,25 @@ def get_report(
         report_type=report.report_type,
         summary=report.summary,
         generation_time_s=report.generation_time_s,
-        created_at=report.created_at or datetime.now(),
+        created_at=report.created_at or tz.now(),
         html_content=report.html_content,
     )
 
 
 @router.get(
-    "/{report_id}/html", response_class=HTMLResponse,
+    "/{report_id}/html",
+    response_class=HTMLResponse,
 )
 def get_report_html(
-    report_id: int, db: Session = Depends(get_db),
+    report_id: int,
+    db: Session = Depends(get_db),
 ) -> HTMLResponse:
     """Get raw HTML content of a report."""
     repo = get_report_repo(db)
     report = repo.get_by_id(report_id)
     if not report:
         raise HTTPException(
-            status_code=404, detail="Report not found",
+            status_code=404,
+            detail="Report not found",
         )
     return HTMLResponse(content=report.html_content)

@@ -22,15 +22,12 @@ class SQLAlchemyReportRepository(ReportRepositoryPort):
         self._db = db
 
     def get_by_id(self, report_id: int) -> Report | None:
-        model = (
-            self._db.query(ReportModel)
-            .filter(ReportModel.id == report_id)
-            .first()
-        )
+        model = self._db.query(ReportModel).filter(ReportModel.id == report_id).first()
         return model.to_entity() if model else None
 
     def get_latest(
-        self, report_type: str = "daily",
+        self,
+        report_type: str = "daily",
     ) -> Report | None:
         model = (
             self._db.query(ReportModel)
@@ -67,11 +64,7 @@ class SQLAlchemyReportRepository(ReportRepositoryPort):
                 ReportModel.report_type == report_type,
             )
         query = query.order_by(ReportModel.created_at.desc())
-        models = (
-            query.offset((page - 1) * per_page)
-            .limit(per_page)
-            .all()
-        )
+        models = query.offset((page - 1) * per_page).limit(per_page).all()
         return [m.to_entity() for m in models]
 
     def save(self, report: Report) -> Report:

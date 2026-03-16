@@ -5,8 +5,9 @@ from __future__ import annotations
 import json
 import logging
 from collections import defaultdict
-from datetime import date, datetime, timedelta
+from datetime import date, timedelta
 
+from daily_scheduler import tz
 from daily_scheduler.domain.entities.recommendation import (
     Recommendation,
 )
@@ -31,47 +32,37 @@ class BuildRetrospective:
         self._rec_repo = rec_repo
 
     def build_daily_context(
-        self, today: date | None = None,
+        self,
+        today: date | None = None,
     ) -> tuple[str, Retrospective]:
         """Build retrospective context text for the daily prompt.
 
         Returns (context_text, retrospective_entity).
         """
-        today = today or date.today()
+        today = today or tz.today()
         thirty_days_ago = today - timedelta(days=30)
         seven_days_ago = today - timedelta(days=7)
 
-        since_30d = datetime.combine(
-            thirty_days_ago, datetime.min.time(),
-        )
+        since_30d = tz.combine(thirty_days_ago)
         all_recs = self._rec_repo.get_by_period(since_30d)
 
         if not all_recs:
             retro = Retrospective(
                 report_date=today,
-                context_block=(
-                    "No past recommendation data available."
-                    " Generating first report."
-                ),
+                context_block=("No past recommendation data available. Generating first report."),
             )
             return retro.context_block, retro
 
         context = self._format_context(
-            all_recs, today, seven_days_ago,
+            all_recs,
+            today,
+            seven_days_ago,
         )
 
-        open_count = sum(
-            1 for r in all_recs if r.status == "OPEN"
-        )
-        target_hit = sum(
-            1 for r in all_recs if r.status == "TARGET_HIT"
-        )
-        stop_hit = sum(
-            1 for r in all_recs if r.status == "STOP_HIT"
-        )
-        expired = sum(
-            1 for r in all_recs if r.status == "EXPIRED"
-        )
+        open_count = sum(1 for r in all_recs if r.status == "OPEN")
+        target_hit = sum(1 for r in all_recs if r.status == "TARGET_HIT")
+        stop_hit = sum(1 for r in all_recs if r.status == "STOP_HIT")
+        expired = sum(1 for r in all_recs if r.status == "EXPIRED")
 
         retro = Retrospective(
             report_date=today,
@@ -84,44 +75,28 @@ class BuildRetrospective:
         return context, retro
 
     def build_weekly_analysis(
-        self, today: date | None = None,
+        self,
+        today: date | None = None,
     ) -> WeeklyAnalysis | None:
         """Build weekly analysis for Monday reports."""
-        today = today or date.today()
+        today = today or tz.today()
         week_start = today - timedelta(days=today.weekday())
         prev_week_start = week_start - timedelta(days=7)
 
-        since = datetime.combine(
-            prev_week_start, datetime.min.time(),
-        )
-        until = datetime.combine(
-            week_start, datetime.min.time(),
-        )
+        since = tz.combine(prev_week_start)
+        until = tz.combine(week_start)
 
         all_recs = self._rec_repo.get_by_period(since)
-        recs = [
-            r for r in all_recs
-            if r.created_at and r.created_at < until
-        ]
+        recs = [r for r in all_recs if r.created_at and r.created_at < until]
 
         if not recs:
             return None
 
-        closed = [
-            r for r in recs
-            if r.status in ("TARGET_HIT", "STOP_HIT")
-        ]
-        wins = [
-            r for r in closed if r.status == "TARGET_HIT"
-        ]
-        losses = [
-            r for r in closed if r.status == "STOP_HIT"
-        ]
+        closed = [r for r in recs if r.status in ("TARGET_HIT", "STOP_HIT")]
+        wins = [r for r in closed if r.status == "TARGET_HIT"]
+        losses = [r for r in closed if r.status == "STOP_HIT"]
         avg_return = (
-            sum(r.pnl_percent for r in closed if r.pnl_percent)
-            / len(closed)
-            if closed
-            else 0.0
+            sum(r.pnl_percent for r in closed if r.pnl_percent) / len(closed) if closed else 0.0
         )
 
         best = max(
@@ -147,7 +122,8 @@ class BuildRetrospective:
             best_pick_ticker=best.ticker if best else "",
             worst_pick_ticker=worst.ticker if worst else "",
             sector_breakdown=json.dumps(
-                sector_data, ensure_ascii=False,
+                sector_data,
+                ensure_ascii=False,
             ),
         )
 
@@ -159,32 +135,19 @@ class BuildRetrospective:
     ) -> str:
         """Format the retrospective context text."""
         total = len(all_recs)
-        target_hit = sum(
-            1 for r in all_recs if r.status == "TARGET_HIT"
-        )
-        stop_hit = sum(
-            1 for r in all_recs if r.status == "STOP_HIT"
-        )
-        expired = sum(
-            1 for r in all_recs if r.status == "EXPIRED"
-        )
-        still_open = sum(
-            1 for r in all_recs if r.status == "OPEN"
-        )
+        target_hit = sum(1 for r in all_recs if r.status == "TARGET_HIT")
+        stop_hit = sum(1 for r in all_recs if r.status == "STOP_HIT")
+        expired = sum(1 for r in all_recs if r.status == "EXPIRED")
+        still_open = sum(1 for r in all_recs if r.status == "OPEN")
 
-        closed_recs = [
-            r for r in all_recs if r.pnl_percent is not None
-        ]
+        closed_recs = [r for r in all_recs if r.pnl_percent is not None]
         avg_pnl = (
-            sum(r.pnl_percent or 0.0 for r in closed_recs)
-            / len(closed_recs)
+            sum(r.pnl_percent or 0.0 for r in closed_recs) / len(closed_recs)
             if closed_recs
             else 0.0
         )
         win_rate = (
-            target_hit / (target_hit + stop_hit) * 100
-            if (target_hit + stop_hit) > 0
-            else 0.0
+            target_hit / (target_hit + stop_hit) * 100 if (target_hit + stop_hit) > 0 else 0.0
         )
 
         best = max(
@@ -200,111 +163,74 @@ class BuildRetrospective:
 
         sector_stats = self._build_sector_stats(closed_recs)
 
-        day_recs = [
-            r for r in closed_recs if r.timeframe == "DAY"
-        ]
-        swing_recs = [
-            r for r in closed_recs if r.timeframe == "SWING"
-        ]
+        day_recs = [r for r in closed_recs if r.timeframe == "DAY"]
+        swing_recs = [r for r in closed_recs if r.timeframe == "SWING"]
         day_wr = self._win_rate(day_recs)
         swing_wr = self._win_rate(swing_recs)
 
-        since_7d = datetime.combine(
-            seven_days_ago, datetime.min.time(),
-        )
-        recent_recs = [
-            r for r in all_recs
-            if r.created_at and r.created_at >= since_7d
-        ]
+        since_7d = tz.combine(seven_days_ago)
+        recent_recs = [r for r in all_recs if r.created_at and r.created_at >= since_7d]
 
         lines = [
             "## Past Recommendation Performance (Last 30 Days)",
             "",
             "### Summary Statistics",
             f"- Total recommendations: {total}",
-            f"- Target hit: {target_hit}"
-            f" ({target_hit / total * 100:.1f}%)",
-            f"- Stop loss hit: {stop_hit}"
-            f" ({stop_hit / total * 100:.1f}%)",
-            f"- Expired: {expired}"
-            f" ({expired / total * 100:.1f}%)",
+            f"- Target hit: {target_hit} ({target_hit / total * 100:.1f}%)",
+            f"- Stop loss hit: {stop_hit} ({stop_hit / total * 100:.1f}%)",
+            f"- Expired: {expired} ({expired / total * 100:.1f}%)",
             f"- Open: {still_open}",
             f"- Overall win rate: {win_rate:.1f}%",
             f"- Average return: {avg_pnl:+.1f}%",
         ]
 
         if best:
-            lines.append(
-                f"- Best profit: {best.name}"
-                f" ({best.ticker}) {best.pnl_percent:+.1f}%"
-            )
+            lines.append(f"- Best profit: {best.name} ({best.ticker}) {best.pnl_percent:+.1f}%")
         if worst:
-            lines.append(
-                f"- Worst loss: {worst.name}"
-                f" ({worst.ticker}) {worst.pnl_percent:+.1f}%"
-            )
+            lines.append(f"- Worst loss: {worst.name} ({worst.ticker}) {worst.pnl_percent:+.1f}%")
 
         lines.extend(["", "### Sector Performance"])
         for sector, stats in sorted(sector_stats.items()):
             count = stats["count"]
             wins = stats["wins"]
-            avg = (
-                stats["total_pnl"] / count if count else 0
-            )
+            avg = stats["total_pnl"] / count if count else 0
             sr = wins / count * 100 if count else 0
             indicator = "Strong" if sr >= 50 else "Weak"
-            lines.append(
-                f"- {sector}: Win rate {sr:.0f}%,"
-                f" Avg {avg:+.1f}% {indicator}"
-            )
+            lines.append(f"- {sector}: Win rate {sr:.0f}%, Avg {avg:+.1f}% {indicator}")
 
-        lines.extend([
-            "",
-            "### Strategy Performance",
-            f"- Day trading: Win rate {day_wr:.0f}%"
-            f" ({len(day_recs)} trades)",
-            f"- Swing trading: Win rate {swing_wr:.0f}%"
-            f" ({len(swing_recs)} trades)",
-        ])
+        lines.extend(
+            [
+                "",
+                "### Strategy Performance",
+                f"- Day trading: Win rate {day_wr:.0f}% ({len(day_recs)} trades)",
+                f"- Swing trading: Win rate {swing_wr:.0f}% ({len(swing_recs)} trades)",
+            ]
+        )
 
-        lines.extend([
-            "",
-            "### Recent 7-Day Recommendations",
-            "| Date | Stock | Direction | Entry"
-            " | Target | Current | P&L | Status |",
-            "|------|-------|-----------|------"
-            "|--------|---------|-----|--------|",
-        ])
+        lines.extend(
+            [
+                "",
+                "### Recent 7-Day Recommendations",
+                "| Date | Stock | Direction | Entry | Target | Current | P&L | Status |",
+                "|------|-------|-----------|------|--------|---------|-----|--------|",
+            ]
+        )
         sorted_recent = sorted(
             recent_recs,
-            key=lambda x: x.created_at or datetime.min,
+            key=lambda x: x.created_at or tz.combine(date.min),
             reverse=True,
         )[:15]
         for r in sorted_recent:
-            pnl_str = (
-                f"{r.pnl_percent:+.1f}%"
-                if r.pnl_percent is not None
-                else "-"
-            )
-            current_str = (
-                f"{r.current_price:,.0f}"
-                if r.current_price
-                else "-"
-            )
+            pnl_str = f"{r.pnl_percent:+.1f}%" if r.pnl_percent is not None else "-"
+            current_str = f"{r.current_price:,.0f}" if r.current_price else "-"
             status_map = {
                 "OPEN": "Open",
                 "TARGET_HIT": "Target Hit",
                 "STOP_HIT": "Stop Hit",
                 "EXPIRED": "Expired",
             }
-            direction = (
-                "Buy" if r.direction == "LONG" else "Sell"
-            )
-            date_str = (
-                r.created_at.strftime("%m-%d")
-                if r.created_at
-                else "?"
-            )
+            direction = "Buy" if r.direction == "LONG" else "Sell"
+            date_str = r.created_at.strftime("%m-%d") if r.created_at else "?"
             status = status_map.get(r.status, r.status)
             lines.append(
                 f"| {date_str} | {r.name} | {direction}"
@@ -316,8 +242,12 @@ class BuildRetrospective:
 
         lines.extend(["", "### Lessons (Auto-derived)"])
         self._add_lessons(
-            lines, sector_stats, day_recs, swing_recs,
-            day_wr, swing_wr,
+            lines,
+            sector_stats,
+            day_recs,
+            swing_recs,
+            day_wr,
+            swing_wr,
         )
 
         return "\n".join(lines)
@@ -328,9 +258,7 @@ class BuildRetrospective:
     ) -> float:
         if not recs:
             return 0.0
-        wins = sum(
-            1 for r in recs if r.status == "TARGET_HIT"
-        )
+        wins = sum(1 for r in recs if r.status == "TARGET_HIT")
         return wins / len(recs) * 100
 
     @staticmethod

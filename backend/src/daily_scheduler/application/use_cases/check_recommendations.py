@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import logging
-from datetime import date, datetime
 
+from daily_scheduler import tz
 from daily_scheduler.domain.ports.finance_provider import (
     FinanceProviderPort,
 )
@@ -30,19 +30,15 @@ class CheckRecommendations:
         """Check all open recs. Returns number updated."""
         open_recs = self._rec_repo.get_open()
         updated = 0
-        today = date.today()
+        today = tz.today()
 
         for rec in open_recs:
             changed = False
 
             # Auto-expire DAY trades from previous days
-            if (
-                rec.timeframe == "DAY"
-                and rec.created_at
-                and rec.created_at.date() < today
-            ):
+            if rec.timeframe == "DAY" and rec.created_at and rec.created_at.date() < today:
                 rec.status = "EXPIRED"
-                rec.closed_at = datetime.now()
+                rec.closed_at = tz.now()
                 changed = True
                 logger.info(
                     "Expired DAY recommendation: %s",
@@ -54,7 +50,7 @@ class CheckRecommendations:
                 days_open = (today - rec.created_at.date()).days
                 if rec.timeframe == "SWING" and days_open > 14:
                     rec.status = "EXPIRED"
-                    rec.closed_at = datetime.now()
+                    rec.closed_at = tz.now()
                     changed = True
                     logger.info(
                         "Expired SWING recommendation (>14d): %s",
@@ -95,60 +91,52 @@ class CheckRecommendations:
         if rec.direction == "LONG":
             if price >= rec.target_price:
                 rec.status = "TARGET_HIT"
-                rec.closed_at = datetime.now()
+                rec.closed_at = tz.now()
                 rec.closed_price = price
-                rec.pnl_percent = (
-                    (price - rec.entry_price)
-                    / rec.entry_price
-                    * 100
-                )
+                rec.pnl_percent = (price - rec.entry_price) / rec.entry_price * 100
                 logger.info(
                     "TARGET HIT: %s at %.2f (%.1f%%)",
-                    rec.ticker, price, rec.pnl_percent,
+                    rec.ticker,
+                    price,
+                    rec.pnl_percent,
                 )
                 return True
             if price <= rec.stop_loss:
                 rec.status = "STOP_HIT"
-                rec.closed_at = datetime.now()
+                rec.closed_at = tz.now()
                 rec.closed_price = price
-                rec.pnl_percent = (
-                    (price - rec.entry_price)
-                    / rec.entry_price
-                    * 100
-                )
+                rec.pnl_percent = (price - rec.entry_price) / rec.entry_price * 100
                 logger.info(
                     "STOP HIT: %s at %.2f (%.1f%%)",
-                    rec.ticker, price, rec.pnl_percent,
+                    rec.ticker,
+                    price,
+                    rec.pnl_percent,
                 )
                 return True
 
         elif rec.direction == "SHORT":
             if price <= rec.target_price:
                 rec.status = "TARGET_HIT"
-                rec.closed_at = datetime.now()
+                rec.closed_at = tz.now()
                 rec.closed_price = price
-                rec.pnl_percent = (
-                    (rec.entry_price - price)
-                    / rec.entry_price
-                    * 100
-                )
+                rec.pnl_percent = (rec.entry_price - price) / rec.entry_price * 100
                 logger.info(
                     "TARGET HIT (SHORT): %s at %.2f (%.1f%%)",
-                    rec.ticker, price, rec.pnl_percent,
+                    rec.ticker,
+                    price,
+                    rec.pnl_percent,
                 )
                 return True
             if price >= rec.stop_loss:
                 rec.status = "STOP_HIT"
-                rec.closed_at = datetime.now()
+                rec.closed_at = tz.now()
                 rec.closed_price = price
-                rec.pnl_percent = (
-                    (rec.entry_price - price)
-                    / rec.entry_price
-                    * 100
-                )
+                rec.pnl_percent = (rec.entry_price - price) / rec.entry_price * 100
                 logger.info(
                     "STOP HIT (SHORT): %s at %.2f (%.1f%%)",
-                    rec.ticker, price, rec.pnl_percent,
+                    rec.ticker,
+                    price,
+                    rec.pnl_percent,
                 )
                 return True
 

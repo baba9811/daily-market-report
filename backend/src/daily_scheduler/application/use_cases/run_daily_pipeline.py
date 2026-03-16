@@ -6,6 +6,7 @@ import logging
 from datetime import date
 from pathlib import Path
 
+from daily_scheduler import tz
 from daily_scheduler.application.use_cases.build_retrospective import (
     BuildRetrospective,
 )
@@ -63,16 +64,16 @@ class RunDailyPipeline:
 
     def execute(self) -> bool:
         """Run the full pipeline. Returns True on success."""
-        today = date.today()
+        today = tz.today()
 
         # Idempotency check
         existing = self._report_repo.get_by_date(
-            today, "daily",
+            today,
+            "daily",
         )
         if existing:
             logger.info(
-                "Daily report for %s already exists (id=%d)."
-                " Skipping.",
+                "Daily report for %s already exists (id=%d). Skipping.",
                 today,
                 existing.id,
             )
@@ -82,24 +83,24 @@ class RunDailyPipeline:
             return self._run(today)
         except Exception:
             logger.exception("Daily pipeline failed")
-            self._email.send_error(
-                "Daily pipeline encountered an"
-                " unexpected error. Check logs."
-            )
+            self._email.send_error("Daily pipeline encountered an unexpected error. Check logs.")
             return False
 
     def _run(self, today: date) -> bool:
         # Step 1: Check recommendations (expiry, target/stop)
         logger.info("Step 1: Checking recommendations...")
         checker = CheckRecommendations(
-            self._rec_repo, self._finance,
+            self._rec_repo,
+            self._finance,
         )
         checker.execute()
 
         # Step 2: Update prices
         logger.info("Step 2: Updating prices...")
         updater = UpdatePrices(
-            self._rec_repo, self._price_repo, self._finance,
+            self._rec_repo,
+            self._price_repo,
+            self._finance,
         )
         updated = updater.execute()
         logger.info("Updated %d recommendations", updated)
@@ -126,21 +127,15 @@ class RunDailyPipeline:
 
         # Step 5: Generate report via Claude
         logger.info("Step 4: Generating report via Claude...")
-        raw_response, gen_time = (
-            self._news.generate_daily_report(
-                today, retro_context, weekly_lessons,
-            )
+        raw_response, gen_time = self._news.generate_daily_report(
+            today,
+            retro_context,
+            weekly_lessons,
         )
 
         if not raw_response:
-            logger.error(
-                "Claude returned empty response."
-                " Sending error notification."
-            )
-            self._email.send_error(
-                "Claude CLI returned empty response"
-                " for daily report."
-            )
+            logger.error("Claude returned empty response. Sending error notification.")
+            self._email.send_error("Claude CLI returned empty response for daily report.")
             return False
 
         # Step 6: Parse response
@@ -202,10 +197,7 @@ class RunDailyPipeline:
             html_content,
         )
         if not email_sent:
-            logger.warning(
-                "Email sending failed, but report"
-                " was saved successfully"
-            )
+            logger.warning("Email sending failed, but report was saved successfully")
 
         logger.info("Daily pipeline completed successfully!")
         return True
@@ -216,10 +208,7 @@ class RunDailyPipeline:
 
         settings = get_settings()
         db_url = settings.database_url
-        reports_dir = (
-            Path(db_url.replace("sqlite:///", "")).parent
-            / "reports"
-        )
+        reports_dir = Path(db_url.replace("sqlite:///", "")).parent / "reports"
         reports_dir.mkdir(parents=True, exist_ok=True)
         path = reports_dir / f"{today}_daily.html"
         path.write_text(html_content, encoding="utf-8")
