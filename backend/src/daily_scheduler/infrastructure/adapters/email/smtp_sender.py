@@ -92,16 +92,19 @@ class SmtpEmailSender(EmailSenderPort):
 
     def send_error(self, error_message: str) -> bool:
         """Send an error notification email."""
-        html = (
+        from html import escape
+
+        safe_message = escape(error_message)
+        body = (
             "<html><body>"
             "<h2>Daily Scheduler Error</h2>"
             "<p>The daily report pipeline encountered"
             " an error:</p>"
-            f"<pre>{error_message}</pre>"
+            f"<pre>{safe_message}</pre>"
             "<p>Please check the logs for details.</p>"
             "</body></html>"
         )
         return self.send(
             "[Error] Daily Scheduler Pipeline Failed",
-            html,
+            body,
         )

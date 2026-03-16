@@ -5,16 +5,14 @@ import {
   Database,
   Cpu,
   Mail,
-  Clock,
   RefreshCw,
   CheckCircle,
   XCircle,
   Play,
   Loader2,
 } from "lucide-react";
-import type { SystemStatus, PipelineStatus } from "@/types";
+import type { SystemStatus, PipelineRunResult } from "@/types";
 import { api } from "@/lib/api-client";
-import { formatDate } from "@/lib/utils";
 
 interface SystemStatusPanelProps {
   status: SystemStatus | null;
@@ -23,9 +21,8 @@ interface SystemStatusPanelProps {
 export default function SystemStatusPanel({
   status,
 }: SystemStatusPanelProps) {
-  const [pipelineStatus, setPipelineStatus] = useState<PipelineStatus | null>(
-    null
-  );
+  const [pipelineResult, setPipelineResult] =
+    useState<PipelineRunResult | null>(null);
   const [runningPipeline, setRunningPipeline] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [currentStatus, setCurrentStatus] = useState(status);
@@ -45,13 +42,12 @@ export default function SystemStatusPanel({
   async function handleRunPipeline() {
     setRunningPipeline(true);
     try {
-      const result = await api.post<PipelineStatus>("/api/pipeline/run");
-      setPipelineStatus(result);
+      const result = await api.post<PipelineRunResult>("/api/pipeline/run");
+      setPipelineResult(result);
     } catch {
-      setPipelineStatus({
-        running: false,
-        last_result: "failure",
-        last_run: null,
+      setPipelineResult({
+        status: "error",
+        message: "Failed to trigger pipeline",
       });
     } finally {
       setRunningPipeline(false);
@@ -72,7 +68,7 @@ export default function SystemStatusPanel({
         },
         {
           label: "SMTP",
-          ok: currentStatus.smtp,
+          ok: currentStatus.smtp_configured,
           icon: <Mail size={16} />,
         },
       ]
@@ -121,30 +117,6 @@ export default function SystemStatusPanel({
                 )}
               </div>
             ))}
-
-            {/* Schedule info */}
-            {currentStatus.last_run && (
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-sm text-[var(--text-secondary)]">
-                  <Clock size={16} />
-                  Last Run
-                </div>
-                <span className="text-xs text-[var(--text-secondary)]">
-                  {formatDate(currentStatus.last_run)}
-                </span>
-              </div>
-            )}
-            {currentStatus.next_run && (
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-sm text-[var(--text-secondary)]">
-                  <Clock size={16} />
-                  Next Run
-                </div>
-                <span className="text-xs text-[var(--text-secondary)]">
-                  {formatDate(currentStatus.next_run)}
-                </span>
-              </div>
-            )}
           </div>
         )}
       </div>
@@ -170,18 +142,18 @@ export default function SystemStatusPanel({
           {runningPipeline ? "Running..." : "Run Pipeline"}
         </button>
 
-        {pipelineStatus && (
+        {pipelineResult && (
           <div className="mt-3 rounded-lg bg-[var(--bg-hover)] p-3">
             <p
               className={`text-sm font-medium ${
-                pipelineStatus.last_result === "success"
+                pipelineResult.status === "started"
                   ? "text-emerald-400"
-                  : "text-red-400"
+                  : pipelineResult.status === "already_running"
+                    ? "text-yellow-400"
+                    : "text-red-400"
               }`}
             >
-              Pipeline {pipelineStatus.last_result === "success"
-                ? "completed successfully"
-                : "failed"}
+              {pipelineResult.message}
             </p>
           </div>
         )}

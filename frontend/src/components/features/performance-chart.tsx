@@ -13,7 +13,9 @@ import {
 
 interface PerformanceChartProps {
   dates: string[];
+  /** Already percentage values (e.g. 65.3 = 65.3%) */
   winRates: number[];
+  /** Already percentage values */
   cumulativeReturns: number[];
 }
 
@@ -27,8 +29,8 @@ export default function PerformanceChart({
       month: "2-digit",
       day: "2-digit",
     }),
-    winRate: Math.round(winRates[i] * 100),
-    cumulativeReturn: Math.round(cumulativeReturns[i] * 100 * 10) / 10,
+    winRate: Math.round(winRates[i]),
+    cumulativeReturn: Math.round(cumulativeReturns[i] * 10) / 10,
   }));
 
   return (

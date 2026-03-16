@@ -46,9 +46,16 @@ def run(
 
     console.print("[bold blue]Starting daily report pipeline...[/bold blue]")
     session_factory = get_session_factory()
-    with session_factory() as db:
-        pipeline = get_daily_pipeline(db)
+    session = session_factory()
+    try:
+        pipeline = get_daily_pipeline(session)
         success = pipeline.execute()
+        session.commit()
+    except Exception:
+        session.rollback()
+        raise
+    finally:
+        session.close()
 
     if success:
         console.print("[bold green]Pipeline completed successfully![/bold green]")

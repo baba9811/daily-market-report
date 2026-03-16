@@ -1,8 +1,8 @@
-import type { Recommendation } from "@/types";
+import type { RecommendationOut } from "@/types";
 import { cn } from "@/lib/utils";
 
 interface RecommendationTableProps {
-  recommendations: Recommendation[];
+  recommendations: RecommendationOut[];
 }
 
 export default function RecommendationTable({
@@ -28,23 +28,23 @@ export default function RecommendationTable({
               Name
             </th>
             <th className="px-4 py-3 font-medium text-[var(--text-secondary)]">
-              Sector
+              Direction
             </th>
             <th className="px-4 py-3 font-medium text-[var(--text-secondary)]">
-              Action
+              Entry / Target / Stop
             </th>
             <th className="px-4 py-3 font-medium text-[var(--text-secondary)]">
-              Confidence
+              Status
             </th>
             <th className="px-4 py-3 font-medium text-[var(--text-secondary)]">
-              Reason
+              P&L
             </th>
           </tr>
         </thead>
         <tbody>
-          {recommendations.map((rec, i) => (
+          {recommendations.map((rec) => (
             <tr
-              key={`${rec.ticker}-${i}`}
+              key={rec.id}
               className="border-b border-[var(--border-color)] last:border-b-0"
             >
               <td className="px-4 py-3 font-mono font-semibold text-blue-400">
@@ -53,36 +53,50 @@ export default function RecommendationTable({
               <td className="px-4 py-3 text-[var(--text-primary)]">
                 {rec.name}
               </td>
-              <td className="px-4 py-3 text-[var(--text-secondary)]">
-                {rec.sector}
+              <td className="px-4 py-3">
+                <span
+                  className={cn(
+                    "rounded-full px-2 py-0.5 text-xs font-medium",
+                    rec.direction === "LONG" &&
+                      "bg-emerald-500/20 text-emerald-400",
+                    rec.direction === "SHORT" &&
+                      "bg-red-500/20 text-red-400"
+                  )}
+                >
+                  {rec.direction}
+                </span>
+              </td>
+              <td className="px-4 py-3 text-xs text-[var(--text-secondary)]">
+                {rec.entry_price.toLocaleString()} / {rec.target_price.toLocaleString()} / {rec.stop_loss.toLocaleString()}
               </td>
               <td className="px-4 py-3">
                 <span
                   className={cn(
                     "rounded-full px-2 py-0.5 text-xs font-medium",
-                    rec.action === "buy" && "bg-emerald-500/20 text-emerald-400",
-                    rec.action === "sell" && "bg-red-500/20 text-red-400",
-                    rec.action === "hold" && "bg-yellow-500/20 text-yellow-400"
+                    rec.status === "OPEN" &&
+                      "bg-blue-500/20 text-blue-400",
+                    rec.status === "TARGET_HIT" &&
+                      "bg-emerald-500/20 text-emerald-400",
+                    rec.status === "STOP_HIT" &&
+                      "bg-red-500/20 text-red-400",
+                    rec.status === "EXPIRED" &&
+                      "bg-yellow-500/20 text-yellow-400"
                   )}
                 >
-                  {rec.action.toUpperCase()}
+                  {rec.status}
                 </span>
               </td>
-              <td className="px-4 py-3">
-                <div className="flex items-center gap-2">
-                  <div className="h-1.5 w-16 rounded-full bg-[var(--bg-hover)]">
-                    <div
-                      className="h-1.5 rounded-full bg-blue-500"
-                      style={{ width: `${rec.confidence * 100}%` }}
-                    />
-                  </div>
-                  <span className="text-xs text-[var(--text-secondary)]">
-                    {Math.round(rec.confidence * 100)}%
-                  </span>
-                </div>
-              </td>
-              <td className="max-w-xs truncate px-4 py-3 text-[var(--text-secondary)]">
-                {rec.reason}
+              <td
+                className={cn(
+                  "px-4 py-3 text-sm font-medium",
+                  rec.pnl_percent !== null && rec.pnl_percent > 0
+                    ? "text-emerald-400"
+                    : "text-red-400"
+                )}
+              >
+                {rec.pnl_percent !== null
+                  ? `${rec.pnl_percent > 0 ? "+" : ""}${rec.pnl_percent.toFixed(2)}%`
+                  : "—"}
               </td>
             </tr>
           ))}

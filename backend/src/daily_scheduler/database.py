@@ -27,10 +27,14 @@ def get_session_factory(database_url: str | None = None) -> sessionmaker[Session
 
 
 def get_db() -> Generator[Session, None, None]:
-    """Yield a database session and close it after use."""
+    """Yield a database session with proper commit/rollback."""
     session_factory = get_session_factory()
     session = session_factory()
     try:
         yield session
+        session.commit()
+    except Exception:
+        session.rollback()
+        raise
     finally:
         session.close()

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { FileText } from "lucide-react";
 import type { ReportSummary } from "@/types";
-import { formatDate, statusBgColor, formatPercent } from "@/lib/utils";
+import { formatDate } from "@/lib/utils";
 
 interface ReportCardProps {
   report: ReportSummary;
@@ -19,23 +19,22 @@ export default function ReportCard({ report }: ReportCardProps) {
         </div>
         <div>
           <h3 className="text-sm font-semibold text-[var(--text-primary)]">
-            {report.title}
+            {report.report_type === "daily" ? "Daily Report" : "Weekly Report"} —{" "}
+            {formatDate(report.report_date)}
           </h3>
-          <p className="text-xs text-[var(--text-secondary)]">
-            {formatDate(report.date)}
+          <p className="text-xs text-[var(--text-secondary)] line-clamp-1">
+            {report.summary || "No summary available"}
           </p>
         </div>
       </div>
       <div className="flex items-center gap-3">
-        {report.win_rate !== null && (
-          <span className="text-sm font-medium text-[var(--text-secondary)]">
-            {formatPercent(report.win_rate)}
+        {report.generation_time_s !== null && (
+          <span className="text-xs text-[var(--text-secondary)]">
+            {report.generation_time_s.toFixed(1)}s
           </span>
         )}
-        <span
-          className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${statusBgColor(report.status)}`}
-        >
-          {report.status}
+        <span className="rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-xs font-medium text-emerald-400">
+          {report.report_type}
         </span>
       </div>
     </Link>

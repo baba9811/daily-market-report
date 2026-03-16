@@ -8,12 +8,12 @@ import {
 } from "lucide-react";
 import { api } from "@/lib/api-client";
 import type { DashboardStats } from "@/types";
-import { formatPercent, formatDate, alertColor } from "@/lib/utils";
+import { formatPercent, formatDate } from "@/lib/utils";
 import DashboardWinRate from "./dashboard-win-rate";
 
 async function getDashboardStats(): Promise<DashboardStats | null> {
   try {
-    return await api.get<DashboardStats>("/api/dashboard/stats");
+    return await api.get<DashboardStats>("/api/dashboard");
   } catch {
     return null;
   }
@@ -24,36 +24,36 @@ export default async function DashboardPage() {
 
   // Fallback data when API is unavailable
   const data: DashboardStats = stats ?? {
-    total_reports: 0,
-    success_rate: 0,
-    avg_win_rate: 0,
-    latest_report_date: null,
+    latest_report: null,
+    open_recommendations: 0,
+    weekly_win_rate: 0,
+    weekly_closed: 0,
     alerts: [],
   };
 
   const statCards = [
     {
-      label: "Total Reports",
-      value: data.total_reports.toString(),
+      label: "Open Recs",
+      value: data.open_recommendations.toString(),
       icon: <FileText size={20} className="text-blue-400" />,
       color: "text-blue-400",
     },
     {
-      label: "Success Rate",
-      value: formatPercent(data.success_rate),
+      label: "Weekly Closed",
+      value: data.weekly_closed.toString(),
       icon: <CheckCircle size={20} className="text-emerald-400" />,
       color: "text-emerald-400",
     },
     {
-      label: "Avg Win Rate",
-      value: formatPercent(data.avg_win_rate),
+      label: "Win Rate (7d)",
+      value: formatPercent(data.weekly_win_rate),
       icon: <Target size={20} className="text-yellow-400" />,
       color: "text-yellow-400",
     },
     {
       label: "Latest Report",
-      value: data.latest_report_date
-        ? formatDate(data.latest_report_date)
+      value: data.latest_report
+        ? formatDate(data.latest_report.date)
         : "None",
       icon: <TrendingUp size={20} className="text-purple-400" />,
       color: "text-purple-400",
@@ -97,7 +97,7 @@ export default async function DashboardPage() {
             Win Rate
           </h2>
           <div className="flex items-center justify-center">
-            <DashboardWinRate value={data.avg_win_rate} />
+            <DashboardWinRate value={data.weekly_win_rate} />
           </div>
         </div>
 
@@ -113,31 +113,40 @@ export default async function DashboardPage() {
             </div>
           ) : (
             <div className="space-y-3">
-              {data.alerts.map((alert, i) => (
-                <div
-                  key={i}
-                  className="flex items-start gap-3 rounded-lg bg-[var(--bg-hover)] p-3"
-                >
-                  {alert.level === "error" ? (
-                    <AlertTriangle
-                      size={16}
-                      className={alertColor(alert.level)}
-                    />
-                  ) : (
-                    <Info size={16} className={alertColor(alert.level)} />
-                  )}
-                  <div>
-                    <p
-                      className={`text-sm font-medium ${alertColor(alert.level)}`}
-                    >
-                      {alert.message}
-                    </p>
-                    <p className="text-xs text-[var(--text-secondary)]">
-                      {formatDate(alert.timestamp)}
-                    </p>
+              {data.alerts.map((alert) => {
+                const isPositive =
+                  alert.pnl_percent !== null && alert.pnl_percent > 0;
+                return (
+                  <div
+                    key={`${alert.ticker}-${alert.status}`}
+                    className="flex items-start gap-3 rounded-lg bg-[var(--bg-hover)] p-3"
+                  >
+                    {alert.status === "STOP_HIT" ? (
+                      <AlertTriangle size={16} className="text-red-400" />
+                    ) : (
+                      <Info
+                        size={16}
+                        className={
+                          isPositive ? "text-emerald-400" : "text-yellow-400"
+                        }
+                      />
+                    )}
+                    <div>
+                      <p className="text-sm font-medium text-[var(--text-primary)]">
+                        {alert.ticker} — {alert.name} ({alert.status})
+                      </p>
+                      {alert.pnl_percent !== null && (
+                        <p
+                          className={`text-xs ${isPositive ? "text-emerald-400" : "text-red-400"}`}
+                        >
+                          {isPositive ? "+" : ""}
+                          {alert.pnl_percent.toFixed(2)}%
+                        </p>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>

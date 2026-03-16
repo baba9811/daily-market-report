@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
-import type { RetrospectiveDay } from "@/types";
-import { formatDate, cn } from "@/lib/utils";
+import type { DailyCheck } from "@/types";
+import { formatDate } from "@/lib/utils";
 
 interface DailyChecksProps {
-  checks: RetrospectiveDay[];
+  checks: DailyCheck[];
 }
 
 export default function DailyChecks({ checks }: DailyChecksProps) {
@@ -23,15 +23,19 @@ export default function DailyChecks({ checks }: DailyChecksProps) {
   return (
     <div className="space-y-2">
       {checks.map((check) => {
-        const isExpanded = expandedDate === check.date;
+        const isExpanded = expandedDate === check.report_date;
+        const total = check.recommendations_checked;
+        const accuracy =
+          total > 0 ? (check.targets_hit / total) * 100 : 0;
+
         return (
           <div
-            key={check.date}
+            key={check.id}
             className="rounded-lg border border-[var(--border-color)]"
           >
             <button
               onClick={() =>
-                setExpandedDate(isExpanded ? null : check.date)
+                setExpandedDate(isExpanded ? null : check.report_date)
               }
               className="flex w-full items-center justify-between p-4 text-left"
             >
@@ -42,71 +46,58 @@ export default function DailyChecks({ checks }: DailyChecksProps) {
                   <ChevronRight size={16} />
                 )}
                 <span className="font-medium text-[var(--text-primary)]">
-                  {formatDate(check.date)}
+                  {formatDate(check.report_date)}
                 </span>
               </div>
               <span
-                className={cn(
-                  "rounded-full px-2.5 py-0.5 text-xs font-medium",
-                  check.accuracy >= 0.6
+                className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                  accuracy >= 60
                     ? "bg-emerald-500/20 text-emerald-400"
-                    : check.accuracy >= 0.4
+                    : accuracy >= 40
                       ? "bg-yellow-500/20 text-yellow-400"
                       : "bg-red-500/20 text-red-400"
-                )}
+                }`}
               >
-                {Math.round(check.accuracy * 100)}% accuracy
+                {Math.round(accuracy)}% accuracy
               </span>
             </button>
 
             {isExpanded && (
               <div className="border-t border-[var(--border-color)] p-4">
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  {/* Predicted */}
+                <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <h4 className="mb-2 text-xs font-medium uppercase text-[var(--text-secondary)]">
-                      Predicted
-                    </h4>
-                    <div className="space-y-1">
-                      {check.predicted.map((item, i) => (
-                        <p
-                          key={i}
-                          className="text-sm text-[var(--text-primary)]"
-                        >
-                          {item}
-                        </p>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Actual */}
-                  <div>
-                    <h4 className="mb-2 text-xs font-medium uppercase text-[var(--text-secondary)]">
-                      Actual
-                    </h4>
-                    <div className="space-y-1">
-                      {check.actual.map((item, i) => (
-                        <p
-                          key={i}
-                          className="text-sm text-[var(--text-primary)]"
-                        >
-                          {item}
-                        </p>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                {check.notes && (
-                  <div className="mt-4 rounded-lg bg-[var(--bg-hover)] p-3">
-                    <h4 className="mb-1 text-xs font-medium uppercase text-[var(--text-secondary)]">
-                      Notes
-                    </h4>
-                    <p className="text-sm text-[var(--text-primary)]">
-                      {check.notes}
+                    <p className="text-xs font-medium uppercase text-[var(--text-secondary)]">
+                      Checked
+                    </p>
+                    <p className="text-lg font-bold text-[var(--text-primary)]">
+                      {check.recommendations_checked}
                     </p>
                   </div>
-                )}
+                  <div>
+                    <p className="text-xs font-medium uppercase text-[var(--text-secondary)]">
+                      Targets Hit
+                    </p>
+                    <p className="text-lg font-bold text-emerald-400">
+                      {check.targets_hit}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-medium uppercase text-[var(--text-secondary)]">
+                      Stops Hit
+                    </p>
+                    <p className="text-lg font-bold text-red-400">
+                      {check.stops_hit}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs font-medium uppercase text-[var(--text-secondary)]">
+                      Expired
+                    </p>
+                    <p className="text-lg font-bold text-yellow-400">
+                      {check.expired_count}
+                    </p>
+                  </div>
+                </div>
               </div>
             )}
           </div>

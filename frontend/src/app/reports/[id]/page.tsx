@@ -2,14 +2,8 @@ import Link from "next/link";
 import { ArrowLeft, ExternalLink } from "lucide-react";
 import { api } from "@/lib/api-client";
 import type { ReportDetail } from "@/types";
-import {
-  formatDate,
-  formatPercent,
-  statusBgColor,
-} from "@/lib/utils";
-import RecommendationTable from "@/components/features/recommendation-table";
+import { formatDate } from "@/lib/utils";
 import ReportHtmlViewer from "./report-html-viewer";
-import SectionContent from "./section-content";
 
 interface ReportDetailPageProps {
   params: Promise<{ id: string }>;
@@ -67,29 +61,32 @@ export default async function ReportDetailPage({
         <div className="flex items-start justify-between">
           <div>
             <h1 className="text-xl font-bold text-[var(--text-primary)]">
-              {report.title}
+              {report.report_type === "daily" ? "Daily Report" : "Weekly Report"}
             </h1>
             <p className="mt-1 text-sm text-[var(--text-secondary)]">
-              {formatDate(report.date)}
+              {formatDate(report.report_date)}
             </p>
           </div>
           <div className="flex items-center gap-3">
-            {report.win_rate !== null && (
-              <span className="text-lg font-bold text-emerald-400">
-                {formatPercent(report.win_rate)}
+            {report.generation_time_s !== null && (
+              <span className="text-sm text-[var(--text-secondary)]">
+                Generated in {report.generation_time_s.toFixed(1)}s
               </span>
             )}
-            <span
-              className={`rounded-full px-3 py-1 text-xs font-medium ${statusBgColor(report.status)}`}
-            >
-              {report.status}
+            <span className="rounded-full bg-emerald-500/20 px-3 py-1 text-xs font-medium text-emerald-400">
+              {report.report_type}
             </span>
           </div>
         </div>
+        {report.summary && (
+          <p className="mt-3 text-sm text-[var(--text-secondary)]">
+            {report.summary}
+          </p>
+        )}
       </div>
 
       {/* HTML report viewer */}
-      {report.html_path && (
+      {report.html_content && (
         <div className="card">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-lg font-semibold text-[var(--text-primary)]">
@@ -106,30 +103,6 @@ export default async function ReportDetailPage({
             </a>
           </div>
           <ReportHtmlViewer reportId={report.id} />
-        </div>
-      )}
-
-      {/* Sections */}
-      {report.sections.length > 0 && (
-        <div className="space-y-4">
-          {report.sections.map((section, i) => (
-            <div key={i} className="card">
-              <h2 className="mb-3 text-lg font-semibold text-[var(--text-primary)]">
-                {section.title}
-              </h2>
-              <SectionContent html={section.content} />
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Recommendations */}
-      {report.recommendations.length > 0 && (
-        <div className="card">
-          <h2 className="mb-4 text-lg font-semibold text-[var(--text-primary)]">
-            Recommendations
-          </h2>
-          <RecommendationTable recommendations={report.recommendations} />
         </div>
       )}
     </div>

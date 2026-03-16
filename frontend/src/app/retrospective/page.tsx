@@ -1,12 +1,21 @@
 import { RotateCcw } from "lucide-react";
 import { api } from "@/lib/api-client";
-import type { RetrospectiveData } from "@/types";
+import type { WeeklyAnalysis, DailyCheck } from "@/types";
 import { formatDate } from "@/lib/utils";
 import DailyChecks from "./daily-checks";
 
-async function getRetrospective(): Promise<RetrospectiveData | null> {
+interface RetrospectivePageData {
+  daily_checks: DailyCheck[];
+  weekly_analyses: WeeklyAnalysis[];
+}
+
+async function getRetrospective(): Promise<RetrospectivePageData | null> {
   try {
-    return await api.get<RetrospectiveData>("/api/retrospective");
+    const [daily_checks, weekly_analyses] = await Promise.all([
+      api.get<DailyCheck[]>("/api/retrospective/daily-checks"),
+      api.get<WeeklyAnalysis[]>("/api/retrospective/weekly"),
+    ]);
+    return { daily_checks, weekly_analyses };
   } catch {
     return null;
   }
@@ -76,7 +85,7 @@ export default async function RetrospectivePage() {
           <div className="space-y-4">
             {data.weekly_analyses.map((week) => (
               <div
-                key={week.week_start}
+                key={week.id}
                 className="rounded-lg border border-[var(--border-color)] p-4"
               >
                 <div className="mb-3 flex items-center justify-between">
@@ -84,46 +93,27 @@ export default async function RetrospectivePage() {
                     {formatDate(week.week_start)} -{" "}
                     {formatDate(week.week_end)}
                   </h3>
-                  <span
-                    className={`text-sm font-bold ${
-                      week.avg_accuracy >= 0.6
-                        ? "text-emerald-400"
-                        : week.avg_accuracy >= 0.4
-                          ? "text-yellow-400"
-                          : "text-red-400"
-                    }`}
-                  >
-                    {Math.round(week.avg_accuracy * 100)}% avg accuracy
+                  <span className="text-sm text-[var(--text-secondary)]">
+                    {week.win_count}W / {week.loss_count}L
+                    {week.avg_return_pct !== null && (
+                      <span
+                        className={
+                          week.avg_return_pct >= 0
+                            ? " text-emerald-400"
+                            : " text-red-400"
+                        }
+                      >
+                        {" "}
+                        ({week.avg_return_pct >= 0 ? "+" : ""}
+                        {week.avg_return_pct.toFixed(1)}%)
+                      </span>
+                    )}
                   </span>
                 </div>
-
-                {week.top_sectors.length > 0 && (
-                  <div className="mb-2">
-                    <span className="text-xs text-[var(--text-secondary)]">
-                      Top sectors:{" "}
-                    </span>
-                    {week.top_sectors.map((sector) => (
-                      <span
-                        key={sector}
-                        className="mr-2 inline-block rounded bg-blue-500/20 px-2 py-0.5 text-xs text-blue-400"
-                      >
-                        {sector}
-                      </span>
-                    ))}
-                  </div>
-                )}
-
-                {week.improvements.length > 0 && (
-                  <div>
-                    <span className="text-xs text-[var(--text-secondary)]">
-                      Improvements:
-                    </span>
-                    <ul className="mt-1 list-inside list-disc text-sm text-[var(--text-secondary)]">
-                      {week.improvements.map((item, i) => (
-                        <li key={i}>{item}</li>
-                      ))}
-                    </ul>
-                  </div>
+                {week.analysis_text && (
+                  <p className="text-sm text-[var(--text-secondary)] line-clamp-3">
+                    {week.analysis_text}
+                  </p>
                 )}
               </div>
             ))}

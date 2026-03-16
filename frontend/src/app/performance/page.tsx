@@ -1,13 +1,31 @@
 import { BarChart3 } from "lucide-react";
 import { api } from "@/lib/api-client";
-import type { PerformanceData } from "@/types";
+import type {
+  PerformanceSummary,
+  SectorPerformance,
+  TimeseriesPoint,
+  RecommendationOut,
+} from "@/types";
 import RecommendationTable from "@/components/features/recommendation-table";
 import PerformanceCharts from "./performance-charts";
 import SectorBars from "./sector-bars";
 
-async function getPerformance(): Promise<PerformanceData | null> {
+interface PerformancePageData {
+  summary: PerformanceSummary;
+  sectors: SectorPerformance[];
+  timeseries: TimeseriesPoint[];
+  recommendations: RecommendationOut[];
+}
+
+async function getPerformance(): Promise<PerformancePageData | null> {
   try {
-    return await api.get<PerformanceData>("/api/performance");
+    const [summary, sectors, timeseries, recommendations] = await Promise.all([
+      api.get<PerformanceSummary>("/api/performance/summary"),
+      api.get<SectorPerformance[]>("/api/performance/sectors"),
+      api.get<TimeseriesPoint[]>("/api/performance/timeseries"),
+      api.get<RecommendationOut[]>("/api/performance/recommendations"),
+    ]);
+    return { summary, sectors, timeseries, recommendations };
   } catch {
     return null;
   }
@@ -62,9 +80,9 @@ export default async function PerformancePage() {
           Win Rate & Returns Over Time
         </h2>
         <PerformanceCharts
-          dates={data.dates}
-          winRates={data.win_rates}
-          cumulativeReturns={data.cumulative_returns}
+          dates={data.timeseries.map((p) => p.date)}
+          winRates={data.timeseries.map((p) => p.win_rate)}
+          cumulativeReturns={data.timeseries.map((p) => p.cumulative_pnl)}
         />
       </div>
 
@@ -73,7 +91,7 @@ export default async function PerformancePage() {
         <h2 className="mb-4 text-lg font-semibold text-[var(--text-primary)]">
           Sector Performance
         </h2>
-        <SectorBars sectors={data.sector_performance} />
+        <SectorBars sectors={data.sectors} />
       </div>
 
       {/* Recent recommendations */}
@@ -81,7 +99,7 @@ export default async function PerformancePage() {
         <h2 className="mb-4 text-lg font-semibold text-[var(--text-primary)]">
           Recent Recommendations
         </h2>
-        <RecommendationTable recommendations={data.recent_recommendations} />
+        <RecommendationTable recommendations={data.recommendations} />
       </div>
     </div>
   );

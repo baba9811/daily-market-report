@@ -26,7 +26,7 @@ export default function SectorBars({ sectors }: SectorBarsProps) {
               {sector.sector}
             </span>
             <div className="flex items-center gap-4 text-[var(--text-secondary)]">
-              <span>Win: {Math.round(sector.win_rate * 100)}%</span>
+              <span>Win: {Math.round(sector.win_rate)}%</span>
               <span>
                 Avg Return:{" "}
                 <span
@@ -37,7 +37,7 @@ export default function SectorBars({ sectors }: SectorBarsProps) {
                   }
                 >
                   {sector.avg_return >= 0 ? "+" : ""}
-                  {(sector.avg_return * 100).toFixed(1)}%
+                  {sector.avg_return.toFixed(1)}%
                 </span>
               </span>
               <span className="text-xs">({sector.count} picks)</span>

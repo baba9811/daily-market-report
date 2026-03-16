@@ -1,110 +1,33 @@
-/** Shared TypeScript types for the Daily Scheduler frontend. */
+/**
+ * Shared TypeScript types for the Daily Scheduler frontend.
+ *
+ * All types are derived from the auto-generated OpenAPI spec.
+ * Run `make generate-types` to regenerate api.generated.ts.
+ */
 
-export interface DashboardStats {
-  total_reports: number;
-  success_rate: number;
-  avg_win_rate: number;
-  latest_report_date: string | null;
-  alerts: Alert[];
-}
+import type { components } from "./api.generated";
 
-export interface Alert {
-  level: "info" | "warning" | "error";
-  message: string;
-  timestamp: string;
-}
+// ─── Dashboard ───────────────────────────────────────────
+export type DashboardStats = components["schemas"]["DashboardOut"];
+export type DashboardAlert = components["schemas"]["DashboardAlert"];
+export type LatestReportInfo = components["schemas"]["LatestReportInfo"];
 
-export interface ReportSummary {
-  id: number;
-  date: string;
-  title: string;
-  status: "success" | "failure" | "pending";
-  win_rate: number | null;
-  created_at: string;
-}
+// ─── Reports ─────────────────────────────────────────────
+export type ReportSummary = components["schemas"]["ReportOut"];
+export type ReportDetail = components["schemas"]["ReportDetailOut"];
 
-export interface ReportDetail {
-  id: number;
-  date: string;
-  title: string;
-  status: "success" | "failure" | "pending";
-  win_rate: number | null;
-  html_path: string | null;
-  sections: ReportSection[];
-  recommendations: Recommendation[];
-  created_at: string;
-}
+// ─── Performance ─────────────────────────────────────────
+export type PerformanceSummary = components["schemas"]["PerformanceSummary"];
+export type SectorPerformance = components["schemas"]["SectorPerformance"];
+export type TimeseriesPoint = components["schemas"]["TimeseriesPoint"];
+export type RecommendationOut = components["schemas"]["RecommendationOut"];
 
-export interface ReportSection {
-  title: string;
-  content: string;
-}
+// ─── Retrospective ───────────────────────────────────────
+export type WeeklyAnalysis = components["schemas"]["WeeklyAnalysisOut"];
+export type DailyCheck = components["schemas"]["DailyCheckOut"];
 
-export interface Recommendation {
-  ticker: string;
-  name: string;
-  sector: string;
-  action: "buy" | "sell" | "hold";
-  confidence: number;
-  reason: string;
-}
-
-export interface PerformanceData {
-  dates: string[];
-  win_rates: number[];
-  cumulative_returns: number[];
-  sector_performance: SectorPerformance[];
-  recent_recommendations: Recommendation[];
-}
-
-export interface SectorPerformance {
-  sector: string;
-  win_rate: number;
-  avg_return: number;
-  count: number;
-}
-
-export interface RetrospectiveDay {
-  date: string;
-  predicted: string[];
-  actual: string[];
-  accuracy: number;
-  notes: string;
-}
-
-export interface WeeklyAnalysis {
-  week_start: string;
-  week_end: string;
-  avg_accuracy: number;
-  top_sectors: string[];
-  improvements: string[];
-}
-
-export interface RetrospectiveData {
-  daily_checks: RetrospectiveDay[];
-  weekly_analyses: WeeklyAnalysis[];
-}
-
-export interface SettingsData {
-  smtp_host: string;
-  smtp_port: number;
-  smtp_user: string;
-  email_from: string;
-  email_to: string[];
-  claude_model: string;
-  report_language: string;
-}
-
-export interface SystemStatus {
-  database: boolean;
-  claude_cli: boolean;
-  smtp: boolean;
-  last_run: string | null;
-  next_run: string | null;
-}
-
-export interface PipelineStatus {
-  running: boolean;
-  last_result: "success" | "failure" | null;
-  last_run: string | null;
-}
+// ─── Settings ────────────────────────────────────────────
+export type SettingsData = components["schemas"]["SettingsOut"];
+export type SystemStatus = components["schemas"]["StatusOut"];
+export type PipelineStatus = components["schemas"]["PipelineStatusOut"];
+export type PipelineRunResult = components["schemas"]["PipelineRunResult"];

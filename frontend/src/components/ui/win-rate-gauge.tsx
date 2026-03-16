@@ -1,7 +1,8 @@
 "use client";
 
 interface WinRateGaugeProps {
-  value: number; // 0-1
+  /** Percentage value, e.g. 65.3 means 65.3% */
+  value: number;
   size?: number;
 }
 
@@ -9,10 +10,11 @@ export default function WinRateGauge({
   value,
   size = 160,
 }: WinRateGaugeProps) {
-  const percentage = Math.round(value * 100);
+  const percentage = Math.round(value);
+  const fraction = value / 100;
   const radius = (size - 20) / 2;
   const circumference = 2 * Math.PI * radius;
-  const strokeDashoffset = circumference - value * circumference;
+  const strokeDashoffset = circumference - fraction * circumference;
   const center = size / 2;
 
   // Color based on value
@@ -26,7 +28,7 @@ export default function WinRateGauge({
   }
 
   return (
-    <div className="flex flex-col items-center gap-2">
+    <div className="relative flex flex-col items-center gap-2">
       <svg width={size} height={size} className="-rotate-90">
         {/* Background circle */}
         <circle

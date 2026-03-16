@@ -1,0 +1,1713 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Daily Scheduler",
+    "description": "AI-powered daily news & trading report system",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/api/dashboard": {
+      "get": {
+        "tags": [
+          "dashboard"
+        ],
+        "summary": "Get Dashboard",
+        "description": "Return aggregated dashboard data.",
+        "operationId": "get_dashboard_api_dashboard_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DashboardOut"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/reports": {
+      "get": {
+        "tags": [
+          "reports"
+        ],
+        "summary": "List Reports",
+        "description": "List reports with pagination.",
+        "operationId": "list_reports_api_reports_get",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 20,
+              "title": "Per Page"
+            }
+          },
+          {
+            "name": "report_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "all",
+              "title": "Report Type"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReportOut"
+                  },
+                  "title": "Response List Reports Api Reports Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/reports/latest": {
+      "get": {
+        "tags": [
+          "reports"
+        ],
+        "summary": "Get Latest Report",
+        "description": "Get the latest daily report.",
+        "operationId": "get_latest_report_api_reports_latest_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportDetailOut"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/reports/{report_id}": {
+      "get": {
+        "tags": [
+          "reports"
+        ],
+        "summary": "Get Report",
+        "description": "Get a specific report by ID.",
+        "operationId": "get_report_api_reports__report_id__get",
+        "parameters": [
+          {
+            "name": "report_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Report Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportDetailOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/reports/{report_id}/html": {
+      "get": {
+        "tags": [
+          "reports"
+        ],
+        "summary": "Get Report Html",
+        "description": "Get raw HTML content of a report.",
+        "operationId": "get_report_html_api_reports__report_id__html_get",
+        "parameters": [
+          {
+            "name": "report_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Report Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/performance/summary": {
+      "get": {
+        "tags": [
+          "performance"
+        ],
+        "summary": "Get Summary",
+        "description": "Get aggregated performance summary.",
+        "operationId": "get_summary_api_performance_summary_get",
+        "parameters": [
+          {
+            "name": "period",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d+d$",
+              "default": "30d",
+              "title": "Period"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PerformanceSummary"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/performance/recommendations": {
+      "get": {
+        "tags": [
+          "performance"
+        ],
+        "summary": "Get Recommendations",
+        "description": "Get recommendations filtered by status.",
+        "operationId": "get_recommendations_api_performance_recommendations_get",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "all",
+              "title": "Status"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RecommendationOut"
+                  },
+                  "title": "Response Get Recommendations Api Performance Recommendations Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/performance/sectors": {
+      "get": {
+        "tags": [
+          "performance"
+        ],
+        "summary": "Get Sector Performance",
+        "description": "Get per-sector performance breakdown.",
+        "operationId": "get_sector_performance_api_performance_sectors_get",
+        "parameters": [
+          {
+            "name": "period",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d+d$",
+              "default": "30d",
+              "title": "Period"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SectorPerformance"
+                  },
+                  "title": "Response Get Sector Performance Api Performance Sectors Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/performance/timeseries": {
+      "get": {
+        "tags": [
+          "performance"
+        ],
+        "summary": "Get Timeseries",
+        "description": "Get time series performance data.",
+        "operationId": "get_timeseries_api_performance_timeseries_get",
+        "parameters": [
+          {
+            "name": "period",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d+d$",
+              "default": "30d",
+              "title": "Period"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TimeseriesPoint"
+                  },
+                  "title": "Response Get Timeseries Api Performance Timeseries Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/retrospective/weekly": {
+      "get": {
+        "tags": [
+          "retrospective"
+        ],
+        "summary": "List Weekly Analyses",
+        "description": "List weekly analyses with pagination.",
+        "operationId": "list_weekly_analyses_api_retrospective_weekly_get",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 50,
+              "minimum": 1,
+              "default": 10,
+              "title": "Per Page"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/WeeklyAnalysisOut"
+                  },
+                  "title": "Response List Weekly Analyses Api Retrospective Weekly Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/retrospective/weekly/{analysis_id}": {
+      "get": {
+        "tags": [
+          "retrospective"
+        ],
+        "summary": "Get Weekly Analysis",
+        "description": "Get a specific weekly analysis.",
+        "operationId": "get_weekly_analysis_api_retrospective_weekly__analysis_id__get",
+        "parameters": [
+          {
+            "name": "analysis_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Analysis Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WeeklyAnalysisDetailOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/retrospective/daily-checks": {
+      "get": {
+        "tags": [
+          "retrospective"
+        ],
+        "summary": "List Daily Checks",
+        "description": "List recent daily retrospective checks.",
+        "operationId": "list_daily_checks_api_retrospective_daily_checks_get",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 90,
+              "minimum": 1,
+              "default": 14,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DailyCheckOut"
+                  },
+                  "title": "Response List Daily Checks Api Retrospective Daily Checks Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/settings": {
+      "get": {
+        "tags": [
+          "settings"
+        ],
+        "summary": "Get Current Settings",
+        "description": "Return current application settings.",
+        "operationId": "get_current_settings_api_settings_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettingsOut"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "settings"
+        ],
+        "summary": "Update Settings",
+        "description": "Update settings by writing to .env file.\n\nOnly safe fields can be updated. Sensitive paths like\nclaude_cli_path and database_url are not writable via API.",
+        "operationId": "update_settings_api_settings_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SettingsUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateResult"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/settings/test-email": {
+      "post": {
+        "tags": [
+          "settings"
+        ],
+        "summary": "Test Email",
+        "description": "Send a test email to verify SMTP config.",
+        "operationId": "test_email_api_settings_test_email_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TestEmailResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/settings/status": {
+      "get": {
+        "tags": [
+          "settings"
+        ],
+        "summary": "Health Check",
+        "description": "Check system health: DB, Claude CLI, SMTP.",
+        "operationId": "health_check_api_settings_status_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StatusOut"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/pipeline/run": {
+      "post": {
+        "tags": [
+          "pipeline"
+        ],
+        "summary": "Trigger Pipeline",
+        "description": "Trigger the daily report pipeline manually.",
+        "operationId": "trigger_pipeline_api_pipeline_run_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PipelineRunResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/pipeline/status": {
+      "get": {
+        "tags": [
+          "pipeline"
+        ],
+        "summary": "Get Pipeline Status",
+        "description": "Return current pipeline status.",
+        "operationId": "get_pipeline_status_api_pipeline_status_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PipelineStatusOut"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "DailyCheckOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "report_date": {
+            "type": "string",
+            "title": "Report Date"
+          },
+          "recommendations_checked": {
+            "type": "integer",
+            "title": "Recommendations Checked"
+          },
+          "targets_hit": {
+            "type": "integer",
+            "title": "Targets Hit"
+          },
+          "stops_hit": {
+            "type": "integer",
+            "title": "Stops Hit"
+          },
+          "expired_count": {
+            "type": "integer",
+            "title": "Expired Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "report_date",
+          "recommendations_checked",
+          "targets_hit",
+          "stops_hit",
+          "expired_count"
+        ],
+        "title": "DailyCheckOut",
+        "description": "Daily retrospective check."
+      },
+      "DashboardAlert": {
+        "properties": {
+          "ticker": {
+            "type": "string",
+            "title": "Ticker"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "pnl_percent": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pnl Percent"
+          }
+        },
+        "type": "object",
+        "required": [
+          "ticker",
+          "name",
+          "status",
+          "pnl_percent"
+        ],
+        "title": "DashboardAlert",
+        "description": "An alert for a recently closed recommendation."
+      },
+      "DashboardOut": {
+        "properties": {
+          "latest_report": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LatestReportInfo"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "open_recommendations": {
+            "type": "integer",
+            "title": "Open Recommendations"
+          },
+          "weekly_win_rate": {
+            "type": "number",
+            "title": "Weekly Win Rate"
+          },
+          "weekly_closed": {
+            "type": "integer",
+            "title": "Weekly Closed"
+          },
+          "alerts": {
+            "items": {
+              "$ref": "#/components/schemas/DashboardAlert"
+            },
+            "type": "array",
+            "title": "Alerts"
+          }
+        },
+        "type": "object",
+        "required": [
+          "latest_report",
+          "open_recommendations",
+          "weekly_win_rate",
+          "weekly_closed",
+          "alerts"
+        ],
+        "title": "DashboardOut",
+        "description": "Aggregated dashboard data."
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "LatestReportInfo": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "date": {
+            "type": "string",
+            "title": "Date"
+          },
+          "summary": {
+            "type": "string",
+            "title": "Summary"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "date",
+          "summary"
+        ],
+        "title": "LatestReportInfo",
+        "description": "Summary info for the latest report."
+      },
+      "PerformanceSummary": {
+        "properties": {
+          "total_recommendations": {
+            "type": "integer",
+            "title": "Total Recommendations"
+          },
+          "open_count": {
+            "type": "integer",
+            "title": "Open Count"
+          },
+          "target_hit_count": {
+            "type": "integer",
+            "title": "Target Hit Count"
+          },
+          "stop_hit_count": {
+            "type": "integer",
+            "title": "Stop Hit Count"
+          },
+          "expired_count": {
+            "type": "integer",
+            "title": "Expired Count"
+          },
+          "win_rate": {
+            "type": "number",
+            "title": "Win Rate"
+          },
+          "avg_pnl": {
+            "type": "number",
+            "title": "Avg Pnl"
+          },
+          "best_ticker": {
+            "type": "string",
+            "title": "Best Ticker"
+          },
+          "best_pnl": {
+            "type": "number",
+            "title": "Best Pnl"
+          },
+          "worst_ticker": {
+            "type": "string",
+            "title": "Worst Ticker"
+          },
+          "worst_pnl": {
+            "type": "number",
+            "title": "Worst Pnl"
+          }
+        },
+        "type": "object",
+        "required": [
+          "total_recommendations",
+          "open_count",
+          "target_hit_count",
+          "stop_hit_count",
+          "expired_count",
+          "win_rate",
+          "avg_pnl",
+          "best_ticker",
+          "best_pnl",
+          "worst_ticker",
+          "worst_pnl"
+        ],
+        "title": "PerformanceSummary",
+        "description": "Aggregated performance summary."
+      },
+      "PipelineRunResult": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "message"
+        ],
+        "title": "PipelineRunResult",
+        "description": "Result of pipeline trigger."
+      },
+      "PipelineStatusOut": {
+        "properties": {
+          "running": {
+            "type": "boolean",
+            "title": "Running"
+          },
+          "last_result": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Result"
+          }
+        },
+        "type": "object",
+        "required": [
+          "running",
+          "last_result"
+        ],
+        "title": "PipelineStatusOut",
+        "description": "Current pipeline status."
+      },
+      "RecommendationOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "report_id": {
+            "type": "integer",
+            "title": "Report Id"
+          },
+          "ticker": {
+            "type": "string",
+            "title": "Ticker"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "market": {
+            "type": "string",
+            "title": "Market"
+          },
+          "direction": {
+            "type": "string",
+            "title": "Direction"
+          },
+          "timeframe": {
+            "type": "string",
+            "title": "Timeframe"
+          },
+          "entry_price": {
+            "type": "number",
+            "title": "Entry Price"
+          },
+          "target_price": {
+            "type": "number",
+            "title": "Target Price"
+          },
+          "stop_loss": {
+            "type": "number",
+            "title": "Stop Loss"
+          },
+          "rationale": {
+            "type": "string",
+            "title": "Rationale"
+          },
+          "sector": {
+            "type": "string",
+            "title": "Sector"
+          },
+          "current_price": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Current Price"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "pnl_percent": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pnl Percent"
+          },
+          "closed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Closed At"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "report_id",
+          "ticker",
+          "name",
+          "market",
+          "direction",
+          "timeframe",
+          "entry_price",
+          "target_price",
+          "stop_loss",
+          "rationale",
+          "sector",
+          "current_price",
+          "status",
+          "pnl_percent",
+          "closed_at",
+          "created_at"
+        ],
+        "title": "RecommendationOut",
+        "description": "Recommendation response model."
+      },
+      "ReportDetailOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "report_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Report Date"
+          },
+          "report_type": {
+            "type": "string",
+            "title": "Report Type"
+          },
+          "summary": {
+            "type": "string",
+            "title": "Summary"
+          },
+          "generation_time_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Generation Time S"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "html_content": {
+            "type": "string",
+            "title": "Html Content"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "report_date",
+          "report_type",
+          "summary",
+          "generation_time_s",
+          "created_at",
+          "html_content"
+        ],
+        "title": "ReportDetailOut",
+        "description": "Report detail with HTML content."
+      },
+      "ReportOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "report_date": {
+            "type": "string",
+            "format": "date",
+            "title": "Report Date"
+          },
+          "report_type": {
+            "type": "string",
+            "title": "Report Type"
+          },
+          "summary": {
+            "type": "string",
+            "title": "Summary"
+          },
+          "generation_time_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Generation Time S"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "report_date",
+          "report_type",
+          "summary",
+          "generation_time_s",
+          "created_at"
+        ],
+        "title": "ReportOut",
+        "description": "Report list item."
+      },
+      "SectorPerformance": {
+        "properties": {
+          "sector": {
+            "type": "string",
+            "title": "Sector"
+          },
+          "count": {
+            "type": "integer",
+            "title": "Count"
+          },
+          "wins": {
+            "type": "integer",
+            "title": "Wins"
+          },
+          "losses": {
+            "type": "integer",
+            "title": "Losses"
+          },
+          "win_rate": {
+            "type": "number",
+            "title": "Win Rate"
+          },
+          "avg_return": {
+            "type": "number",
+            "title": "Avg Return"
+          }
+        },
+        "type": "object",
+        "required": [
+          "sector",
+          "count",
+          "wins",
+          "losses",
+          "win_rate",
+          "avg_return"
+        ],
+        "title": "SectorPerformance",
+        "description": "Per-sector performance."
+      },
+      "SettingsOut": {
+        "properties": {
+          "smtp_host": {
+            "type": "string",
+            "title": "Smtp Host"
+          },
+          "smtp_port": {
+            "type": "integer",
+            "title": "Smtp Port"
+          },
+          "smtp_user": {
+            "type": "string",
+            "title": "Smtp User"
+          },
+          "smtp_password_set": {
+            "type": "boolean",
+            "title": "Smtp Password Set"
+          },
+          "email_from": {
+            "type": "string",
+            "title": "Email From"
+          },
+          "email_to": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Email To"
+          },
+          "claude_model": {
+            "type": "string",
+            "title": "Claude Model"
+          },
+          "report_language": {
+            "type": "string",
+            "title": "Report Language"
+          }
+        },
+        "type": "object",
+        "required": [
+          "smtp_host",
+          "smtp_port",
+          "smtp_user",
+          "smtp_password_set",
+          "email_from",
+          "email_to",
+          "claude_model",
+          "report_language"
+        ],
+        "title": "SettingsOut",
+        "description": "Current settings (no secrets or sensitive paths)."
+      },
+      "SettingsUpdate": {
+        "properties": {
+          "smtp_host": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Smtp Host"
+          },
+          "smtp_port": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Smtp Port"
+          },
+          "smtp_user": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Smtp User"
+          },
+          "smtp_password": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Smtp Password"
+          },
+          "email_from": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email From"
+          },
+          "email_to": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email To"
+          },
+          "claude_model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Claude Model"
+          },
+          "report_language": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Report Language"
+          }
+        },
+        "type": "object",
+        "title": "SettingsUpdate",
+        "description": "Partial settings update.\n\nOnly safe fields are writable. Sensitive paths like\nclaude_cli_path and database_url cannot be changed via API."
+      },
+      "StatusOut": {
+        "properties": {
+          "database": {
+            "type": "boolean",
+            "title": "Database"
+          },
+          "claude_cli": {
+            "type": "boolean",
+            "title": "Claude Cli"
+          },
+          "smtp_configured": {
+            "type": "boolean",
+            "title": "Smtp Configured"
+          },
+          "all_ok": {
+            "type": "boolean",
+            "title": "All Ok"
+          }
+        },
+        "type": "object",
+        "required": [
+          "database",
+          "claude_cli",
+          "smtp_configured",
+          "all_ok"
+        ],
+        "title": "StatusOut",
+        "description": "System health status."
+      },
+      "TestEmailResult": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success"
+          }
+        },
+        "type": "object",
+        "required": [
+          "success"
+        ],
+        "title": "TestEmailResult",
+        "description": "Result of a test email."
+      },
+      "TimeseriesPoint": {
+        "properties": {
+          "date": {
+            "type": "string",
+            "title": "Date"
+          },
+          "win_rate": {
+            "type": "number",
+            "title": "Win Rate"
+          },
+          "cumulative_pnl": {
+            "type": "number",
+            "title": "Cumulative Pnl"
+          },
+          "recommendations_count": {
+            "type": "integer",
+            "title": "Recommendations Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "date",
+          "win_rate",
+          "cumulative_pnl",
+          "recommendations_count"
+        ],
+        "title": "TimeseriesPoint",
+        "description": "Single time series data point."
+      },
+      "UpdateResult": {
+        "properties": {
+          "updated": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Updated"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "updated",
+          "message"
+        ],
+        "title": "UpdateResult",
+        "description": "Result of a settings update."
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "WeeklyAnalysisDetailOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "week_start": {
+            "type": "string",
+            "title": "Week Start"
+          },
+          "week_end": {
+            "type": "string",
+            "title": "Week End"
+          },
+          "total_recommendations": {
+            "type": "integer",
+            "title": "Total Recommendations"
+          },
+          "win_count": {
+            "type": "integer",
+            "title": "Win Count"
+          },
+          "loss_count": {
+            "type": "integer",
+            "title": "Loss Count"
+          },
+          "avg_return_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avg Return Pct"
+          },
+          "best_pick_ticker": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Best Pick Ticker"
+          },
+          "worst_pick_ticker": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Worst Pick Ticker"
+          },
+          "analysis_text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Analysis Text"
+          },
+          "sector_breakdown": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sector Breakdown"
+          },
+          "lessons": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lessons"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "week_start",
+          "week_end",
+          "total_recommendations",
+          "win_count",
+          "loss_count",
+          "avg_return_pct",
+          "best_pick_ticker",
+          "worst_pick_ticker",
+          "analysis_text",
+          "sector_breakdown",
+          "lessons"
+        ],
+        "title": "WeeklyAnalysisDetailOut",
+        "description": "Weekly analysis with full detail."
+      },
+      "WeeklyAnalysisOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "week_start": {
+            "type": "string",
+            "title": "Week Start"
+          },
+          "week_end": {
+            "type": "string",
+            "title": "Week End"
+          },
+          "total_recommendations": {
+            "type": "integer",
+            "title": "Total Recommendations"
+          },
+          "win_count": {
+            "type": "integer",
+            "title": "Win Count"
+          },
+          "loss_count": {
+            "type": "integer",
+            "title": "Loss Count"
+          },
+          "avg_return_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avg Return Pct"
+          },
+          "best_pick_ticker": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Best Pick Ticker"
+          },
+          "worst_pick_ticker": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Worst Pick Ticker"
+          },
+          "analysis_text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Analysis Text"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "week_start",
+          "week_end",
+          "total_recommendations",
+          "win_count",
+          "loss_count",
+          "avg_return_pct",
+          "best_pick_ticker",
+          "worst_pick_ticker",
+          "analysis_text"
+        ],
+        "title": "WeeklyAnalysisOut",
+        "description": "Weekly analysis summary."
+      }
+    }
+  }
+}

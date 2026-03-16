@@ -1,4 +1,4 @@
-.PHONY: all setup dev dev-backend dev-frontend test lint format build run serve check install-scheduler clean help
+.PHONY: all setup dev dev-backend dev-frontend test lint format generate-types build run serve check install-scheduler clean help
 
 # ============================================================
 # Daily Scheduler - Development Commands
@@ -41,6 +41,10 @@ lint: ## Run linting and static analysis
 	cd backend && uv run pylint src/daily_scheduler/
 	cd frontend && yarn lint
 	cd frontend && yarn oxlint
+
+generate-types: ## Generate TypeScript types from OpenAPI spec
+	cd backend && uv run python scripts/export_openapi.py ../frontend/openapi.json
+	cd frontend && yarn generate:types
 
 format: ## Auto-format all code
 	cd backend && uv run ruff check --fix src/

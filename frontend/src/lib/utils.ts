@@ -31,10 +31,11 @@ export function formatDateShort(dateStr: string): string {
 }
 
 /**
- * Format a percentage value (0-1) to a display string.
+ * Format a percentage value to a display string.
+ * Backend returns values already as percentages (e.g. 65.3 means 65.3%).
  */
 export function formatPercent(value: number): string {
-  return `${(value * 100).toFixed(1)}%`;
+  return `${value.toFixed(1)}%`;
 }
 
 /**
