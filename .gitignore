@@ -28,7 +28,9 @@ frontend/.yarn/cache
 frontend/.yarn/unplugged
 frontend/.yarn/install-state.gz
 frontend/.pnp.*
+frontend/next-env.d.ts
 *.tsbuildinfo
+*.pem
 
 # === Screenshots ===
 *.png
