@@ -13,14 +13,14 @@ export default function Dashboard() {
   const handleTrigger = async () => {
     try {
       await api.triggerPipeline()
-      alert('파이프라인이 시작되었습니다. 잠시 후 새로고침하세요.')
+      alert('Pipeline started. Please refresh shortly.')
     } catch {
-      alert('파이프라인 시작 실패')
+      alert('Failed to start pipeline')
     }
   }
 
   if (isLoading) {
-    return <div className="text-slate-400">로딩 중...</div>
+    return <div className="text-slate-400">Loading...</div>
   }
 
   const d = data as any
@@ -30,15 +30,15 @@ export default function Dashboard() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-white">대시보드</h2>
-          <p className="text-sm text-slate-400 mt-1">오늘의 트레이딩 리포트 현황</p>
+          <h2 className="text-2xl font-bold text-white">Dashboard</h2>
+          <p className="text-sm text-slate-400 mt-1">Today's trading report overview</p>
         </div>
         <button
           onClick={handleTrigger}
           className="flex items-center gap-2 bg-accent-blue hover:bg-accent-blue/80 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
         >
           <Play size={16} />
-          수동 실행
+          Run Now
         </button>
       </div>
 
@@ -47,28 +47,28 @@ export default function Dashboard() {
         <div className="bg-bg-card rounded-xl p-5 border border-slate-700">
           <div className="flex items-center gap-2 text-slate-400 text-sm mb-2">
             <Target size={16} />
-            진행 중 추천
+            Active Picks
           </div>
           <div className="text-2xl font-bold text-white">{d?.open_recommendations ?? 0}</div>
         </div>
         <div className="bg-bg-card rounded-xl p-5 border border-slate-700">
           <div className="flex items-center gap-2 text-slate-400 text-sm mb-2">
             <TrendingUp size={16} />
-            주간 승률
+            Weekly Win Rate
           </div>
           <div className="text-2xl font-bold text-accent-green">{d?.weekly_win_rate ?? 0}%</div>
         </div>
         <div className="bg-bg-card rounded-xl p-5 border border-slate-700">
           <div className="flex items-center gap-2 text-slate-400 text-sm mb-2">
             <TrendingUp size={16} />
-            주간 마감
+            Weekly Closed
           </div>
-          <div className="text-2xl font-bold text-white">{d?.weekly_closed ?? 0}건</div>
+          <div className="text-2xl font-bold text-white">{d?.weekly_closed ?? 0}</div>
         </div>
         <div className="bg-bg-card rounded-xl p-5 border border-slate-700">
           <div className="flex items-center gap-2 text-slate-400 text-sm mb-2">
             <AlertTriangle size={16} />
-            오늘 알림
+            Alerts Today
           </div>
           <div className="text-2xl font-bold text-accent-yellow">{d?.alerts?.length ?? 0}</div>
         </div>
@@ -78,32 +78,32 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Win Rate */}
         <div className="bg-bg-card rounded-xl p-6 border border-slate-700">
-          <h3 className="text-sm font-medium text-slate-300 mb-6">30일 성과 요약</h3>
+          <h3 className="text-sm font-medium text-slate-300 mb-6">30-Day Performance</h3>
           {summary ? (
             <div className="flex justify-around">
-              <WinRateGauge rate={(summary as any).win_rate} label="승률" />
+              <WinRateGauge rate={(summary as any).win_rate} label="Win Rate" />
               <div className="text-center">
                 <div className="text-2xl font-bold text-white">
                   {(summary as any).avg_pnl >= 0 ? '+' : ''}
                   {(summary as any).avg_pnl.toFixed(1)}%
                 </div>
-                <div className="text-xs text-slate-400 mt-1">평균 수익률</div>
+                <div className="text-xs text-slate-400 mt-1">Avg Return</div>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-white">
                   {(summary as any).total_recommendations}
                 </div>
-                <div className="text-xs text-slate-400 mt-1">총 추천</div>
+                <div className="text-xs text-slate-400 mt-1">Total Picks</div>
               </div>
             </div>
           ) : (
-            <div className="text-slate-500 text-center">데이터 없음</div>
+            <div className="text-slate-500 text-center">No data</div>
           )}
         </div>
 
         {/* Latest Report */}
         <div className="bg-bg-card rounded-xl p-6 border border-slate-700">
-          <h3 className="text-sm font-medium text-slate-300 mb-4">최근 리포트</h3>
+          <h3 className="text-sm font-medium text-slate-300 mb-4">Latest Report</h3>
           {d?.latest_report ? (
             <div>
               <div className="text-lg font-medium text-white mb-2">{d.latest_report.date}</div>
@@ -112,14 +112,14 @@ export default function Dashboard() {
                 href={`/reports/${d.latest_report.id}`}
                 className="inline-block mt-4 text-sm text-accent-blue hover:underline"
               >
-                리포트 보기 &rarr;
+                View Report &rarr;
               </a>
             </div>
           ) : (
             <div className="text-slate-500 text-center py-4">
-              아직 생성된 리포트가 없습니다.
+              No reports generated yet.
               <br />
-              <span className="text-xs">수동 실행 버튼을 눌러 첫 리포트를 생성하세요.</span>
+              <span className="text-xs">Click "Run Now" to generate your first report.</span>
             </div>
           )}
         </div>
@@ -128,7 +128,7 @@ export default function Dashboard() {
       {/* Today's Alerts */}
       {d?.alerts?.length > 0 && (
         <div className="bg-bg-card rounded-xl p-6 border border-accent-yellow/30">
-          <h3 className="text-sm font-medium text-accent-yellow mb-4">오늘 알림</h3>
+          <h3 className="text-sm font-medium text-accent-yellow mb-4">Alerts Today</h3>
           <div className="space-y-2">
             {d.alerts.map((alert: any, i: number) => (
               <div key={i} className="flex items-center justify-between py-2 border-b border-slate-700 last:border-0">
@@ -141,7 +141,7 @@ export default function Dashboard() {
                     alert.status === 'TARGET_HIT' ? 'text-accent-green' : 'text-accent-red'
                   }`}
                 >
-                  {alert.status === 'TARGET_HIT' ? '목표 달성' : '손절'}{' '}
+                  {alert.status === 'TARGET_HIT' ? 'Target Hit' : 'Stop Loss'}{' '}
                   {alert.pnl_percent != null && `(${alert.pnl_percent >= 0 ? '+' : ''}${alert.pnl_percent.toFixed(1)}%)`}
                 </span>
               </div>

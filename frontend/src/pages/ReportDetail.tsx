@@ -12,8 +12,8 @@ export default function ReportDetail() {
     enabled: !!id,
   })
 
-  if (isLoading) return <div className="text-slate-400">로딩 중...</div>
-  if (!report) return <div className="text-slate-400">리포트를 찾을 수 없습니다</div>
+  if (isLoading) return <div className="text-slate-400">Loading...</div>
+  if (!report) return <div className="text-slate-400">Report not found</div>
 
   const r = report as any
 
@@ -24,7 +24,7 @@ export default function ReportDetail() {
           to="/reports"
           className="flex items-center gap-1 text-sm text-slate-400 hover:text-white transition-colors"
         >
-          <ArrowLeft size={16} /> 목록
+          <ArrowLeft size={16} /> Back
         </Link>
         <div className="flex items-center gap-4 text-sm text-slate-400">
           <span className="flex items-center gap-1">
@@ -42,7 +42,7 @@ export default function ReportDetail() {
                 : 'bg-accent-blue/10 text-accent-blue'
             }`}
           >
-            {r.report_type === 'weekly' ? '주간' : '일일'}
+            {r.report_type === 'weekly' ? 'Weekly' : 'Daily'}
           </span>
         </div>
       </div>

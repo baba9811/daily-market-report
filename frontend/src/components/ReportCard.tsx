@@ -27,10 +27,10 @@ export default function ReportCard({ id, date, type, summary, generationTime }: 
               : 'bg-accent-blue/10 text-accent-blue'
           }`}
         >
-          {type === 'weekly' ? '주간' : '일일'}
+          {type === 'weekly' ? 'Weekly' : 'Daily'}
         </span>
       </div>
-      <p className="text-sm text-slate-400 line-clamp-2">{summary || '리포트 요약 없음'}</p>
+      <p className="text-sm text-slate-400 line-clamp-2">{summary || 'No summary available'}</p>
       {generationTime && (
         <div className="flex items-center gap-1 mt-3 text-xs text-slate-500">
           <Clock size={12} />

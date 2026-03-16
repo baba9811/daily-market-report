@@ -32,7 +32,7 @@ def build_daily_context(db: Session, today: date | None = None) -> str:
     )
 
     if not all_recs:
-        return "아직 과거 추천 데이터가 없습니다. 첫 번째 리포트를 생성합니다."
+        return "No past recommendation data available. Generating first report."
 
     total = len(all_recs)
     target_hit = sum(1 for r in all_recs if r.status == "TARGET_HIT")
@@ -51,7 +51,7 @@ def build_daily_context(db: Session, today: date | None = None) -> str:
     # Sector breakdown
     sector_stats: dict[str, dict[str, float]] = defaultdict(lambda: {"wins": 0, "losses": 0, "total_pnl": 0, "count": 0})
     for r in closed_recs:
-        sector = r.sector or "기타"
+        sector = r.sector or "Other"
         sector_stats[sector]["count"] += 1
         sector_stats[sector]["total_pnl"] += r.pnl_percent or 0
         if r.status == "TARGET_HIT":
@@ -82,68 +82,68 @@ def build_daily_context(db: Session, today: date | None = None) -> str:
 
     # Build context text
     lines = [
-        "## 과거 추천 실적 (최근 30일)",
+        "## Past Recommendation Performance (Last 30 Days)",
         "",
-        "### 요약 통계",
-        f"- 총 추천 수: {total}",
-        f"- 목표가 도달: {target_hit} ({target_hit/total*100:.1f}%)",
-        f"- 손절 도달: {stop_hit} ({stop_hit/total*100:.1f}%)",
-        f"- 만료: {expired} ({expired/total*100:.1f}%)",
-        f"- 진행 중: {still_open}",
-        f"- 전체 승률: {win_rate:.1f}%",
-        f"- 평균 수익률: {avg_pnl:+.1f}%",
+        "### Summary Statistics",
+        f"- Total recommendations: {total}",
+        f"- Target hit: {target_hit} ({target_hit/total*100:.1f}%)",
+        f"- Stop loss hit: {stop_hit} ({stop_hit/total*100:.1f}%)",
+        f"- Expired: {expired} ({expired/total*100:.1f}%)",
+        f"- Open: {still_open}",
+        f"- Overall win rate: {win_rate:.1f}%",
+        f"- Average return: {avg_pnl:+.1f}%",
     ]
 
     if best:
-        lines.append(f"- 최고 수익: {best.name} ({best.ticker}) {best.pnl_percent:+.1f}%")
+        lines.append(f"- Best profit: {best.name} ({best.ticker}) {best.pnl_percent:+.1f}%")
     if worst:
-        lines.append(f"- 최대 손실: {worst.name} ({worst.ticker}) {worst.pnl_percent:+.1f}%")
+        lines.append(f"- Worst loss: {worst.name} ({worst.ticker}) {worst.pnl_percent:+.1f}%")
 
     # Sector breakdown
-    lines.extend(["", "### 섹터별 성과"])
+    lines.extend(["", "### Sector Performance"])
     for sector, stats in sorted(sector_stats.items()):
         count = stats["count"]
         wins = stats["wins"]
         avg = stats["total_pnl"] / count if count else 0
         sr = wins / count * 100 if count else 0
-        indicator = "✅ 강점" if sr >= 50 else "❌ 약점"
-        lines.append(f"- {sector}: 승률 {sr:.0f}%, 평균 {avg:+.1f}% {indicator}")
+        indicator = "Strong" if sr >= 50 else "Weak"
+        lines.append(f"- {sector}: Win rate {sr:.0f}%, Avg {avg:+.1f}% {indicator}")
 
     # Timeframe breakdown
     lines.extend([
         "",
-        "### 전략별 성과",
-        f"- 데이트레이딩: 승률 {day_win_rate:.0f}% ({len(day_recs)}건)",
-        f"- 스윙트레이딩: 승률 {swing_win_rate:.0f}% ({len(swing_recs)}건)",
+        "### Strategy Performance",
+        f"- Day trading: Win rate {day_win_rate:.0f}% ({len(day_recs)} trades)",
+        f"- Swing trading: Win rate {swing_win_rate:.0f}% ({len(swing_recs)} trades)",
     ])
 
     # Recent detail table
-    lines.extend(["", "### 최근 7일 추천 상세", "| 날짜 | 종목 | 방향 | 진입가 | 목표가 | 현재가 | 손익 | 상태 |", "|------|------|------|--------|--------|--------|------|------|"])
+    lines.extend(["", "### Recent 7-Day Recommendations", "| Date | Stock | Direction | Entry | Target | Current | P&L | Status |", "|------|-------|-----------|-------|--------|---------|-----|--------|"])
     for r in sorted(recent_recs, key=lambda x: x.created_at, reverse=True)[:15]:
         pnl_str = f"{r.pnl_percent:+.1f}%" if r.pnl_percent is not None else "-"
         current_str = f"{r.current_price:,.0f}" if r.current_price else "-"
-        status_map = {"OPEN": "진행중", "TARGET_HIT": "✅목표도달", "STOP_HIT": "❌손절", "EXPIRED": "만료"}
+        status_map = {"OPEN": "Open", "TARGET_HIT": "Target Hit", "STOP_HIT": "Stop Hit", "EXPIRED": "Expired"}
         lines.append(
-            f"| {r.created_at.strftime('%m-%d')} | {r.name} | {'매수' if r.direction == 'LONG' else '매도'} | "
+            f"| {r.created_at.strftime('%m-%d')} | {r.name} | {'Buy' if r.direction == 'LONG' else 'Sell'} | "
             f"{r.entry_price:,.0f} | {r.target_price:,.0f} | {current_str} | {pnl_str} | {status_map.get(r.status, r.status)} |"
         )
 
     # Auto-derived lessons
-    lines.extend(["", "### 교훈 (자동 도출)"])
+    lines.extend(["", "### Lessons (Auto-derived)"])
     for sector, stats in sector_stats.items():
         count = stats["count"]
         if count >= 3:
             sr = stats["wins"] / count * 100
             if sr < 30:
-                lines.append(f"- ⚠️ {sector} 섹터 추천 성공률이 {sr:.0f}%로 매우 낮음. 추천을 줄이거나 보수적 접근 필요")
+                lines.append(f"- Warning: {sector} sector win rate is {sr:.0f}%, very low. Reduce exposure or use more conservative approach.")
             elif sr >= 70:
-                lines.append(f"- 💡 {sector} 섹터 추천 성공률이 {sr:.0f}%로 우수. 이 섹터 전략 강화 권장")
+                lines.append(f"- Tip: {sector} sector win rate is {sr:.0f}%, excellent. Consider increasing allocation to this sector.")
 
     if day_recs and swing_recs:
         if swing_win_rate > day_win_rate + 10:
-            lines.append(f"- 💡 스윙트레이딩({swing_win_rate:.0f}%)이 데이트레이딩({day_win_rate:.0f}%)보다 성과 우수")
+            lines.append(f"- Tip: Swing trading ({swing_win_rate:.0f}%) outperforms day trading ({day_win_rate:.0f}%).")
         elif day_win_rate > swing_win_rate + 10:
-            lines.append(f"- 💡 데이트레이딩({day_win_rate:.0f}%)이 스윙트레이딩({swing_win_rate:.0f}%)보다 성과 우수")
+            lines.append(f"- Tip: Day trading ({day_win_rate:.0f}%) outperforms swing trading ({swing_win_rate:.0f}%).")
 
     context = "\n".join(lines)
 
@@ -196,7 +196,7 @@ def build_weekly_analysis(db: Session, today: date | None = None) -> WeeklyAnaly
     # Sector breakdown
     sector_data: dict[str, dict[str, float]] = defaultdict(lambda: {"wins": 0, "losses": 0, "avg_return": 0, "count": 0})
     for r in closed:
-        s = r.sector or "기타"
+        s = r.sector or "Other"
         sector_data[s]["count"] += 1
         sector_data[s]["avg_return"] += r.pnl_percent or 0
         if r.status == "TARGET_HIT":

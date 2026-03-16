@@ -7,6 +7,8 @@ from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader
 
+from daily_scheduler.config import get_settings
+
 TEMPLATES_DIR = Path(__file__).parent.parent / "templates" / "prompts"
 
 
@@ -24,12 +26,14 @@ def build_daily_prompt(
     weekly_lessons: str = "",
 ) -> str:
     """Render the daily report prompt with context data."""
+    settings = get_settings()
     env = get_jinja_env()
     template = env.get_template("daily_report.j2")
     return template.render(
         date=report_date.isoformat(),
         retrospective=retrospective_context,
         weekly_lessons=weekly_lessons,
+        language=settings.report_language,
     )
 
 
@@ -39,10 +43,12 @@ def build_weekly_prompt(
     detailed_performance: str,
 ) -> str:
     """Render the weekly retrospective prompt."""
+    settings = get_settings()
     env = get_jinja_env()
     template = env.get_template("weekly_retro.j2")
     return template.render(
         date=report_date.isoformat(),
         weekly_stats=weekly_stats,
         detailed_performance=detailed_performance,
+        language=settings.report_language,
     )

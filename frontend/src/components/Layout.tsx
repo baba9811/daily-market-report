@@ -8,11 +8,11 @@ import {
 } from 'lucide-react'
 
 const navItems = [
-  { to: '/', icon: LayoutDashboard, label: '대시보드' },
-  { to: '/reports', icon: FileText, label: '리포트' },
-  { to: '/performance', icon: TrendingUp, label: '성과' },
-  { to: '/retrospective', icon: RotateCcw, label: '회고' },
-  { to: '/settings', icon: Settings, label: '설정' },
+  { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
+  { to: '/reports', icon: FileText, label: 'Reports' },
+  { to: '/performance', icon: TrendingUp, label: 'Performance' },
+  { to: '/retrospective', icon: RotateCcw, label: 'Retrospective' },
+  { to: '/settings', icon: Settings, label: 'Settings' },
 ]
 
 export default function Layout() {

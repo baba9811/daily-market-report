@@ -11,17 +11,17 @@ export default function Reports() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-white">리포트</h2>
-        <p className="text-sm text-slate-400 mt-1">생성된 일일/주간 리포트 목록</p>
+        <h2 className="text-2xl font-bold text-white">Reports</h2>
+        <p className="text-sm text-slate-400 mt-1">Generated daily/weekly report list</p>
       </div>
 
       {isLoading ? (
-        <div className="text-slate-400">로딩 중...</div>
+        <div className="text-slate-400">Loading...</div>
       ) : !reports?.length ? (
         <div className="bg-bg-card rounded-xl p-12 border border-slate-700 text-center">
-          <p className="text-slate-400">아직 생성된 리포트가 없습니다.</p>
+          <p className="text-slate-400">No reports generated yet.</p>
           <p className="text-sm text-slate-500 mt-2">
-            대시보드에서 수동 실행하거나, 스케줄러가 자동으로 생성합니다.
+            Run manually from the dashboard, or wait for the scheduler.
           </p>
         </div>
       ) : (

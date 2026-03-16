@@ -20,18 +20,18 @@ export default function Settings() {
     mutationFn: api.updateSettings,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['settings'] })
-      alert('설정이 저장되었습니다. 서버를 재시작하면 적용됩니다.')
+      alert('Settings saved. Restart the server to apply.')
     },
   })
 
   const testEmailMutation = useMutation({
     mutationFn: api.testEmail,
     onSuccess: (data: any) => {
-      alert(data.success ? '테스트 이메일이 전송되었습니다!' : '이메일 전송에 실패했습니다.')
+      alert(data.success ? 'Test email sent successfully!' : 'Failed to send test email.')
     },
   })
 
-  if (isLoading) return <div className="text-slate-400">로딩 중...</div>
+  if (isLoading) return <div className="text-slate-400">Loading...</div>
 
   const s = settings as any
   const h = health as any
@@ -60,18 +60,18 @@ export default function Settings() {
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-2xl font-bold text-white">설정</h2>
-        <p className="text-sm text-slate-400 mt-1">이메일, API, 스케줄러 설정 관리</p>
+        <h2 className="text-2xl font-bold text-white">Settings</h2>
+        <p className="text-sm text-slate-400 mt-1">Manage email, API, and scheduler settings</p>
       </div>
 
       {/* Health Status */}
       {h && (
         <div className="bg-bg-card rounded-xl p-6 border border-slate-700">
-          <h3 className="text-sm font-medium text-slate-300 mb-4">시스템 상태</h3>
+          <h3 className="text-sm font-medium text-slate-300 mb-4">System Status</h3>
           <div className="grid grid-cols-3 gap-4">
             <div className="flex items-center gap-2">
               <StatusIcon ok={h.database} />
-              <span className="text-sm text-slate-300">데이터베이스</span>
+              <span className="text-sm text-slate-300">Database</span>
             </div>
             <div className="flex items-center gap-2">
               <StatusIcon ok={h.claude_cli} />
@@ -79,7 +79,7 @@ export default function Settings() {
             </div>
             <div className="flex items-center gap-2">
               <StatusIcon ok={h.smtp_configured} />
-              <span className="text-sm text-slate-300">SMTP 설정</span>
+              <span className="text-sm text-slate-300">SMTP Config</span>
             </div>
           </div>
         </div>
@@ -87,7 +87,7 @@ export default function Settings() {
 
       {/* Email Settings */}
       <div className="bg-bg-card rounded-xl p-6 border border-slate-700">
-        <h3 className="text-sm font-medium text-slate-300 mb-4">이메일 설정</h3>
+        <h3 className="text-sm font-medium text-slate-300 mb-4">Email Settings</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-xs text-slate-400 mb-1">SMTP Host</label>
@@ -120,13 +120,13 @@ export default function Settings() {
             <label className="block text-xs text-slate-400 mb-1">SMTP Password</label>
             <input
               type="password"
-              placeholder={s?.smtp_password_set ? '••••••••' : '미설정'}
+              placeholder={s?.smtp_password_set ? '••••••••' : 'Not set'}
               onChange={(e) => setForm({ ...form, smtp_password: e.target.value })}
               className="w-full bg-bg-primary border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:border-accent-blue focus:outline-none"
             />
           </div>
           <div>
-            <label className="block text-xs text-slate-400 mb-1">발신자</label>
+            <label className="block text-xs text-slate-400 mb-1">From</label>
             <input
               type="email"
               defaultValue={s?.email_from}
@@ -135,7 +135,7 @@ export default function Settings() {
             />
           </div>
           <div>
-            <label className="block text-xs text-slate-400 mb-1">수신자 (쉼표 구분)</label>
+            <label className="block text-xs text-slate-400 mb-1">Recipients (comma-separated)</label>
             <input
               type="text"
               defaultValue={s?.email_to?.join(', ')}
@@ -149,21 +149,21 @@ export default function Settings() {
             onClick={handleSave}
             className="bg-accent-blue hover:bg-accent-blue/80 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
           >
-            <RefreshCw size={14} /> 저장
+            <RefreshCw size={14} /> Save
           </button>
           <button
             onClick={() => testEmailMutation.mutate()}
             disabled={testEmailMutation.isPending}
             className="bg-bg-hover hover:bg-slate-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
           >
-            <Send size={14} /> 테스트 이메일
+            <Send size={14} /> Test Email
           </button>
         </div>
       </div>
 
       {/* Claude Settings */}
       <div className="bg-bg-card rounded-xl p-6 border border-slate-700">
-        <h3 className="text-sm font-medium text-slate-300 mb-4">Claude 설정</h3>
+        <h3 className="text-sm font-medium text-slate-300 mb-4">Claude Settings</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-xs text-slate-400 mb-1">CLI Path</label>
@@ -191,7 +191,7 @@ export default function Settings() {
           onClick={handleSave}
           className="bg-accent-blue hover:bg-accent-blue/80 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors mt-4 flex items-center gap-2"
         >
-          <RefreshCw size={14} /> 저장
+          <RefreshCw size={14} /> Save
         </button>
       </div>
     </div>

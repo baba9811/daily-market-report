@@ -15,13 +15,13 @@ export default function Retrospective() {
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-2xl font-bold text-white">회고</h2>
-        <p className="text-sm text-slate-400 mt-1">주간 종합 분석 및 일일 체크 기록</p>
+        <h2 className="text-2xl font-bold text-white">Retrospective</h2>
+        <p className="text-sm text-slate-400 mt-1">Weekly analysis and daily check records</p>
       </div>
 
       {/* Daily Checks */}
       <div className="bg-bg-card rounded-xl p-6 border border-slate-700">
-        <h3 className="text-sm font-medium text-slate-300 mb-4">일일 체크 기록</h3>
+        <h3 className="text-sm font-medium text-slate-300 mb-4">Daily Checks</h3>
         {dailyChecks && (dailyChecks as any[]).length > 0 ? (
           <div className="grid grid-cols-7 gap-2">
             {(dailyChecks as any[]).map((check: any) => (
@@ -49,18 +49,18 @@ export default function Retrospective() {
             ))}
           </div>
         ) : (
-          <div className="text-slate-500 text-center py-6">체크 기록 없음</div>
+          <div className="text-slate-500 text-center py-6">No check records</div>
         )}
       </div>
 
       {/* Weekly Analyses */}
       <div>
-        <h3 className="text-sm font-medium text-slate-300 mb-4">주간 분석</h3>
+        <h3 className="text-sm font-medium text-slate-300 mb-4">Weekly Analysis</h3>
         {loadingWeekly ? (
-          <div className="text-slate-400">로딩 중...</div>
+          <div className="text-slate-400">Loading...</div>
         ) : !weekly?.length ? (
           <div className="bg-bg-card rounded-xl p-12 border border-slate-700 text-center text-slate-500">
-            아직 주간 분석 데이터가 없습니다. 첫 월요일 리포트 이후 생성됩니다.
+            No weekly analysis data yet. Will be generated after the first Monday report.
           </div>
         ) : (
           <div className="space-y-4">
@@ -74,22 +74,22 @@ export default function Retrospective() {
                     </span>
                   </div>
                   <div className="flex gap-4 text-sm">
-                    <span className="text-accent-green">승: {w.win_count}</span>
-                    <span className="text-accent-red">패: {w.loss_count}</span>
+                    <span className="text-accent-green">W: {w.win_count}</span>
+                    <span className="text-accent-red">L: {w.loss_count}</span>
                     <span className={w.avg_return_pct >= 0 ? 'text-accent-green' : 'text-accent-red'}>
-                      평균: {w.avg_return_pct >= 0 ? '+' : ''}{w.avg_return_pct?.toFixed(1)}%
+                      Avg: {w.avg_return_pct >= 0 ? '+' : ''}{w.avg_return_pct?.toFixed(1)}%
                     </span>
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <span className="text-slate-400">총 추천: </span>
-                    <span className="text-white">{w.total_recommendations}건</span>
+                    <span className="text-slate-400">Total: </span>
+                    <span className="text-white">{w.total_recommendations}</span>
                   </div>
                   <div>
-                    <span className="text-slate-400">최고: </span>
+                    <span className="text-slate-400">Best: </span>
                     <span className="text-accent-green">{w.best_pick_ticker || '-'}</span>
-                    <span className="text-slate-400 mx-2">최저: </span>
+                    <span className="text-slate-400 mx-2">Worst: </span>
                     <span className="text-accent-red">{w.worst_pick_ticker || '-'}</span>
                   </div>
                 </div>

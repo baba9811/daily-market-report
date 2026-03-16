@@ -22,6 +22,7 @@ def get_current_settings():
         email_to=s.email_to,
         claude_cli_path=s.claude_cli_path,
         claude_model=s.claude_model,
+        report_language=s.report_language,
         database_url=s.database_url,
         host=s.host,
         port=s.port,
@@ -45,6 +46,7 @@ def update_settings(update: SettingsUpdate):
         "email_to": "EMAIL_TO",
         "claude_cli_path": "CLAUDE_CLI_PATH",
         "claude_model": "CLAUDE_MODEL",
+        "report_language": "REPORT_LANGUAGE",
     }
 
     for field_name, env_key in field_map.items():

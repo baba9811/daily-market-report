@@ -90,7 +90,7 @@ def get_sector_performance(
         lambda: {"count": 0, "wins": 0, "losses": 0, "total_pnl": 0}
     )
     for r in closed:
-        s = r.sector or "기타"
+        s = r.sector or "Other"
         sectors[s]["count"] += 1
         sectors[s]["total_pnl"] += r.pnl_percent or 0
         if r.status == "TARGET_HIT":

@@ -14,6 +14,7 @@ class SettingsOut(BaseModel):
     email_to: list[str]
     claude_cli_path: str
     claude_model: str
+    report_language: str
     database_url: str
     host: str
     port: int
@@ -28,3 +29,4 @@ class SettingsUpdate(BaseModel):
     email_to: list[str] | None = None
     claude_cli_path: str | None = None
     claude_model: str | None = None
+    report_language: str | None = None

@@ -125,7 +125,7 @@ def run_daily_pipeline(db: Session) -> bool:
         # Step 10: Send email
         logger.info("Step 6: Sending email...")
         email_sent = send_email(
-            f"[{today}] 일일 뉴스 & 트레이딩 리포트",
+            f"[{today}] Daily News & Trading Report",
             html_content,
         )
         if not email_sent:
@@ -158,7 +158,7 @@ def run_weekly_pipeline(db: Session, today: date | None = None) -> bool:
         # Build weekly prompt
         prompt = build_weekly_prompt(
             today,
-            weekly_stats=f"승: {analysis.win_count}, 패: {analysis.loss_count}, 평균수익: {analysis.avg_return_pct:.1f}%",
+            weekly_stats=f"Wins: {analysis.win_count}, Losses: {analysis.loss_count}, Avg return: {analysis.avg_return_pct:.1f}%",
             detailed_performance=analysis.sector_breakdown,
         )
 
@@ -185,7 +185,7 @@ def run_weekly_pipeline(db: Session, today: date | None = None) -> bool:
 
         # Send weekly email
         send_email(
-            f"[{today}] 주간 트레이딩 회고 리포트",
+            f"[{today}] Weekly Trading Retrospective Report",
             html_content,
         )
 

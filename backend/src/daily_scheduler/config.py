@@ -38,6 +38,9 @@ class Settings(BaseSettings):
     # Database
     database_url: str = f"sqlite:///{PROJECT_ROOT}/data/daily_scheduler.db"
 
+    # Report
+    report_language: str = "ko"
+
     # Server
     host: str = "127.0.0.1"
     port: int = 8000

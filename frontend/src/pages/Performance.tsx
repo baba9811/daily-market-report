@@ -36,8 +36,8 @@ export default function Performance() {
       {/* Header with period selector */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-white">성과</h2>
-          <p className="text-sm text-slate-400 mt-1">추천 종목 성과 추적</p>
+          <h2 className="text-2xl font-bold text-white">Performance</h2>
+          <p className="text-sm text-slate-400 mt-1">Track recommendation performance</p>
         </div>
         <div className="flex gap-1 bg-bg-card rounded-lg p-1 border border-slate-700">
           {periods.map((p) => (
@@ -58,27 +58,27 @@ export default function Performance() {
       {s && (
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           <div className="bg-bg-card rounded-xl p-4 border border-slate-700 flex flex-col items-center">
-            <WinRateGauge rate={s.win_rate} label="승률" />
+            <WinRateGauge rate={s.win_rate} label="Win Rate" />
           </div>
           <div className="bg-bg-card rounded-xl p-4 border border-slate-700 text-center">
             <div className="text-2xl font-bold text-white">{s.total_recommendations}</div>
-            <div className="text-xs text-slate-400 mt-1">총 추천</div>
+            <div className="text-xs text-slate-400 mt-1">Total Picks</div>
           </div>
           <div className="bg-bg-card rounded-xl p-4 border border-slate-700 text-center">
             <div className={`text-2xl font-bold ${s.avg_pnl >= 0 ? 'text-accent-green' : 'text-accent-red'}`}>
               {s.avg_pnl >= 0 ? '+' : ''}{s.avg_pnl.toFixed(1)}%
             </div>
-            <div className="text-xs text-slate-400 mt-1">평균 수익률</div>
+            <div className="text-xs text-slate-400 mt-1">Avg Return</div>
           </div>
           <div className="bg-bg-card rounded-xl p-4 border border-slate-700 text-center">
             <div className="text-lg font-bold text-accent-green">{s.best_ticker}</div>
             <div className="text-xs text-accent-green">+{s.best_pnl.toFixed(1)}%</div>
-            <div className="text-xs text-slate-400 mt-1">최고 수익</div>
+            <div className="text-xs text-slate-400 mt-1">Best Profit</div>
           </div>
           <div className="bg-bg-card rounded-xl p-4 border border-slate-700 text-center">
             <div className="text-lg font-bold text-accent-red">{s.worst_ticker}</div>
             <div className="text-xs text-accent-red">{s.worst_pnl.toFixed(1)}%</div>
-            <div className="text-xs text-slate-400 mt-1">최대 손실</div>
+            <div className="text-xs text-slate-400 mt-1">Worst Loss</div>
           </div>
         </div>
       )}
@@ -89,7 +89,7 @@ export default function Performance() {
 
         {/* Sector Performance */}
         <div className="bg-bg-card rounded-xl p-6 border border-slate-700">
-          <h3 className="text-sm font-medium text-slate-300 mb-4">섹터별 성과</h3>
+          <h3 className="text-sm font-medium text-slate-300 mb-4">Sector Performance</h3>
           {sectors && (sectors as any[]).length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={sectors as any[]}>
@@ -100,11 +100,11 @@ export default function Performance() {
                   contentStyle={{ background: '#1e293b', border: '1px solid #334155', borderRadius: 8 }}
                   labelStyle={{ color: '#e2e8f0' }}
                 />
-                <Bar dataKey="win_rate" name="승률" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="win_rate" name="Win Rate" fill="#3b82f6" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           ) : (
-            <div className="text-slate-500 text-center py-12">섹터 데이터 없음</div>
+            <div className="text-slate-500 text-center py-12">No sector data</div>
           )}
         </div>
       </div>
@@ -112,7 +112,7 @@ export default function Performance() {
       {/* Recommendations Table */}
       <div className="bg-bg-card rounded-xl p-6 border border-slate-700">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-medium text-slate-300">추천 종목 내역</h3>
+          <h3 className="text-sm font-medium text-slate-300">Recommendations</h3>
           <div className="flex gap-1">
             {['all', 'open', 'target_hit', 'stop_hit'].map((s) => (
               <button
@@ -122,7 +122,7 @@ export default function Performance() {
                   statusFilter === s ? 'bg-accent-blue/20 text-accent-blue' : 'text-slate-400 hover:text-white'
                 }`}
               >
-                {s === 'all' ? '전체' : s === 'open' ? '진행중' : s === 'target_hit' ? '목표달성' : '손절'}
+                {s === 'all' ? 'All' : s === 'open' ? 'Open' : s === 'target_hit' ? 'Target Hit' : 'Stop Loss'}
               </button>
             ))}
           </div>

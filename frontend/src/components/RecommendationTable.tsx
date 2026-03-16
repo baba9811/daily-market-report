@@ -17,15 +17,15 @@ interface Recommendation {
 }
 
 const statusBadge: Record<string, { bg: string; text: string; label: string }> = {
-  OPEN: { bg: 'bg-accent-blue/10', text: 'text-accent-blue', label: '진행중' },
-  TARGET_HIT: { bg: 'bg-accent-green/10', text: 'text-accent-green', label: '목표달성' },
-  STOP_HIT: { bg: 'bg-accent-red/10', text: 'text-accent-red', label: '손절' },
-  EXPIRED: { bg: 'bg-slate-700/50', text: 'text-slate-400', label: '만료' },
+  OPEN: { bg: 'bg-accent-blue/10', text: 'text-accent-blue', label: 'Open' },
+  TARGET_HIT: { bg: 'bg-accent-green/10', text: 'text-accent-green', label: 'Target Hit' },
+  STOP_HIT: { bg: 'bg-accent-red/10', text: 'text-accent-red', label: 'Stop Loss' },
+  EXPIRED: { bg: 'bg-slate-700/50', text: 'text-slate-400', label: 'Expired' },
 }
 
 export default function RecommendationTable({ data }: { data: Recommendation[] }) {
   if (!data.length) {
-    return <div className="text-center text-slate-500 py-8">추천 종목 데이터가 없습니다</div>
+    return <div className="text-center text-slate-500 py-8">No recommendation data available</div>
   }
 
   return (
@@ -33,15 +33,15 @@ export default function RecommendationTable({ data }: { data: Recommendation[] }
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-slate-700 text-slate-400">
-            <th className="text-left py-3 px-2">종목</th>
-            <th className="text-left py-3 px-2">시장</th>
-            <th className="text-center py-3 px-2">방향</th>
-            <th className="text-right py-3 px-2">진입가</th>
-            <th className="text-right py-3 px-2">목표가</th>
-            <th className="text-right py-3 px-2">손절가</th>
-            <th className="text-right py-3 px-2">현재가</th>
-            <th className="text-right py-3 px-2">손익</th>
-            <th className="text-center py-3 px-2">상태</th>
+            <th className="text-left py-3 px-2">Stock</th>
+            <th className="text-left py-3 px-2">Market</th>
+            <th className="text-center py-3 px-2">Direction</th>
+            <th className="text-right py-3 px-2">Entry</th>
+            <th className="text-right py-3 px-2">Target</th>
+            <th className="text-right py-3 px-2">Stop Loss</th>
+            <th className="text-right py-3 px-2">Current</th>
+            <th className="text-right py-3 px-2">P&L</th>
+            <th className="text-center py-3 px-2">Status</th>
           </tr>
         </thead>
         <tbody>
@@ -57,11 +57,11 @@ export default function RecommendationTable({ data }: { data: Recommendation[] }
                 <td className="py-3 px-2 text-center">
                   {rec.direction === 'LONG' ? (
                     <span className="inline-flex items-center gap-1 text-accent-green">
-                      <ArrowUpRight size={14} /> 매수
+                      <ArrowUpRight size={14} /> Buy
                     </span>
                   ) : (
                     <span className="inline-flex items-center gap-1 text-accent-red">
-                      <ArrowDownRight size={14} /> 매도
+                      <ArrowDownRight size={14} /> Sell
                     </span>
                   )}
                 </td>

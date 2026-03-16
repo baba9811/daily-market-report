@@ -19,14 +19,14 @@ export default function PerformanceChart({ data }: { data: DataPoint[] }) {
   if (!data.length) {
     return (
       <div className="bg-bg-card rounded-xl p-6 border border-slate-700 text-center text-slate-500">
-        아직 성과 데이터가 없습니다
+        No performance data yet
       </div>
     )
   }
 
   return (
     <div className="bg-bg-card rounded-xl p-6 border border-slate-700">
-      <h3 className="text-sm font-medium text-slate-300 mb-4">누적 수익률 (P&L)</h3>
+      <h3 className="text-sm font-medium text-slate-300 mb-4">Cumulative P&L</h3>
       <ResponsiveContainer width="100%" height={300}>
         <AreaChart data={data}>
           <defs>
@@ -45,7 +45,7 @@ export default function PerformanceChart({ data }: { data: DataPoint[] }) {
           <Tooltip
             contentStyle={{ background: '#1e293b', border: '1px solid #334155', borderRadius: 8 }}
             labelStyle={{ color: '#e2e8f0' }}
-            formatter={(value: number) => [`${value.toFixed(2)}%`, '누적 P&L']}
+            formatter={(value: number) => [`${value.toFixed(2)}%`, 'Cumulative P&L']}
           />
           <Area
             type="monotone"
