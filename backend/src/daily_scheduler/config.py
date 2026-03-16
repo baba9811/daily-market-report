@@ -68,7 +68,10 @@ class Settings(BaseSettings):
     def db_path(self) -> Path:
         """Return the database file path."""
         url = self.database_url.replace("sqlite:///", "")
-        return Path(url)
+        path = Path(url)
+        if not path.is_absolute():
+            path = PROJECT_ROOT / path
+        return path
 
 
 def get_settings() -> Settings:
