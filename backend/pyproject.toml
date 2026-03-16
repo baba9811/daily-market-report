@@ -84,3 +84,7 @@ python_version = "3.11"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
+markers = [
+    "integration: tests that hit real external services (SMTP, yfinance, Claude CLI)",
+    "slow: tests that take a long time to run",
+]

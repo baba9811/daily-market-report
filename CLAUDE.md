@@ -14,11 +14,15 @@ Open-source (Apache 2.0) monorepo with Python backend and Next.js frontend.
 ## Rules
 
 ### Testing
+- **All logic MUST have corresponding test code** — every use case, adapter, and utility must be tested
+- Unit tests: mock external dependencies (ports), test business logic in isolation
+- Integration tests: test real external services (SMTP, yfinance, Claude CLI, DB) with `--integration` flag
 - All E2E test cases MUST be verified with Playwright MCP tools before writing test code
 - Use Playwright for E2E tests: navigate to the page, interact with elements, verify outcomes
 - Backend unit tests use pytest with in-memory SQLite
 - Frontend tests use Playwright for E2E scenarios
 - Run `make test` before committing
+- Run `uv run pytest tests/ --integration` to verify external service connectivity
 
 ### Code Quality & Static Analysis
 - Backend: ruff (lint + format, line-length 100), pyrefly (type checking), pylint (10.00/10 required), mypy (strict)
