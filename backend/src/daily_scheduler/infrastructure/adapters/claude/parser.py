@@ -78,9 +78,11 @@ def extract_html_report(raw_output: str) -> str:
 
 
 def extract_summary(raw_output: str) -> str:
-    """Extract a brief summary (first 200 chars of text)."""
+    """Extract a brief summary from text content."""
+    from daily_scheduler.constants import SUMMARY_MAX_LENGTH
+
     text = re.sub(r"<[^>]+>", "", raw_output)
     text = re.sub(r"\s+", " ", text).strip()
-    if len(text) > 200:
-        return text[:200] + "..."
+    if len(text) > SUMMARY_MAX_LENGTH:
+        return text[:SUMMARY_MAX_LENGTH] + "..."
     return text

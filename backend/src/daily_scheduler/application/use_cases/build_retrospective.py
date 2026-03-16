@@ -39,9 +39,14 @@ class BuildRetrospective:
 
         Returns (context_text, retrospective_entity).
         """
+        from daily_scheduler.constants import (
+            RECENT_PERIOD_DAYS,
+            RETROSPECTIVE_LOOKBACK_DAYS,
+        )
+
         today = today or tz.today()
-        thirty_days_ago = today - timedelta(days=30)
-        seven_days_ago = today - timedelta(days=7)
+        thirty_days_ago = today - timedelta(days=RETROSPECTIVE_LOOKBACK_DAYS)
+        seven_days_ago = today - timedelta(days=RECENT_PERIOD_DAYS)
 
         since_30d = tz.combine(thirty_days_ago)
         all_recs = self._rec_repo.get_by_period(since_30d)

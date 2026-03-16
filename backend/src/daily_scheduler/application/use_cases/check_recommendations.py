@@ -28,6 +28,11 @@ class CheckRecommendations:
 
     def execute(self) -> int:
         """Check all open recs. Returns number updated."""
+        from daily_scheduler.constants import (
+            DAY_TRADE_EXPIRY_DAYS,
+            SWING_TRADE_EXPIRY_DAYS,
+        )
+
         open_recs = self._rec_repo.get_open()
         updated = 0
         today = tz.today()
@@ -35,8 +40,12 @@ class CheckRecommendations:
         for rec in open_recs:
             changed = False
 
-            # Auto-expire DAY trades from previous days
-            if rec.timeframe == "DAY" and rec.created_at and rec.created_at.date() < today:
+            # Auto-expire DAY trades
+            if (
+                rec.timeframe == "DAY"
+                and rec.created_at
+                and (today - rec.created_at.date()).days >= DAY_TRADE_EXPIRY_DAYS
+            ):
                 rec.status = "EXPIRED"
                 rec.closed_at = tz.now()
                 changed = True
@@ -45,10 +54,10 @@ class CheckRecommendations:
                     rec.ticker,
                 )
 
-            # Auto-expire SWING trades older than 14 days
+            # Auto-expire SWING trades
             elif rec.created_at:
                 days_open = (today - rec.created_at.date()).days
-                if rec.timeframe == "SWING" and days_open > 14:
+                if rec.timeframe == "SWING" and days_open > SWING_TRADE_EXPIRY_DAYS:
                     rec.status = "EXPIRED"
                     rec.closed_at = tz.now()
                     changed = True

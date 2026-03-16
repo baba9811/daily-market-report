@@ -91,15 +91,15 @@ class RunDailyPipeline:
 
     def _run(self, today: date) -> bool:
         # Step 1: Check recommendations (expiry, target/stop)
-        logger.info("Step 1: Checking recommendations...")
+        logger.info("Step 1/8: Checking recommendations...")
         checker = CheckRecommendations(
             self._rec_repo,
             self._finance,
         )
         checker.execute()
 
-        # Step 2: Update prices
-        logger.info("Step 2: Updating prices...")
+        # Step 2: Update prices for open recommendations
+        logger.info("Step 2/8: Updating prices...")
         updater = UpdatePrices(
             self._rec_repo,
             self._price_repo,
@@ -108,28 +108,21 @@ class RunDailyPipeline:
         updated = updater.execute()
         logger.info("Updated %d recommendations", updated)
 
-        # Step 3: Build retrospective
-        logger.info("Step 3: Building retrospective context...")
+        # Step 3: Build retrospective context
+        logger.info("Step 3/8: Building retrospective context...")
         retro_builder = BuildRetrospective(self._rec_repo)
-        retro_context, _retro = retro_builder.build_daily_context(
-            today,
-        )
+        retro_context, _retro = retro_builder.build_daily_context(today)
 
-        # Step 4: Weekly lessons on Monday
+        # Step 3b: Weekly lessons on Monday
         weekly_lessons = ""
         if today.weekday() == 0:
-            analysis = retro_builder.build_weekly_analysis(
-                today,
-            )
+            analysis = retro_builder.build_weekly_analysis(today)
             if analysis:
                 weekly_lessons = analysis.analysis_text
-                logger.info(
-                    "Weekly analysis built for week of %s",
-                    analysis.week_start,
-                )
+                logger.info("Weekly analysis built for week of %s", analysis.week_start)
 
-        # Step 5: Fetch real-time market data
-        logger.info("Step 4: Fetching real-time market data...")
+        # Step 4: Fetch real-time market data
+        logger.info("Step 4/8: Fetching real-time market data...")
         market_fetcher = FetchMarketData(self._finance)
         market_ctx = market_fetcher.execute()
         market_data_text = market_ctx.to_prompt_text()
@@ -140,8 +133,8 @@ class RunDailyPipeline:
             len(market_ctx.commodities),
         )
 
-        # Step 6: Generate report via Claude
-        logger.info("Step 5: Generating report via Claude...")
+        # Step 5: Generate report via Claude
+        logger.info("Step 5/8: Generating report via Claude...")
         raw_response, gen_time = self._news.generate_daily_report(
             today,
             retro_context,
@@ -155,12 +148,13 @@ class RunDailyPipeline:
             return False
 
         # Step 6: Parse response
-        logger.info("Step 5: Parsing report...")
+        logger.info("Step 6/8: Parsing report...")
         html_content = extract_html_report(raw_response)
         summary = extract_summary(raw_response)
         rec_data = extract_recommendations(raw_response)
 
-        # Step 7: Save report
+        # Step 7: Save report + recommendations
+        logger.info("Step 7/8: Saving report...")
         report = Report(
             report_date=today,
             report_type="daily",
@@ -174,7 +168,6 @@ class RunDailyPipeline:
         if saved_report.id is None:
             raise RuntimeError("Report save did not return an ID")
 
-        # Step 8: Save recommendations
         recs = [
             Recommendation(
                 report_id=saved_report.id,
@@ -183,12 +176,8 @@ class RunDailyPipeline:
                 market=r.get("market", ""),
                 direction=r.get("direction", "LONG"),
                 timeframe=r.get("timeframe", "SWING"),
-                entry_price=float(
-                    r.get("entry_price", 0),
-                ),
-                target_price=float(
-                    r.get("target_price", 0),
-                ),
+                entry_price=float(r.get("entry_price", 0)),
+                target_price=float(r.get("target_price", 0)),
                 stop_loss=float(r.get("stop_loss", 0)),
                 rationale=r.get("rationale", ""),
                 sector=r.get("sector", ""),
@@ -203,12 +192,10 @@ class RunDailyPipeline:
             saved_report.id,
             len(recs),
         )
-
-        # Step 9: Save HTML to disk
         self._save_html(today, html_content)
 
-        # Step 10: Send email
-        logger.info("Step 6: Sending email...")
+        # Step 8: Send email
+        logger.info("Step 8/8: Sending email...")
         email_sent = self._email.send(
             f"[{today}] Daily News & Trading Report",
             html_content,

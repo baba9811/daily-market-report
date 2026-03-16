@@ -15,9 +15,6 @@ from daily_scheduler.domain.ports.email_sender import (
 
 logger = logging.getLogger(__name__)
 
-MAX_RETRIES = 3
-BACKOFF_BASE = 5
-
 
 class SmtpEmailSender(EmailSenderPort):
     """Send HTML emails via SMTP with retry logic."""
@@ -49,12 +46,18 @@ class SmtpEmailSender(EmailSenderPort):
             MIMEText(html_content, "html", "utf-8"),
         )
 
-        for attempt in range(MAX_RETRIES):
+        from daily_scheduler.constants import (
+            EMAIL_BACKOFF_BASE,
+            EMAIL_MAX_RETRIES,
+            EMAIL_SMTP_TIMEOUT,
+        )
+
+        for attempt in range(EMAIL_MAX_RETRIES):
             try:
                 with smtplib.SMTP(
                     s.smtp_host,
                     s.smtp_port,
-                    timeout=30,
+                    timeout=EMAIL_SMTP_TIMEOUT,
                 ) as server:
                     server.ehlo()
                     server.starttls()
@@ -74,19 +77,19 @@ class SmtpEmailSender(EmailSenderPort):
                 )
                 return True
             except Exception:  # pylint: disable=broad-exception-caught
-                wait = BACKOFF_BASE * (2**attempt)
+                wait = EMAIL_BACKOFF_BASE * (2**attempt)
                 logger.exception(
                     "Email send failed (attempt %d/%d). Retrying in %ds...",
                     attempt + 1,
-                    MAX_RETRIES,
+                    EMAIL_MAX_RETRIES,
                     wait,
                 )
-                if attempt < MAX_RETRIES - 1:
+                if attempt < EMAIL_MAX_RETRIES - 1:
                     time.sleep(wait)
 
         logger.error(
             "Failed to send email after %d attempts",
-            MAX_RETRIES,
+            EMAIL_MAX_RETRIES,
         )
         return False
 

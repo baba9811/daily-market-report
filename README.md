@@ -6,7 +6,7 @@
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Python](https://img.shields.io/badge/Python-3.11+-3776ab.svg)](https://www.python.org)
-[![React](https://img.shields.io/badge/React-19-61dafb.svg)](https://react.dev)
+[![Next.js](https://img.shields.io/badge/Next.js-15-000000.svg)](https://nextjs.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688.svg)](https://fastapi.tiangolo.com)
 [![Claude](https://img.shields.io/badge/Powered_by-Claude_Code-cc785c.svg)](https://claude.ai)
 
@@ -22,12 +22,14 @@
 
 ## ✨ Features
 
-- **🤖 AI 리포트 생성** — Claude Code CLI가 실시간 뉴스를 검색하고, 전문 애널리스트 수준의 트레이딩 리포트를 생성
+- **🤖 AI 리포트 생성** — Claude Code CLI (opus, `--effort max`)가 실시간 뉴스를 검색하고, 인과관계 분석 기반의 트레이딩 리포트를 생성
+- **📊 실시간 시세 기반** — yfinance로 주요 지수/환율/원자재를 사전 수집하여 정확한 가격 기반 추천
+- **🔗 인과관계 분석** — 뉴스 → 직접 영향 → 파생 효과 → 투자 기회의 Causal Chain 분석
 - **📊 듀얼 마켓** — 한국 (KOSPI/KOSDAQ) + 미국 (NYSE/NASDAQ) 주식 추천
-- **📧 자동 이메일** — 매일 오전 7:30 KST에 프로페셔널 HTML 리포트를 이메일로 발송
+- **📧 자동 이메일** — 설정 시간(기본 7:30 KST)에 프로페셔널 HTML 리포트를 이메일로 발송
 - **🔄 자기 개선 회고** — 과거 추천 성과를 추적하고, 성공/실패 패턴을 분석하여 다음 추천에 반영
 - **📈 웹 대시보드** — 성과 차트, 추천 이력, 주간 회고를 시각적으로 확인
-- **⏰ macOS 스케줄러** — `launchd`로 매일 자동 실행, 수면 중에도 놓치지 않음
+- **⏰ 통합 스케줄러** — `make dev`로 백엔드+프론트엔드+스케줄러 한번에 실행, Ctrl+C로 전체 종료
 - **🔒 시크릿 안전 관리** — API 키, 비밀번호는 `.env`에만 저장, 절대 커밋되지 않음
 
 ## 🏗 Architecture
@@ -35,27 +37,29 @@
 ```mermaid
 graph TB
     subgraph Scheduler
-        L[macOS launchd] -->|07:30 KST| S[run_daily.sh]
+        L[macOS launchd] -->|SCHEDULE_TIME| S[run_daily.sh]
     end
 
     subgraph Backend["Backend (Python + FastAPI)"]
         S --> O[Orchestrator]
-        O --> F[Finance Service<br/>yfinance]
-        O --> R[Retrospective<br/>성과 추적]
-        O --> P[Prompt Builder<br/>Jinja2]
-        O --> C[Claude CLI<br/>뉴스 수집 + 분석]
+        O --> CK[Check Recommendations<br/>expiry + target/stop]
+        O --> UP[Update Prices<br/>yfinance]
+        O --> RT[Build Retrospective<br/>성과 추적]
+        O --> MD[Fetch Market Data<br/>지수/환율/원자재]
+        O --> PB[Prompt Builder<br/>Jinja2]
+        O --> C[Claude CLI<br/>opus + effort max<br/>뉴스 수집 + 분석]
         O --> PR[Parser<br/>추천 추출]
         O --> E[Email<br/>Gmail SMTP]
-        F --> DB[(SQLite)]
-        R --> DB
+        UP --> DB[(SQLite)]
+        RT --> DB
         PR --> DB
     end
 
-    subgraph Frontend["Frontend (React + Vite)"]
+    subgraph Frontend["Frontend (Next.js + Tailwind)"]
         D[Dashboard]
         RP[Reports]
         PF[Performance]
-        RT[Retrospective]
+        RS[Retrospective]
         ST[Settings]
     end
 
@@ -90,6 +94,7 @@ SMTP_USER=your-email@gmail.com
 SMTP_PASSWORD=your-app-password
 EMAIL_FROM=your-email@gmail.com
 EMAIL_TO=["recipient@email.com"]
+SCHEDULE_TIME=07:30               # HH:MM in KST
 ```
 
 ### 2. Setup
@@ -102,26 +107,32 @@ This will:
 - Install Python dependencies (`uv sync`)
 - Install frontend dependencies (`yarn install`)
 - Initialize the database
-- Build the frontend
 
 ### 3. Run
 
 ```bash
-# Run the report pipeline manually
-make run
-
-# Or start the web dashboard
+# Start everything (backend + frontend + scheduler)
 make dev
-# Open http://localhost:5173
+# Backend: http://localhost:8000
+# Frontend: http://localhost:3000
+# Scheduler: loaded into launchd
+# Ctrl+C stops all three
+
+# Or run the pipeline once manually
+make run
 ```
 
-### 4. Install Scheduler (Optional)
+### 4. Scheduler Management
 
 ```bash
-make install-scheduler
+make scheduler-install    # Install & load launchd scheduler
+make scheduler-status     # Show scheduler status
+make scheduler-start      # Manually trigger now
+make scheduler-stop       # Unload scheduler
+make scheduler-uninstall  # Unload & remove plist
 ```
 
-The scheduler will automatically run the pipeline every day at 7:30 AM KST.
+To change the schedule time, edit `SCHEDULE_TIME` in `.env` and run `make scheduler-install`.
 
 ## 📊 Dashboard
 
@@ -139,19 +150,21 @@ The web dashboard provides:
 
 ```
 daily-scheduler/
-├── backend/                 # Python backend (FastAPI + services)
+├── backend/                 # Python backend (FastAPI + Hexagonal Architecture)
 │   ├── src/daily_scheduler/
-│   │   ├── services/        # Business logic (finance, claude, email, etc.)
-│   │   ├── routers/         # API endpoints
-│   │   ├── models/          # SQLAlchemy ORM models
-│   │   ├── schemas/         # Pydantic schemas
-│   │   └── templates/       # Jinja2 prompt templates
+│   │   ├── domain/          # Entities, Ports (interfaces)
+│   │   ├── application/     # Use cases (pipeline, retrospective, market data)
+│   │   ├── infrastructure/  # Adapters (yfinance, Claude CLI, SMTP, SQLAlchemy)
+│   │   ├── entrypoints/     # API routes, CLI commands
+│   │   ├── templates/       # Jinja2 prompt templates
+│   │   └── constants.py     # Tunable constants (timeouts, expiry, etc.)
 │   └── pyproject.toml       # uv project config
-├── frontend/                # React SPA (Vite + Tailwind + Recharts)
-│   └── src/
-│       ├── pages/           # Dashboard, Reports, Performance, etc.
-│       └── components/      # Reusable UI components
+├── frontend/                # Next.js (App Router + Tailwind + Recharts)
+│   └── src/app/             # Pages: dashboard, reports, performance, etc.
 ├── scheduler/               # macOS launchd configuration
+│   ├── install.sh           # Reads SCHEDULE_TIME from .env, auto TZ conversion
+│   ├── run_daily.sh         # Pipeline execution wrapper
+│   └── com.dailyscheduler.report.plist  # launchd template
 ├── .env.example             # Environment template (committed)
 ├── Makefile                 # Convenience commands
 └── DISCLAIMER.md            # Financial data disclaimer
@@ -165,9 +178,10 @@ The self-improvement loop:
 1. 매일 아침: 과거 추천 종목의 현재가를 조회
 2. 목표가/손절가 도달 여부 자동 체크
 3. 30일 승률, 섹터별 성과, 전략별 비교 통계 생성
-4. 이 데이터를 Claude 프롬프트에 주입
-5. Claude가 과거 실적을 참고하여 추천 전략 조정
-6. 새 추천 → 다음날 성과 추적 → 피드백 루프 반복
+4. 실시간 시세(지수/환율/원자재) 수집
+5. 이 데이터를 Claude 프롬프트에 주입
+6. Claude가 뉴스 검색 → 인과관계 분석 → 파생효과 분석 → 추천 생성
+7. 새 추천 → 다음날 성과 추적 → 피드백 루프 반복
 ```
 
 **주간 회고 (매주 월요일)**:
@@ -177,7 +191,7 @@ The self-improvement loop:
 
 ## ⚙️ Configuration
 
-All configuration is managed through `.env`:
+### Environment Variables (`.env`) — secrets & environment-specific
 
 | Variable | Description | Default |
 |----------|-------------|---------|
@@ -187,8 +201,21 @@ All configuration is managed through `.env`:
 | `SMTP_PASSWORD` | Gmail app password | — |
 | `EMAIL_TO` | Recipient(s) as JSON array | — |
 | `CLAUDE_CLI_PATH` | Path to claude binary | `claude` |
-| `CLAUDE_MODEL` | Claude model to use | `sonnet` |
+| `CLAUDE_MODEL` | Claude model to use | `opus` |
+| `REPORT_LANGUAGE` | Report language (ko, en, ja) | `ko` |
+| `TIMEZONE` | IANA timezone | `Asia/Seoul` |
+| `SCHEDULE_TIME` | Daily run time in KST (HH:MM) | `07:30` |
 | `DATABASE_URL` | SQLite database path | `sqlite:///data/daily_scheduler.db` |
+
+### Application Constants (`constants.py`) — tunable defaults
+
+| Constant | Description | Default |
+|----------|-------------|---------|
+| `CLAUDE_TIMEOUT_SECONDS` | Claude CLI call timeout | `600` |
+| `CLAUDE_RETRY_COUNT` | Number of retry attempts | `2` |
+| `DAY_TRADE_EXPIRY_DAYS` | DAY trade auto-expiry | `1` |
+| `SWING_TRADE_EXPIRY_DAYS` | SWING trade auto-expiry | `14` |
+| `RETROSPECTIVE_LOOKBACK_DAYS` | Retrospective analysis period | `30` |
 
 ## 🛡 Disclaimer
 
@@ -209,5 +236,5 @@ This project is licensed under the [Apache License 2.0](LICENSE).
 ---
 
 <div align="center">
-  <sub>Built with Claude Code · FastAPI · React · yfinance</sub>
+  <sub>Built with Claude Code · FastAPI · Next.js · yfinance</sub>
 </div>

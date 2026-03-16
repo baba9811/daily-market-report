@@ -16,8 +16,6 @@ from daily_scheduler.domain.ports.news_provider import (
 )
 
 logger = logging.getLogger(__name__)
-
-TIMEOUT_SECONDS = 600
 TEMPLATES_DIR = Path(__file__).resolve().parent.parent.parent.parent / "templates" / "prompts"
 
 
@@ -102,6 +100,12 @@ class ClaudeNewsProvider(NewsProviderPort):
         retry: bool = True,
     ) -> tuple[str, float]:
         """Call Claude CLI and return (response, elapsed)."""
+        from daily_scheduler.constants import (
+            CLAUDE_RETRY_COUNT,
+            CLAUDE_RETRY_DELAY_SECONDS,
+            CLAUDE_TIMEOUT_SECONDS,
+        )
+
         s = self._settings
         cmd = [
             s.claude_cli_path,
@@ -119,7 +123,8 @@ class ClaudeNewsProvider(NewsProviderPort):
         cwd = str(s.db_path.parent.parent)
 
         start = time.time()
-        for attempt in range(2 if retry else 1):
+        attempts = CLAUDE_RETRY_COUNT if retry else 1
+        for attempt in range(attempts):
             try:
                 logger.info(
                     "Calling Claude CLI (attempt %d)...",
@@ -129,7 +134,7 @@ class ClaudeNewsProvider(NewsProviderPort):
                     cmd,
                     capture_output=True,
                     text=True,
-                    timeout=TIMEOUT_SECONDS,
+                    timeout=CLAUDE_TIMEOUT_SECONDS,
                     cwd=cwd,
                     check=False,
                 )
@@ -145,11 +150,12 @@ class ClaudeNewsProvider(NewsProviderPort):
                         "Claude CLI error (stderr): %s",
                         result.stderr[:500],
                     )
-                    if attempt == 0 and retry:
+                    if attempt < attempts - 1:
                         logger.info(
-                            "Retrying in 30s...",
+                            "Retrying in %ds...",
+                            CLAUDE_RETRY_DELAY_SECONDS,
                         )
-                        time.sleep(30)
+                        time.sleep(CLAUDE_RETRY_DELAY_SECONDS)
                         continue
                     return "", elapsed
 
@@ -158,11 +164,12 @@ class ClaudeNewsProvider(NewsProviderPort):
                     logger.warning(
                         "Claude returned empty output",
                     )
-                    if attempt == 0 and retry:
+                    if attempt < attempts - 1:
                         logger.info(
-                            "Retrying in 30s...",
+                            "Retrying in %ds...",
+                            CLAUDE_RETRY_DELAY_SECONDS,
                         )
-                        time.sleep(30)
+                        time.sleep(CLAUDE_RETRY_DELAY_SECONDS)
                         continue
                     return "", elapsed
 
@@ -172,10 +179,10 @@ class ClaudeNewsProvider(NewsProviderPort):
                 elapsed = time.time() - start
                 logger.error(
                     "Claude CLI timed out after %ds",
-                    TIMEOUT_SECONDS,
+                    CLAUDE_TIMEOUT_SECONDS,
                 )
-                if attempt == 0 and retry:
-                    time.sleep(30)
+                if attempt < attempts - 1:
+                    time.sleep(CLAUDE_RETRY_DELAY_SECONDS)
                     continue
                 return "", elapsed
             except FileNotFoundError:

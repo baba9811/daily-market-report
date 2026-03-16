@@ -8,8 +8,9 @@ Open-source (Apache 2.0) monorepo with Python backend and Next.js frontend.
 - **Backend**: Hexagonal Architecture (Ports & Adapters) with Python + FastAPI + uv
 - **Frontend**: Next.js (App Router, latest stable) + Tailwind CSS + Recharts
 - **Database**: SQLite via SQLAlchemy
-- **Scheduler**: macOS launchd
+- **Scheduler**: macOS launchd, integrated into `make dev` (Ctrl+C stops all)
 - **Package Managers**: uv (backend), Yarn Berry (frontend)
+- **Constants**: Tunable defaults in `backend/src/daily_scheduler/constants.py` (not .env)
 
 ## Rules
 
@@ -51,6 +52,12 @@ Open-source (Apache 2.0) monorepo with Python backend and Next.js frontend.
 - Ports (interfaces) define boundaries; adapters implement them
 - Nested directory structure (avoid flat sprawl)
 - All external references and best practices must be followed
+
+### Configuration
+- **`.env`**: Only secrets and environment-specific values (SMTP credentials, API keys, paths)
+- **`constants.py`**: Tunable operational defaults (timeouts, retries, expiry periods, lookback days)
+- Never put non-secret tunables in `.env`; use `constants.py` instead
+- `SCHEDULE_TIME` in `.env` controls the daily run time (HH:MM in KST)
 
 ### Dependencies
 - Check license compatibility with Apache 2.0 before adding any dependency
