@@ -9,6 +9,11 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 from daily_scheduler.config import Settings
+from daily_scheduler.constants import (
+    EMAIL_BACKOFF_BASE,
+    EMAIL_MAX_RETRIES,
+    EMAIL_SMTP_TIMEOUT,
+)
 from daily_scheduler.domain.ports.email_sender import (
     EmailSenderPort,
 )
@@ -46,11 +51,6 @@ class SmtpEmailSender(EmailSenderPort):
             MIMEText(html_content, "html", "utf-8"),
         )
 
-        from daily_scheduler.constants import (
-            EMAIL_BACKOFF_BASE,
-            EMAIL_MAX_RETRIES,
-            EMAIL_SMTP_TIMEOUT,
-        )
 
         for attempt in range(EMAIL_MAX_RETRIES):
             try:

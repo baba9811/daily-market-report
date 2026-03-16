@@ -7,6 +7,8 @@ import logging
 import re
 from typing import Any
 
+from daily_scheduler.constants import SUMMARY_MAX_LENGTH
+
 logger = logging.getLogger(__name__)
 
 REC_PATTERN = re.compile(
@@ -79,7 +81,6 @@ def extract_html_report(raw_output: str) -> str:
 
 def extract_summary(raw_output: str) -> str:
     """Extract a brief summary from text content."""
-    from daily_scheduler.constants import SUMMARY_MAX_LENGTH
 
     text = re.sub(r"<[^>]+>", "", raw_output)
     text = re.sub(r"\s+", " ", text).strip()

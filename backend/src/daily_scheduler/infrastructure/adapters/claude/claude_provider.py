@@ -11,6 +11,11 @@ from pathlib import Path
 from jinja2 import Environment, FileSystemLoader
 
 from daily_scheduler.config import Settings
+from daily_scheduler.constants import (
+    CLAUDE_RETRY_COUNT,
+    CLAUDE_RETRY_DELAY_SECONDS,
+    CLAUDE_TIMEOUT_SECONDS,
+)
 from daily_scheduler.domain.ports.news_provider import (
     NewsProviderPort,
 )
@@ -100,11 +105,6 @@ class ClaudeNewsProvider(NewsProviderPort):
         retry: bool = True,
     ) -> tuple[str, float]:
         """Call Claude CLI and return (response, elapsed)."""
-        from daily_scheduler.constants import (
-            CLAUDE_RETRY_COUNT,
-            CLAUDE_RETRY_DELAY_SECONDS,
-            CLAUDE_TIMEOUT_SECONDS,
-        )
 
         s = self._settings
         cmd = [
@@ -115,9 +115,7 @@ class ClaudeNewsProvider(NewsProviderPort):
             s.claude_model,
             "--effort",
             "max",
-            "--permission-mode",
-            "bypassPermissions",
-            "--allowedTools",
+            "--tools",
             "WebSearch,WebFetch",
         ]
         cwd = str(s.db_path.parent.parent)

@@ -8,6 +8,10 @@ from collections import defaultdict
 from datetime import date, timedelta
 
 from daily_scheduler import tz
+from daily_scheduler.constants import (
+    RECENT_PERIOD_DAYS,
+    RETROSPECTIVE_LOOKBACK_DAYS,
+)
 from daily_scheduler.domain.entities.recommendation import (
     Recommendation,
 )
@@ -39,10 +43,6 @@ class BuildRetrospective:
 
         Returns (context_text, retrospective_entity).
         """
-        from daily_scheduler.constants import (
-            RECENT_PERIOD_DAYS,
-            RETROSPECTIVE_LOOKBACK_DAYS,
-        )
 
         today = today or tz.today()
         thirty_days_ago = today - timedelta(days=RETROSPECTIVE_LOOKBACK_DAYS)

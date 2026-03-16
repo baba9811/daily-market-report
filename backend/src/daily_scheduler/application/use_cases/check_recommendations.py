@@ -5,6 +5,10 @@ from __future__ import annotations
 import logging
 
 from daily_scheduler import tz
+from daily_scheduler.constants import (
+    DAY_TRADE_EXPIRY_DAYS,
+    SWING_TRADE_EXPIRY_DAYS,
+)
 from daily_scheduler.domain.ports.finance_provider import (
     FinanceProviderPort,
 )
@@ -28,10 +32,6 @@ class CheckRecommendations:
 
     def execute(self) -> int:
         """Check all open recs. Returns number updated."""
-        from daily_scheduler.constants import (
-            DAY_TRADE_EXPIRY_DAYS,
-            SWING_TRADE_EXPIRY_DAYS,
-        )
 
         open_recs = self._rec_repo.get_open()
         updated = 0
