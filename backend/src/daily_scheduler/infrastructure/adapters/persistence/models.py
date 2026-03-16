@@ -1,0 +1,432 @@
+"""SQLAlchemy ORM models with entity conversion methods."""
+
+from __future__ import annotations
+
+from datetime import date, datetime
+
+from sqlalchemy import (
+    Date,
+    DateTime,
+    Float,
+    ForeignKey,
+    Integer,
+    Text,
+    UniqueConstraint,
+    func,
+)
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from daily_scheduler.database import Base
+from daily_scheduler.domain.entities.price import (
+    PriceSnapshot as PriceEntity,
+)
+from daily_scheduler.domain.entities.recommendation import (
+    Recommendation as RecEntity,
+)
+from daily_scheduler.domain.entities.report import (
+    Report as ReportEntity,
+)
+from daily_scheduler.domain.entities.retrospective import (
+    Retrospective as RetroEntity,
+)
+from daily_scheduler.domain.entities.retrospective import (
+    WeeklyAnalysis as WeeklyEntity,
+)
+
+
+class ReportModel(Base):
+    """SQLAlchemy model for reports."""
+
+    __tablename__ = "reports"
+
+    id: Mapped[int] = mapped_column(
+        primary_key=True, autoincrement=True,
+    )
+    report_date: Mapped[date] = mapped_column(
+        Date, nullable=False, index=True,
+    )
+    report_type: Mapped[str] = mapped_column(default="daily")
+    html_content: Mapped[str] = mapped_column(
+        Text, default="",
+    )
+    summary: Mapped[str] = mapped_column(Text, default="")
+    prompt_used: Mapped[str] = mapped_column(
+        Text, default="",
+    )
+    raw_response: Mapped[str] = mapped_column(
+        Text, default="",
+    )
+    generation_time_s: Mapped[float | None] = mapped_column(
+        Float, nullable=True,
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        server_default=func.now(),
+        nullable=False,
+    )
+
+    recommendations: Mapped[
+        list[RecommendationModel]
+    ] = relationship(
+        back_populates="report",
+        cascade="all, delete-orphan",
+    )
+
+    def to_entity(self) -> ReportEntity:
+        return ReportEntity(
+            id=self.id,
+            report_date=self.report_date,
+            report_type=self.report_type,
+            html_content=self.html_content,
+            summary=self.summary,
+            prompt_used=self.prompt_used,
+            raw_response=self.raw_response,
+            generation_time_s=self.generation_time_s,
+            created_at=self.created_at,
+        )
+
+    @staticmethod
+    def from_entity(entity: ReportEntity) -> ReportModel:
+        model = ReportModel(
+            report_date=entity.report_date,
+            report_type=entity.report_type,
+            html_content=entity.html_content,
+            summary=entity.summary,
+            prompt_used=entity.prompt_used,
+            raw_response=entity.raw_response,
+            generation_time_s=entity.generation_time_s,
+        )
+        if entity.id is not None:
+            model.id = entity.id
+        return model
+
+
+class RecommendationModel(Base):
+    """SQLAlchemy model for recommendations."""
+
+    __tablename__ = "recommendations"
+
+    id: Mapped[int] = mapped_column(
+        primary_key=True, autoincrement=True,
+    )
+    report_id: Mapped[int] = mapped_column(
+        Integer,
+        ForeignKey("reports.id"),
+        nullable=False,
+    )
+    ticker: Mapped[str] = mapped_column(
+        nullable=False, index=True,
+    )
+    name: Mapped[str] = mapped_column(nullable=False)
+    market: Mapped[str] = mapped_column(nullable=False)
+    direction: Mapped[str] = mapped_column(nullable=False)
+    timeframe: Mapped[str] = mapped_column(nullable=False)
+    entry_price: Mapped[float] = mapped_column(
+        Float, nullable=False,
+    )
+    target_price: Mapped[float] = mapped_column(
+        Float, nullable=False,
+    )
+    stop_loss: Mapped[float] = mapped_column(
+        Float, nullable=False,
+    )
+    rationale: Mapped[str] = mapped_column(Text, default="")
+    sector: Mapped[str] = mapped_column(default="")
+    current_price: Mapped[float | None] = mapped_column(
+        Float, nullable=True,
+    )
+    status: Mapped[str] = mapped_column(
+        default="OPEN", index=True,
+    )
+    closed_at: Mapped[datetime | None] = mapped_column(
+        DateTime, nullable=True,
+    )
+    closed_price: Mapped[float | None] = mapped_column(
+        Float, nullable=True,
+    )
+    pnl_percent: Mapped[float | None] = mapped_column(
+        Float, nullable=True,
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        server_default=func.now(),
+        nullable=False,
+    )
+
+    report: Mapped[ReportModel] = relationship(
+        back_populates="recommendations",
+    )
+
+    def to_entity(self) -> RecEntity:
+        return RecEntity(
+            id=self.id,
+            report_id=self.report_id,
+            ticker=self.ticker,
+            name=self.name,
+            market=self.market,
+            direction=self.direction,
+            timeframe=self.timeframe,
+            entry_price=self.entry_price,
+            target_price=self.target_price,
+            stop_loss=self.stop_loss,
+            rationale=self.rationale,
+            sector=self.sector,
+            current_price=self.current_price,
+            status=self.status,
+            closed_at=self.closed_at,
+            closed_price=self.closed_price,
+            pnl_percent=self.pnl_percent,
+            created_at=self.created_at,
+        )
+
+    @staticmethod
+    def from_entity(entity: RecEntity) -> RecommendationModel:
+        model = RecommendationModel(
+            report_id=entity.report_id,
+            ticker=entity.ticker,
+            name=entity.name,
+            market=entity.market,
+            direction=entity.direction,
+            timeframe=entity.timeframe,
+            entry_price=entity.entry_price,
+            target_price=entity.target_price,
+            stop_loss=entity.stop_loss,
+            rationale=entity.rationale,
+            sector=entity.sector,
+            current_price=entity.current_price,
+            status=entity.status,
+            closed_at=entity.closed_at,
+            closed_price=entity.closed_price,
+            pnl_percent=entity.pnl_percent,
+        )
+        if entity.id is not None:
+            model.id = entity.id
+        return model
+
+
+class PriceSnapshotModel(Base):
+    """SQLAlchemy model for price snapshots."""
+
+    __tablename__ = "price_snapshots"
+    __table_args__ = (
+        UniqueConstraint(
+            "ticker",
+            "snapshot_date",
+            name="uq_ticker_date",
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(
+        primary_key=True, autoincrement=True,
+    )
+    ticker: Mapped[str] = mapped_column(
+        nullable=False, index=True,
+    )
+    snapshot_date: Mapped[date] = mapped_column(
+        Date, nullable=False,
+    )
+    price: Mapped[float] = mapped_column(
+        Float, nullable=False,
+    )
+    open_price: Mapped[float | None] = mapped_column(
+        Float, nullable=True,
+    )
+    high: Mapped[float | None] = mapped_column(
+        Float, nullable=True,
+    )
+    low: Mapped[float | None] = mapped_column(
+        Float, nullable=True,
+    )
+    volume: Mapped[int | None] = mapped_column(
+        Integer, nullable=True,
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        server_default=func.now(),
+        nullable=False,
+    )
+
+    def to_entity(self) -> PriceEntity:
+        return PriceEntity(
+            id=self.id,
+            ticker=self.ticker,
+            snapshot_date=self.snapshot_date,
+            price=self.price,
+            open_price=self.open_price,
+            high=self.high,
+            low=self.low,
+            volume=self.volume,
+            created_at=self.created_at,
+        )
+
+    @staticmethod
+    def from_entity(
+        entity: PriceEntity,
+    ) -> PriceSnapshotModel:
+        model = PriceSnapshotModel(
+            ticker=entity.ticker,
+            snapshot_date=entity.snapshot_date,
+            price=entity.price,
+            open_price=entity.open_price,
+            high=entity.high,
+            low=entity.low,
+            volume=entity.volume,
+        )
+        if entity.id is not None:
+            model.id = entity.id
+        return model
+
+
+class RetrospectiveModel(Base):
+    """SQLAlchemy model for retrospectives."""
+
+    __tablename__ = "retrospectives"
+
+    id: Mapped[int] = mapped_column(
+        primary_key=True, autoincrement=True,
+    )
+    report_date: Mapped[date] = mapped_column(
+        Date, nullable=False, unique=True,
+    )
+    recommendations_checked: Mapped[int] = mapped_column(
+        Integer, default=0,
+    )
+    targets_hit: Mapped[int] = mapped_column(
+        Integer, default=0,
+    )
+    stops_hit: Mapped[int] = mapped_column(
+        Integer, default=0,
+    )
+    expired_count: Mapped[int] = mapped_column(
+        Integer, default=0,
+    )
+    context_block: Mapped[str] = mapped_column(
+        Text, default="",
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        server_default=func.now(),
+        nullable=False,
+    )
+
+    def to_entity(self) -> RetroEntity:
+        return RetroEntity(
+            id=self.id,
+            report_date=self.report_date,
+            recommendations_checked=(
+                self.recommendations_checked
+            ),
+            targets_hit=self.targets_hit,
+            stops_hit=self.stops_hit,
+            expired_count=self.expired_count,
+            context_block=self.context_block,
+            created_at=self.created_at,
+        )
+
+    @staticmethod
+    def from_entity(
+        entity: RetroEntity,
+    ) -> RetrospectiveModel:
+        model = RetrospectiveModel(
+            report_date=entity.report_date,
+            recommendations_checked=(
+                entity.recommendations_checked
+            ),
+            targets_hit=entity.targets_hit,
+            stops_hit=entity.stops_hit,
+            expired_count=entity.expired_count,
+            context_block=entity.context_block,
+        )
+        if entity.id is not None:
+            model.id = entity.id
+        return model
+
+
+class WeeklyAnalysisModel(Base):
+    """SQLAlchemy model for weekly analyses."""
+
+    __tablename__ = "weekly_analyses"
+
+    id: Mapped[int] = mapped_column(
+        primary_key=True, autoincrement=True,
+    )
+    week_start: Mapped[date] = mapped_column(
+        Date, nullable=False,
+    )
+    week_end: Mapped[date] = mapped_column(
+        Date, nullable=False,
+    )
+    total_recommendations: Mapped[int] = mapped_column(
+        Integer, default=0,
+    )
+    win_count: Mapped[int] = mapped_column(
+        Integer, default=0,
+    )
+    loss_count: Mapped[int] = mapped_column(
+        Integer, default=0,
+    )
+    avg_return_pct: Mapped[float | None] = mapped_column(
+        Float, nullable=True,
+    )
+    best_pick_ticker: Mapped[str] = mapped_column(
+        default="",
+    )
+    worst_pick_ticker: Mapped[str] = mapped_column(
+        default="",
+    )
+    sector_breakdown: Mapped[str] = mapped_column(
+        Text, default="{}",
+    )
+    analysis_text: Mapped[str] = mapped_column(
+        Text, default="",
+    )
+    lessons: Mapped[str] = mapped_column(
+        Text, default="[]",
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        server_default=func.now(),
+        nullable=False,
+    )
+
+    def to_entity(self) -> WeeklyEntity:
+        return WeeklyEntity(
+            id=self.id,
+            week_start=self.week_start,
+            week_end=self.week_end,
+            total_recommendations=(
+                self.total_recommendations
+            ),
+            win_count=self.win_count,
+            loss_count=self.loss_count,
+            avg_return_pct=self.avg_return_pct,
+            best_pick_ticker=self.best_pick_ticker,
+            worst_pick_ticker=self.worst_pick_ticker,
+            sector_breakdown=self.sector_breakdown,
+            analysis_text=self.analysis_text,
+            lessons=self.lessons,
+            created_at=self.created_at,
+        )
+
+    @staticmethod
+    def from_entity(
+        entity: WeeklyEntity,
+    ) -> WeeklyAnalysisModel:
+        model = WeeklyAnalysisModel(
+            week_start=entity.week_start,
+            week_end=entity.week_end,
+            total_recommendations=(
+                entity.total_recommendations
+            ),
+            win_count=entity.win_count,
+            loss_count=entity.loss_count,
+            avg_return_pct=entity.avg_return_pct,
+            best_pick_ticker=entity.best_pick_ticker,
+            worst_pick_ticker=entity.worst_pick_ticker,
+            sector_breakdown=entity.sector_breakdown,
+            analysis_text=entity.analysis_text,
+            lessons=entity.lessons,
+        )
+        if entity.id is not None:
+            model.id = entity.id
+        return model

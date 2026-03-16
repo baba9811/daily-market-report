@@ -21,8 +21,8 @@ build/
 
 # === Node / Frontend ===
 frontend/node_modules/
-frontend/dist/
-frontend/.vite/
+frontend/.next/
+frontend/out/
 frontend/.yarn/cache
 frontend/.yarn/unplugged
 frontend/.yarn/install-state.gz

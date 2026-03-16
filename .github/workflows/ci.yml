@@ -8,7 +8,7 @@ on:
 
 jobs:
   backend-lint:
-    name: Backend Lint & Type Check
+    name: Backend Lint
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -36,8 +36,8 @@ jobs:
       - run: uv sync --extra dev
       - run: uv run pytest tests/ -v --tb=short
 
-  frontend-lint:
-    name: Frontend Type Check & Build
+  frontend-check:
+    name: Frontend Lint & Build
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -50,5 +50,6 @@ jobs:
       - name: Enable Corepack
         run: corepack enable
       - run: yarn install --immutable
-      - run: yarn tsc --noEmit
+      - run: yarn typecheck
+      - run: yarn lint
       - run: yarn build

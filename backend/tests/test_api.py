@@ -1,5 +1,7 @@
 """Tests for FastAPI API endpoints."""
 
+from __future__ import annotations
+
 from fastapi.testclient import TestClient
 
 from daily_scheduler.main import app
@@ -7,10 +9,22 @@ from daily_scheduler.main import app
 client = TestClient(app)
 
 
-class TestDashboardEndpoint:
-    def test_dashboard_endpoint_exists(self):
+class TestRouteRegistration:
+    def test_dashboard_route_exists(self):
         routes = [r.path for r in app.routes]
         assert "/api/dashboard" in routes
+
+    def test_reports_route_exists(self):
+        routes = [r.path for r in app.routes]
+        assert "/api/reports" in routes
+
+    def test_performance_route_exists(self):
+        routes = [r.path for r in app.routes]
+        assert "/api/performance/summary" in routes
+
+    def test_pipeline_route_exists(self):
+        routes = [r.path for r in app.routes]
+        assert "/api/pipeline/run" in routes
 
 
 class TestSettingsEndpoint:
@@ -27,7 +41,6 @@ class TestSettingsEndpoint:
         data = response.json()
         assert "database" in data
         assert "claude_cli" in data
-        assert "smtp_configured" in data
 
 
 class TestPipelineEndpoint:

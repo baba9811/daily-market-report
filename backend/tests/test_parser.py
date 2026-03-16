@@ -1,6 +1,8 @@
-"""Tests for the parser service."""
+"""Tests for the parser module."""
 
-from daily_scheduler.services.parser import (
+from __future__ import annotations
+
+from daily_scheduler.infrastructure.adapters.claude.parser import (
     extract_html_report,
     extract_recommendations,
     extract_summary,
@@ -10,7 +12,7 @@ from daily_scheduler.services.parser import (
 class TestExtractRecommendations:
     def test_extracts_valid_json(self):
         raw = """
-        <html><body>Report content</body></html>
+        <html><body>Report</body></html>
         <!-- REC_START
         [
           {
@@ -34,22 +36,26 @@ class TestExtractRecommendations:
         assert recs[0]["entry_price"] == 185.0
 
     def test_returns_empty_on_no_markers(self):
-        recs = extract_recommendations("<html>no markers here</html>")
+        recs = extract_recommendations("<html>no markers</html>")
         assert recs == []
 
     def test_returns_empty_on_invalid_json(self):
-        raw = "<!-- REC_START\n{invalid json}\nREC_END -->"
+        raw = "<!-- REC_START\n{invalid}\nREC_END -->"
         recs = extract_recommendations(raw)
         assert recs == []
 
     def test_multiple_recommendations(self):
         raw = """<!-- REC_START
         [
-          {"ticker": "AAPL", "name": "Apple", "market": "NASDAQ", "direction": "LONG",
-           "timeframe": "DAY", "entry_price": 185, "target_price": 190, "stop_loss": 182,
+          {"ticker": "AAPL", "name": "Apple",
+           "market": "NASDAQ", "direction": "LONG",
+           "timeframe": "DAY", "entry_price": 185,
+           "target_price": 190, "stop_loss": 182,
            "sector": "Tech", "rationale": "test"},
-          {"ticker": "TSLA", "name": "Tesla", "market": "NASDAQ", "direction": "SHORT",
-           "timeframe": "SWING", "entry_price": 250, "target_price": 230, "stop_loss": 260,
+          {"ticker": "TSLA", "name": "Tesla",
+           "market": "NASDAQ", "direction": "SHORT",
+           "timeframe": "SWING", "entry_price": 250,
+           "target_price": 230, "stop_loss": 260,
            "sector": "Auto", "rationale": "test2"}
         ]
         REC_END -->"""
@@ -61,13 +67,16 @@ class TestExtractRecommendations:
 
 class TestExtractHtmlReport:
     def test_extracts_full_html_document(self):
-        raw = "some preamble\n<!DOCTYPE html><html><body>content</body></html>\nmore text"
+        raw = (
+            "preamble\n<!DOCTYPE html><html>"
+            "<body>c</body></html>\nmore"
+        )
         html = extract_html_report(raw)
         assert html.startswith("<!DOCTYPE html>")
         assert html.endswith("</html>")
 
     def test_returns_raw_if_html_tags_present(self):
-        raw = "<div>some content</div><table>data</table>"
+        raw = "<div>content</div><table>data</table>"
         html = extract_html_report(raw)
         assert "<div>" in html
 
@@ -82,7 +91,7 @@ class TestExtractSummary:
     def test_strips_html_and_truncates(self):
         raw = "<h1>Title</h1><p>" + "a" * 300 + "</p>"
         summary = extract_summary(raw)
-        assert len(summary) <= 203  # 200 + "..."
+        assert len(summary) <= 203
         assert "<h1>" not in summary
 
     def test_short_text_no_ellipsis(self):

@@ -1,16 +1,20 @@
-"""Tests for database models."""
+"""Tests for database ORM models."""
+
+from __future__ import annotations
 
 from datetime import date, datetime
 
 from sqlalchemy.orm import Session
 
-from daily_scheduler.models.recommendation import Recommendation
-from daily_scheduler.models.report import Report
+from daily_scheduler.infrastructure.adapters.persistence.models import (
+    RecommendationModel,
+    ReportModel,
+)
 
 
 class TestReportModel:
     def test_create_report(self, db: Session):
-        report = Report(
+        report = ReportModel(
             report_date=date(2026, 3, 17),
             report_type="daily",
             html_content="<html>test</html>",
@@ -19,17 +23,20 @@ class TestReportModel:
         db.add(report)
         db.commit()
 
-        fetched = db.query(Report).first()
+        fetched = db.query(ReportModel).first()
         assert fetched is not None
         assert fetched.report_date == date(2026, 3, 17)
         assert fetched.report_type == "daily"
 
     def test_report_recommendation_relationship(self, db: Session):
-        report = Report(report_date=date(2026, 3, 17), report_type="daily")
+        report = ReportModel(
+            report_date=date(2026, 3, 17),
+            report_type="daily",
+        )
         db.add(report)
         db.flush()
 
-        rec = Recommendation(
+        rec = RecommendationModel(
             report_id=report.id,
             ticker="AAPL",
             name="Apple Inc.",
@@ -43,7 +50,7 @@ class TestReportModel:
         db.add(rec)
         db.commit()
 
-        fetched = db.query(Report).first()
+        fetched = db.query(ReportModel).first()
         assert fetched is not None
         assert len(fetched.recommendations) == 1
         assert fetched.recommendations[0].ticker == "AAPL"
@@ -51,11 +58,14 @@ class TestReportModel:
 
 class TestRecommendationModel:
     def test_default_status_is_open(self, db: Session):
-        report = Report(report_date=date(2026, 3, 17), report_type="daily")
+        report = ReportModel(
+            report_date=date(2026, 3, 17),
+            report_type="daily",
+        )
         db.add(report)
         db.flush()
 
-        rec = Recommendation(
+        rec = RecommendationModel(
             report_id=report.id,
             ticker="TSLA",
             name="Tesla",
@@ -69,17 +79,20 @@ class TestRecommendationModel:
         db.add(rec)
         db.commit()
 
-        fetched = db.query(Recommendation).first()
+        fetched = db.query(RecommendationModel).first()
         assert fetched is not None
         assert fetched.status == "OPEN"
         assert fetched.pnl_percent is None
 
     def test_close_recommendation(self, db: Session):
-        report = Report(report_date=date(2026, 3, 17), report_type="daily")
+        report = ReportModel(
+            report_date=date(2026, 3, 17),
+            report_type="daily",
+        )
         db.add(report)
         db.flush()
 
-        rec = Recommendation(
+        rec = RecommendationModel(
             report_id=report.id,
             ticker="AAPL",
             name="Apple",
@@ -99,7 +112,7 @@ class TestRecommendationModel:
         rec.pnl_percent = 5.95
         db.commit()
 
-        fetched = db.query(Recommendation).first()
+        fetched = db.query(RecommendationModel).first()
         assert fetched is not None
         assert fetched.status == "TARGET_HIT"
         assert fetched.pnl_percent == 5.95

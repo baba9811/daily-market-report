@@ -7,12 +7,12 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 
 from daily_scheduler.database import Base
-from daily_scheduler.models import (  # noqa: F401 — register models
-    PriceSnapshot,
-    Recommendation,
-    Report,
-    Retrospective,
-    WeeklyAnalysis,
+from daily_scheduler.infrastructure.adapters.persistence.models import (  # noqa: F401
+    PriceSnapshotModel,
+    RecommendationModel,
+    ReportModel,
+    RetrospectiveModel,
+    WeeklyAnalysisModel,
 )
 
 
