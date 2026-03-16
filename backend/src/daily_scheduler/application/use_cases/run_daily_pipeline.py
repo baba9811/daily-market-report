@@ -160,6 +160,7 @@ class RunDailyPipeline:
             generation_time_s=gen_time,
         )
         saved_report = self._report_repo.save(report)
+        assert saved_report.id is not None
 
         # Step 8: Save recommendations
         recs = [

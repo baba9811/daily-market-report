@@ -176,7 +176,7 @@ class BuildRetrospective:
             r for r in all_recs if r.pnl_percent is not None
         ]
         avg_pnl = (
-            sum(r.pnl_percent for r in closed_recs)
+            sum(r.pnl_percent or 0.0 for r in closed_recs)
             / len(closed_recs)
             if closed_recs
             else 0.0

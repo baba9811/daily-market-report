@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from datetime import datetime
+
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import HTMLResponse
 from sqlalchemy.orm import Session
@@ -34,12 +36,12 @@ def list_reports(
     )
     return [
         ReportOut(
-            id=r.id,
+            id=r.id or 0,
             report_date=r.report_date,
             report_type=r.report_type,
             summary=r.summary,
             generation_time_s=r.generation_time_s,
-            created_at=r.created_at,
+            created_at=r.created_at or datetime.now(),
         )
         for r in reports
     ]
@@ -57,12 +59,12 @@ def get_latest_report(
             status_code=404, detail="No reports found",
         )
     return ReportDetailOut(
-        id=report.id,
+        id=report.id or 0,
         report_date=report.report_date,
         report_type=report.report_type,
         summary=report.summary,
         generation_time_s=report.generation_time_s,
-        created_at=report.created_at,
+        created_at=report.created_at or datetime.now(),
         html_content=report.html_content,
     )
 
@@ -79,12 +81,12 @@ def get_report(
             status_code=404, detail="Report not found",
         )
     return ReportDetailOut(
-        id=report.id,
+        id=report.id or 0,
         report_date=report.report_date,
         report_type=report.report_type,
         summary=report.summary,
         generation_time_s=report.generation_time_s,
-        created_at=report.created_at,
+        created_at=report.created_at or datetime.now(),
         html_content=report.html_content,
     )
 

@@ -60,7 +60,7 @@ def get_summary(
         r for r in recs if r.pnl_percent is not None
     ]
     avg_pnl = (
-        sum(r.pnl_percent for r in closed) / len(closed)
+        sum(r.pnl_percent or 0.0 for r in closed) / len(closed)
         if closed
         else 0
     )
@@ -72,12 +72,12 @@ def get_summary(
 
     best = max(
         closed,
-        key=lambda r: r.pnl_percent,
+        key=lambda r: r.pnl_percent or 0.0,
         default=None,
     )
     worst = min(
         closed,
-        key=lambda r: r.pnl_percent,
+        key=lambda r: r.pnl_percent or 0.0,
         default=None,
     )
 
@@ -91,11 +91,11 @@ def get_summary(
         avg_pnl=round(avg_pnl, 2),
         best_ticker=best.ticker if best else "",
         best_pnl=(
-            round(best.pnl_percent, 2) if best else 0
+            round(best.pnl_percent or 0.0, 2) if best else 0
         ),
         worst_ticker=worst.ticker if worst else "",
         worst_pnl=(
-            round(worst.pnl_percent, 2) if worst else 0
+            round(worst.pnl_percent or 0.0, 2) if worst else 0
         ),
     )
 
@@ -113,7 +113,7 @@ def get_recommendations(
     recs = repo.list_all(status=status)
     return [
         RecommendationOut(
-            id=r.id,
+            id=r.id or 0,
             report_id=r.report_id,
             ticker=r.ticker,
             name=r.name,
@@ -129,7 +129,7 @@ def get_recommendations(
             status=r.status,
             pnl_percent=r.pnl_percent,
             closed_at=r.closed_at,
-            created_at=r.created_at,
+            created_at=r.created_at or datetime.now(),
         )
         for r in recs
     ]
@@ -151,10 +151,10 @@ def get_sector_performance(
 
     sectors: dict[str, dict[str, float]] = defaultdict(
         lambda: {
-            "count": 0,
-            "wins": 0,
-            "losses": 0,
-            "total_pnl": 0,
+            "count": 0.0,
+            "wins": 0.0,
+            "losses": 0.0,
+            "total_pnl": 0.0,
         }
     )
     for r in closed:
