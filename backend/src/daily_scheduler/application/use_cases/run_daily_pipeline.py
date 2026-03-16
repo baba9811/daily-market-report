@@ -81,7 +81,7 @@ class RunDailyPipeline:
 
         try:
             return self._run(today)
-        except Exception:
+        except Exception:  # pylint: disable=broad-exception-caught
             logger.exception("Daily pipeline failed")
             self._email.send_error("Daily pipeline encountered an unexpected error. Check logs.")
             return False

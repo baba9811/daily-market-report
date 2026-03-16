@@ -89,6 +89,6 @@ class RunWeeklyPipeline:
             logger.info("Weekly pipeline completed!")
             return True
 
-        except Exception:
+        except Exception:  # pylint: disable=broad-exception-caught
             logger.exception("Weekly pipeline failed")
             return False

@@ -21,8 +21,9 @@ Open-source (Apache 2.0) monorepo with Python backend and Next.js frontend.
 - Run `make test` before committing
 
 ### Code Quality & Static Analysis
-- Backend: ruff (lint + format, line-length 100), pyrefly (type checking), mypy (strict)
+- Backend: ruff (lint + format, line-length 100), pyrefly (type checking), pylint (10.00/10 required), mypy (strict)
 - Frontend: ESLint (Next.js rules), oxlint (additional bug detection), TypeScript strict
+- pylint errors and warnings MUST all be resolved — zero tolerance
 - All static analysis runs automatically via PostToolUse hooks on file edit
 - All code must be in English (comments, variable names, UI strings)
 - Report/email language is controlled by REPORT_LANGUAGE env var
@@ -39,7 +40,7 @@ Open-source (Apache 2.0) monorepo with Python backend and Next.js frontend.
   - Red → Green → Refactor cycle
   - Backend: pytest with in-memory SQLite
   - Frontend: Playwright E2E via MCP tools
-- Run `make test` before committing — includes pytest, pyrefly, typecheck, oxlint
+- Run `make test` before committing — includes pytest, pyrefly, pylint, typecheck, oxlint
 
 ### Architecture Principles
 - Hexagonal Architecture: domain logic has no framework dependencies

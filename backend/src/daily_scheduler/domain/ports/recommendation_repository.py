@@ -14,35 +14,42 @@ class RecommendationRepositoryPort(ABC):
     """Abstract interface for recommendation persistence."""
 
     @abstractmethod
-    def get_open(self) -> list[Recommendation]: ...
+    def get_open(self) -> list[Recommendation]:
+        """Return all open recommendations."""
 
     @abstractmethod
     def get_by_period(
         self,
         since: datetime,
-    ) -> list[Recommendation]: ...
+    ) -> list[Recommendation]:
+        """Return recommendations created since the given datetime."""
 
     @abstractmethod
     def get_closed_by_period(
         self,
         since: datetime,
-    ) -> list[Recommendation]: ...
+    ) -> list[Recommendation]:
+        """Return closed recommendations since the given datetime."""
 
     @abstractmethod
-    def save(self, rec: Recommendation) -> Recommendation: ...
+    def save(self, rec: Recommendation) -> Recommendation:
+        """Persist a single recommendation."""
 
     @abstractmethod
     def save_many(
         self,
         recs: list[Recommendation],
-    ) -> list[Recommendation]: ...
+    ) -> list[Recommendation]:
+        """Persist multiple recommendations."""
 
     @abstractmethod
-    def update(self, rec: Recommendation) -> None: ...
+    def update(self, rec: Recommendation) -> None:
+        """Update an existing recommendation."""
 
     @abstractmethod
     def list_all(
         self,
         status: str = "all",
         limit: int = 100,
-    ) -> list[Recommendation]: ...
+    ) -> list[Recommendation]:
+        """List recommendations filtered by status."""

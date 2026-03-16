@@ -121,6 +121,7 @@ class ClaudeNewsProvider(NewsProviderPort):
                     text=True,
                     timeout=TIMEOUT_SECONDS,
                     cwd=cwd,
+                    check=False,
                 )
                 elapsed = time.time() - start
                 logger.info(

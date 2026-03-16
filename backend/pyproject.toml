@@ -28,6 +28,7 @@ dev = [
     "ruff>=0.8",
     "mypy>=1.13",
     "pyrefly>=0.56",
+    "pylint>=3.0",
 ]
 
 [project.scripts]
@@ -52,6 +53,29 @@ python_version = "3.11"
 strict = true
 warn_return_any = true
 warn_unused_configs = true
+
+[tool.pylint.main]
+load-plugins = []
+jobs = 0
+
+[tool.pylint."messages control"]
+disable = [
+    "too-many-instance-attributes",   # dataclasses/Pydantic models need many fields
+    "too-few-public-methods",         # ABC ports with single method are valid
+    "duplicate-code",                 # DTOs and schemas intentionally mirror each other
+    "import-outside-toplevel",        # intentional lazy imports in CLI/routes for startup perf
+    "too-many-arguments",             # DI constructors naturally have many dependencies
+    "too-many-positional-arguments",  # same as above
+]
+
+[tool.pylint.format]
+max-line-length = 100
+
+[tool.pylint.design]
+max-locals = 25
+
+[tool.pylint.typecheck]
+generated-members = ["func.*"]
 
 [tool.pyrefly]
 project_includes = ["src/"]

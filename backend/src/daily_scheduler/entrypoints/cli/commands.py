@@ -106,6 +106,7 @@ def init_db() -> None:
         cwd=str(alembic_dir.parent),
         capture_output=True,
         text=True,
+        check=False,
     )
 
     if result.returncode == 0:
@@ -130,6 +131,7 @@ def check() -> None:
             capture_output=True,
             text=True,
             timeout=10,
+            check=False,
         )
         if result.returncode == 0:
             console.print(f"[green]Claude CLI:[/green] {result.stdout.strip()}")

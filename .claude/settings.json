@@ -17,7 +17,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "filepath=\"$CLAUDE_FILE_PATH\"; if [[ \"$filepath\" == */backend/* ]] && [[ \"$filepath\" == *.py ]]; then cd /Users/bany1111/local-workspace/daily-scheduler/backend && uv run ruff format \"$filepath\" && uv run ruff check --fix \"$filepath\" && uv run pyrefly check \"$filepath\" --warn \"implicit-any,unannotated-return\"; elif [[ \"$filepath\" == */frontend/* ]] && [[ \"$filepath\" =~ \\.(ts|tsx|js|jsx)$ ]]; then cd /Users/bany1111/local-workspace/daily-scheduler/frontend && npx oxlint \"$filepath\"; fi"
+            "command": "filepath=\"$CLAUDE_FILE_PATH\"; if [[ \"$filepath\" == */backend/* ]] && [[ \"$filepath\" == *.py ]]; then cd /Users/bany1111/local-workspace/daily-scheduler/backend && uv run ruff format \"$filepath\" && uv run ruff check --fix \"$filepath\" && uv run pyrefly check \"$filepath\" --warn \"implicit-any,unannotated-return\" && uv run pylint \"$filepath\"; elif [[ \"$filepath\" == */frontend/* ]] && [[ \"$filepath\" =~ \\.(ts|tsx|js|jsx)$ ]]; then cd /Users/bany1111/local-workspace/daily-scheduler/frontend && npx oxlint \"$filepath\"; fi"
           }
         ]
       }

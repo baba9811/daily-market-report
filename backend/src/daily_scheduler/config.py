@@ -13,6 +13,8 @@ ENV_FILE = PROJECT_ROOT / ".env"
 
 
 class Settings(BaseSettings):
+    """Application settings loaded from environment variables."""
+
     model_config = SettingsConfigDict(
         env_file=str(ENV_FILE),
         env_file_encoding="utf-8",
@@ -51,6 +53,7 @@ class Settings(BaseSettings):
     @field_validator("email_to", mode="before")
     @classmethod
     def parse_email_to(cls, v: str | list[str]) -> list[str]:
+        """Parse email_to from JSON string or list."""
         if isinstance(v, str):
             try:
                 parsed = json.loads(v)
@@ -63,9 +66,11 @@ class Settings(BaseSettings):
 
     @property
     def db_path(self) -> Path:
+        """Return the database file path."""
         url = self.database_url.replace("sqlite:///", "")
         return Path(url)
 
 
 def get_settings() -> Settings:
+    """Create and return a Settings instance."""
     return Settings()

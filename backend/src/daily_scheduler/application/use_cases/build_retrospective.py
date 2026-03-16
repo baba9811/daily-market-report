@@ -127,10 +127,10 @@ class BuildRetrospective:
             ),
         )
 
-    def _format_context(
+    def _format_context(  # pylint: disable=too-many-locals
         self,
         all_recs: list[Recommendation],
-        today: date,
+        _today: date,
         seven_days_ago: date,
     ) -> str:
         """Format the retrospective context text."""

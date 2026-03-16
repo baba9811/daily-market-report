@@ -35,7 +35,7 @@ class YFinanceProvider(FinanceProviderPort):
                 "low": float(latest["Low"]),
                 "volume": int(latest["Volume"]),
             }
-        except Exception:
+        except Exception:  # pylint: disable=broad-exception-caught
             logger.exception(
                 "Failed to fetch price for %s",
                 ticker,

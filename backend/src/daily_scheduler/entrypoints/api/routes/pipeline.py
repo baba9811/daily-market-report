@@ -41,7 +41,7 @@ def trigger_pipeline() -> dict[str, str]:
                 pipeline = get_daily_pipeline(session)
                 success = pipeline.execute()
                 _pipeline_status["last_result"] = "success" if success else "failed"
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             _pipeline_status["last_result"] = f"error: {e}"
         finally:
             _pipeline_status["running"] = False

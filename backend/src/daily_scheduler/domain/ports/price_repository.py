@@ -16,7 +16,9 @@ class PriceRepositoryPort(ABC):
         self,
         ticker: str,
         snapshot_date: date,
-    ) -> PriceSnapshot | None: ...
+    ) -> PriceSnapshot | None:
+        """Return a price snapshot for the given ticker and date."""
 
     @abstractmethod
-    def save(self, snapshot: PriceSnapshot) -> PriceSnapshot: ...
+    def save(self, snapshot: PriceSnapshot) -> PriceSnapshot:
+        """Persist a price snapshot."""

@@ -30,6 +30,7 @@ dev-frontend: ## Start Next.js dev server
 test: ## Run all tests (backend unit + frontend typecheck + static analysis)
 	cd backend && uv run pytest tests/ -v
 	cd backend && uv run pyrefly check src/
+	cd backend && uv run pylint src/daily_scheduler/
 	cd frontend && yarn typecheck
 	cd frontend && yarn oxlint
 
@@ -37,6 +38,7 @@ lint: ## Run linting and static analysis
 	cd backend && uv run ruff check src/
 	cd backend && uv run ruff format --check src/
 	cd backend && uv run pyrefly check src/
+	cd backend && uv run pylint src/daily_scheduler/
 	cd frontend && yarn lint
 	cd frontend && yarn oxlint
 

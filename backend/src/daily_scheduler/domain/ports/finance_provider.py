@@ -15,4 +15,3 @@ class FinanceProviderPort(ABC):
         Returns dict with keys: price, open_price, high, low, volume.
         Returns None on failure.
         """
-        ...

@@ -20,7 +20,6 @@ class NewsProviderPort(ABC):
 
         Returns (raw_response, generation_time_seconds).
         """
-        ...
 
     @abstractmethod
     def generate_weekly_report(
@@ -33,4 +32,3 @@ class NewsProviderPort(ABC):
 
         Returns (raw_response, generation_time_seconds).
         """
-        ...

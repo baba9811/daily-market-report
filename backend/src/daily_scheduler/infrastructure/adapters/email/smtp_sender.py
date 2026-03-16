@@ -73,7 +73,7 @@ class SmtpEmailSender(EmailSenderPort):
                     s.email_to,
                 )
                 return True
-            except Exception:
+            except Exception:  # pylint: disable=broad-exception-caught
                 wait = BACKOFF_BASE * (2**attempt)
                 logger.exception(
                     "Email send failed (attempt %d/%d). Retrying in %ds...",

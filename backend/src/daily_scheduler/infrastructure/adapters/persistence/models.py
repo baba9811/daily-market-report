@@ -68,7 +68,7 @@ class ReportModel(Base):
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime,
-        server_default=func.now(),
+        server_default=func.now(),  # pylint: disable=not-callable
         nullable=False,
     )
 
@@ -78,6 +78,7 @@ class ReportModel(Base):
     )
 
     def to_entity(self) -> ReportEntity:
+        """Convert to domain entity."""
         return ReportEntity(
             id=self.id,
             report_date=self.report_date,
@@ -92,6 +93,7 @@ class ReportModel(Base):
 
     @staticmethod
     def from_entity(entity: ReportEntity) -> ReportModel:
+        """Create model from domain entity."""
         model = ReportModel(
             report_date=entity.report_date,
             report_type=entity.report_type,
@@ -164,7 +166,7 @@ class RecommendationModel(Base):
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime,
-        server_default=func.now(),
+        server_default=func.now(),  # pylint: disable=not-callable
         nullable=False,
     )
 
@@ -173,6 +175,7 @@ class RecommendationModel(Base):
     )
 
     def to_entity(self) -> RecEntity:
+        """Convert to domain entity."""
         return RecEntity(
             id=self.id,
             report_id=self.report_id,
@@ -196,6 +199,7 @@ class RecommendationModel(Base):
 
     @staticmethod
     def from_entity(entity: RecEntity) -> RecommendationModel:
+        """Create model from domain entity."""
         model = RecommendationModel(
             report_id=entity.report_id,
             ticker=entity.ticker,
@@ -265,11 +269,12 @@ class PriceSnapshotModel(Base):
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime,
-        server_default=func.now(),
+        server_default=func.now(),  # pylint: disable=not-callable
         nullable=False,
     )
 
     def to_entity(self) -> PriceEntity:
+        """Convert to domain entity."""
         return PriceEntity(
             id=self.id,
             ticker=self.ticker,
@@ -286,6 +291,7 @@ class PriceSnapshotModel(Base):
     def from_entity(
         entity: PriceEntity,
     ) -> PriceSnapshotModel:
+        """Create model from domain entity."""
         model = PriceSnapshotModel(
             ticker=entity.ticker,
             snapshot_date=entity.snapshot_date,
@@ -336,11 +342,12 @@ class RetrospectiveModel(Base):
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime,
-        server_default=func.now(),
+        server_default=func.now(),  # pylint: disable=not-callable
         nullable=False,
     )
 
     def to_entity(self) -> RetroEntity:
+        """Convert to domain entity."""
         return RetroEntity(
             id=self.id,
             report_date=self.report_date,
@@ -356,6 +363,7 @@ class RetrospectiveModel(Base):
     def from_entity(
         entity: RetroEntity,
     ) -> RetrospectiveModel:
+        """Create model from domain entity."""
         model = RetrospectiveModel(
             report_date=entity.report_date,
             recommendations_checked=(entity.recommendations_checked),
@@ -422,11 +430,12 @@ class WeeklyAnalysisModel(Base):
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime,
-        server_default=func.now(),
+        server_default=func.now(),  # pylint: disable=not-callable
         nullable=False,
     )
 
     def to_entity(self) -> WeeklyEntity:
+        """Convert to domain entity."""
         return WeeklyEntity(
             id=self.id,
             week_start=self.week_start,
@@ -447,6 +456,7 @@ class WeeklyAnalysisModel(Base):
     def from_entity(
         entity: WeeklyEntity,
     ) -> WeeklyAnalysisModel:
+        """Create model from domain entity."""
         model = WeeklyAnalysisModel(
             week_start=entity.week_start,
             week_end=entity.week_end,

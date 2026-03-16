@@ -100,6 +100,7 @@ def health_check() -> dict[str, bool]:
             [settings.claude_cli_path, "--version"],
             capture_output=True,
             timeout=5,
+            check=False,
         )
         status["claude_cli"] = result.returncode == 0
     except (FileNotFoundError, subprocess.TimeoutExpired):
