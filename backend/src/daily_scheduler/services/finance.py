@@ -75,26 +75,38 @@ def update_open_recommendations(db: Session) -> int:
                 rec.closed_at = datetime.now()
                 rec.closed_price = data["price"]
                 rec.pnl_percent = ((data["price"] - rec.entry_price) / rec.entry_price) * 100
-                logger.info("TARGET HIT: %s at %.2f (%.1f%%)", rec.ticker, data["price"], rec.pnl_percent)
+                logger.info(
+                    "TARGET HIT: %s at %.2f (%.1f%%)",
+                    rec.ticker, data["price"], rec.pnl_percent,
+                )
             elif data["price"] <= rec.stop_loss:
                 rec.status = "STOP_HIT"
                 rec.closed_at = datetime.now()
                 rec.closed_price = data["price"]
                 rec.pnl_percent = ((data["price"] - rec.entry_price) / rec.entry_price) * 100
-                logger.info("STOP HIT: %s at %.2f (%.1f%%)", rec.ticker, data["price"], rec.pnl_percent)
+                logger.info(
+                    "STOP HIT: %s at %.2f (%.1f%%)",
+                    rec.ticker, data["price"], rec.pnl_percent,
+                )
         elif rec.direction == "SHORT":
             if data["price"] <= rec.target_price:
                 rec.status = "TARGET_HIT"
                 rec.closed_at = datetime.now()
                 rec.closed_price = data["price"]
                 rec.pnl_percent = ((rec.entry_price - data["price"]) / rec.entry_price) * 100
-                logger.info("TARGET HIT (SHORT): %s at %.2f (%.1f%%)", rec.ticker, data["price"], rec.pnl_percent)
+                logger.info(
+                    "TARGET HIT (SHORT): %s at %.2f (%.1f%%)",
+                    rec.ticker, data["price"], rec.pnl_percent,
+                )
             elif data["price"] >= rec.stop_loss:
                 rec.status = "STOP_HIT"
                 rec.closed_at = datetime.now()
                 rec.closed_price = data["price"]
                 rec.pnl_percent = ((rec.entry_price - data["price"]) / rec.entry_price) * 100
-                logger.info("STOP HIT (SHORT): %s at %.2f (%.1f%%)", rec.ticker, data["price"], rec.pnl_percent)
+                logger.info(
+                    "STOP HIT (SHORT): %s at %.2f (%.1f%%)",
+                    rec.ticker, data["price"], rec.pnl_percent,
+                )
 
     db.commit()
 

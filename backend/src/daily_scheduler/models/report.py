@@ -25,6 +25,6 @@ class Report(Base):
         DateTime, server_default=func.now(), nullable=False
     )
 
-    recommendations: Mapped[list["Recommendation"]] = relationship(  # noqa: F821
+    recommendations: Mapped[list[Recommendation]] = relationship(  # noqa: F821
         back_populates="report", cascade="all, delete-orphan"
     )

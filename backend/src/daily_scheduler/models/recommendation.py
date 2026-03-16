@@ -37,4 +37,4 @@ class Recommendation(Base):
         DateTime, server_default=func.now(), nullable=False
     )
 
-    report: Mapped["Report"] = relationship(back_populates="recommendations")  # noqa: F821
+    report: Mapped[Report] = relationship(back_populates="recommendations")  # noqa: F821

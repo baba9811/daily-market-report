@@ -49,7 +49,12 @@ def build_daily_context(db: Session, today: date | None = None) -> str:
     worst = min(closed_recs, key=lambda r: r.pnl_percent, default=None)
 
     # Sector breakdown
-    sector_stats: dict[str, dict[str, float]] = defaultdict(lambda: {"wins": 0, "losses": 0, "total_pnl": 0, "count": 0})
+    def _default_sector_stats() -> dict[str, float]:
+        return {"wins": 0, "losses": 0, "total_pnl": 0, "count": 0}
+
+    sector_stats: dict[str, dict[str, float]] = defaultdict(
+        _default_sector_stats,
+    )
     for r in closed_recs:
         sector = r.sector or "Other"
         sector_stats[sector]["count"] += 1
@@ -118,14 +123,30 @@ def build_daily_context(db: Session, today: date | None = None) -> str:
     ])
 
     # Recent detail table
-    lines.extend(["", "### Recent 7-Day Recommendations", "| Date | Stock | Direction | Entry | Target | Current | P&L | Status |", "|------|-------|-----------|-------|--------|---------|-----|--------|"])
+    lines.extend([
+        "",
+        "### Recent 7-Day Recommendations",
+        "| Date | Stock | Direction | Entry | Target"
+        " | Current | P&L | Status |",
+        "|------|-------|-----------|-------|--------"
+        "|---------|-----|--------|",
+    ])
     for r in sorted(recent_recs, key=lambda x: x.created_at, reverse=True)[:15]:
         pnl_str = f"{r.pnl_percent:+.1f}%" if r.pnl_percent is not None else "-"
         current_str = f"{r.current_price:,.0f}" if r.current_price else "-"
-        status_map = {"OPEN": "Open", "TARGET_HIT": "Target Hit", "STOP_HIT": "Stop Hit", "EXPIRED": "Expired"}
+        status_map = {
+            "OPEN": "Open",
+            "TARGET_HIT": "Target Hit",
+            "STOP_HIT": "Stop Hit",
+            "EXPIRED": "Expired",
+        }
+        direction = "Buy" if r.direction == "LONG" else "Sell"
+        date_str = r.created_at.strftime("%m-%d")
+        status = status_map.get(r.status, r.status)
         lines.append(
-            f"| {r.created_at.strftime('%m-%d')} | {r.name} | {'Buy' if r.direction == 'LONG' else 'Sell'} | "
-            f"{r.entry_price:,.0f} | {r.target_price:,.0f} | {current_str} | {pnl_str} | {status_map.get(r.status, r.status)} |"
+            f"| {date_str} | {r.name} | {direction} | "
+            f"{r.entry_price:,.0f} | {r.target_price:,.0f} | "
+            f"{current_str} | {pnl_str} | {status} |"
         )
 
     # Auto-derived lessons
@@ -135,15 +156,29 @@ def build_daily_context(db: Session, today: date | None = None) -> str:
         if count >= 3:
             sr = stats["wins"] / count * 100
             if sr < 30:
-                lines.append(f"- Warning: {sector} sector win rate is {sr:.0f}%, very low. Reduce exposure or use more conservative approach.")
+                lines.append(
+                    f"- Warning: {sector} sector win rate is"
+                    f" {sr:.0f}%, very low. Reduce exposure"
+                    " or use more conservative approach."
+                )
             elif sr >= 70:
-                lines.append(f"- Tip: {sector} sector win rate is {sr:.0f}%, excellent. Consider increasing allocation to this sector.")
+                lines.append(
+                    f"- Tip: {sector} sector win rate is"
+                    f" {sr:.0f}%, excellent. Consider increasing"
+                    " allocation to this sector."
+                )
 
     if day_recs and swing_recs:
         if swing_win_rate > day_win_rate + 10:
-            lines.append(f"- Tip: Swing trading ({swing_win_rate:.0f}%) outperforms day trading ({day_win_rate:.0f}%).")
+            lines.append(
+                f"- Tip: Swing trading ({swing_win_rate:.0f}%)"
+                f" outperforms day trading ({day_win_rate:.0f}%)."
+            )
         elif day_win_rate > swing_win_rate + 10:
-            lines.append(f"- Tip: Day trading ({day_win_rate:.0f}%) outperforms swing trading ({swing_win_rate:.0f}%).")
+            lines.append(
+                f"- Tip: Day trading ({day_win_rate:.0f}%)"
+                f" outperforms swing trading ({swing_win_rate:.0f}%)."
+            )
 
     context = "\n".join(lines)
 
@@ -166,7 +201,6 @@ def build_weekly_analysis(db: Session, today: date | None = None) -> WeeklyAnaly
     """Build comprehensive weekly analysis for Monday reports."""
     today = today or date.today()
     week_start = today - timedelta(days=today.weekday())  # Monday
-    week_end = week_start + timedelta(days=6)  # Sunday
     prev_week_start = week_start - timedelta(days=7)
 
     recs = (
@@ -194,7 +228,12 @@ def build_weekly_analysis(db: Session, today: date | None = None) -> WeeklyAnaly
     worst = min(closed, key=lambda r: r.pnl_percent or 0, default=None)
 
     # Sector breakdown
-    sector_data: dict[str, dict[str, float]] = defaultdict(lambda: {"wins": 0, "losses": 0, "avg_return": 0, "count": 0})
+    def _default_sector_data() -> dict[str, float]:
+        return {"wins": 0, "losses": 0, "avg_return": 0, "count": 0}
+
+    sector_data: dict[str, dict[str, float]] = defaultdict(
+        _default_sector_data,
+    )
     for r in closed:
         s = r.sector or "Other"
         sector_data[s]["count"] += 1

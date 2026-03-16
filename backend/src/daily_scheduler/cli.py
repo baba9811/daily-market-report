@@ -26,7 +26,11 @@ def setup_logging(verbose: bool = False) -> None:
 
 
 @app.command()
-def run(verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose logging")) -> None:
+def run(
+    verbose: bool = typer.Option(
+        False, "--verbose", "-v", help="Enable verbose logging"
+    ),
+) -> None:
     """Run the daily report pipeline."""
     setup_logging(verbose)
     from daily_scheduler.database import get_session_factory
@@ -132,7 +136,10 @@ def check() -> None:
     if db_path.exists():
         console.print(f"[green]Database:[/green] {db_path}")
     else:
-        console.print(f"[yellow]Database:[/yellow] Not found at {db_path}. Run 'daily-scheduler init-db'")
+        console.print(
+            f"[yellow]Database:[/yellow] Not found at {db_path}."
+            " Run 'daily-scheduler init-db'"
+        )
         all_ok = False
 
     # Summary

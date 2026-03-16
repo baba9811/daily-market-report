@@ -9,7 +9,7 @@ import re
 logger = logging.getLogger(__name__)
 
 REC_PATTERN = re.compile(
-    r"<!--\s*REC_START\s*\n(.*?)\nREC_END\s*-->",
+    r"<!--\s*REC_START\s*(.*?)\s*REC_END\s*-->",
     re.DOTALL,
 )
 
@@ -55,7 +55,7 @@ def extract_html_report(raw_output: str) -> str:
 
     # Wrap plain text in basic HTML
     return f"""<!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head><meta charset="utf-8"><title>Daily Report</title></head>
 <body>{raw_output}</body>
 </html>"""

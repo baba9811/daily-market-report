@@ -8,7 +8,14 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from daily_scheduler.routers import dashboard, performance, pipeline, reports, retrospective, settings
+from daily_scheduler.routers import (
+    dashboard,
+    performance,
+    pipeline,
+    reports,
+    retrospective,
+    settings,
+)
 
 
 def create_app() -> FastAPI:

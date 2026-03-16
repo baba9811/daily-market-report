@@ -158,7 +158,11 @@ def run_weekly_pipeline(db: Session, today: date | None = None) -> bool:
         # Build weekly prompt
         prompt = build_weekly_prompt(
             today,
-            weekly_stats=f"Wins: {analysis.win_count}, Losses: {analysis.loss_count}, Avg return: {analysis.avg_return_pct:.1f}%",
+            weekly_stats=(
+                f"Wins: {analysis.win_count},"
+                f" Losses: {analysis.loss_count},"
+                f" Avg return: {analysis.avg_return_pct:.1f}%"
+            ),
             detailed_performance=analysis.sector_breakdown,
         )
 
