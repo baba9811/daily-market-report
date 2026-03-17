@@ -6,12 +6,12 @@ from alembic import context
 from sqlalchemy import engine_from_config, pool
 
 from daily_scheduler.database import Base
-from daily_scheduler.models import (  # noqa: F401 — ensure models are registered
-    PriceSnapshot,
-    Recommendation,
-    Report,
-    Retrospective,
-    WeeklyAnalysis,
+from daily_scheduler.infrastructure.adapters.persistence.models import (  # noqa: F401
+    PriceSnapshotModel,
+    RecommendationModel,
+    ReportModel,
+    RetrospectiveModel,
+    WeeklyAnalysisModel,
 )
 
 config = context.config

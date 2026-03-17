@@ -3,13 +3,22 @@ set -euo pipefail
 
 # ============================================================
 # Daily Scheduler - Run Daily Pipeline
-# Triggered by macOS launchd or manually
+# Triggered by macOS launchd, Linux cron, or manually
 # ============================================================
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 LOG_DIR="$PROJECT_DIR/logs"
 LOG_FILE="$LOG_DIR/scheduler.log"
+
+# Load user PATH (cron runs with minimal PATH)
+if [ -f "$HOME/.profile" ]; then
+    . "$HOME/.profile"
+fi
+if [ -f "$HOME/.bashrc" ]; then
+    . "$HOME/.bashrc"
+fi
+export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
 
 mkdir -p "$LOG_DIR"
 

@@ -1,5 +1,7 @@
-.PHONY: all setup dev dev-backend dev-frontend test lint format generate-types build run serve check \
-	scheduler-install scheduler-uninstall scheduler-status scheduler-start scheduler-stop clean help
+.PHONY: all setup dev linux dev-linux dev-backend dev-frontend test lint format generate-types build run serve check \
+	scheduler-install scheduler-uninstall scheduler-status scheduler-start scheduler-stop \
+	scheduler-linux-install scheduler-linux-uninstall scheduler-linux-status scheduler-linux-start scheduler-linux-stop \
+	clean help
 
 # ============================================================
 # Daily Scheduler - Development Commands
@@ -23,6 +25,19 @@ dev: ## Start backend + frontend + scheduler
 	@bash scheduler/install.sh
 	@trap 'echo ""; echo "Stopping scheduler..."; \
 		launchctl unload $(HOME)/Library/LaunchAgents/com.dailyscheduler.report.plist 2>/dev/null; \
+		echo "All services stopped."' INT TERM; \
+		$(MAKE) -j2 dev-backend dev-frontend; \
+		wait
+
+linux: dev-linux ## Alias for dev-linux
+
+dev-linux: ## Start backend + frontend + scheduler (Linux/WSL2, uses cron)
+	@echo "Starting backend on http://localhost:8000"
+	@echo "Starting frontend on http://localhost:3000"
+	@echo "Starting scheduler (cron)..."
+	@bash scheduler/install-linux.sh
+	@trap 'echo ""; echo "Stopping scheduler..."; \
+		bash scheduler/uninstall-linux.sh; \
 		echo "All services stopped."' INT TERM; \
 		$(MAKE) -j2 dev-backend dev-frontend; \
 		wait
@@ -87,6 +102,22 @@ scheduler-start: ## Manually trigger scheduler now
 scheduler-stop: ## Unload scheduler (stop scheduled runs)
 	launchctl unload $(HOME)/Library/LaunchAgents/com.dailyscheduler.report.plist 2>/dev/null || true
 	@echo "Scheduler stopped."
+
+scheduler-linux-install: ## Install & load cron scheduler (Linux)
+	bash scheduler/install-linux.sh
+
+scheduler-linux-uninstall: ## Unload & remove cron scheduler (Linux)
+	bash scheduler/uninstall-linux.sh
+
+scheduler-linux-status: ## Show cron scheduler status (Linux)
+	@crontab -l 2>/dev/null | grep "daily-scheduler" || echo "Scheduler is not loaded."
+
+scheduler-linux-start: ## Manually trigger scheduler now (Linux)
+	bash scheduler/run_daily.sh
+	@echo "Scheduler triggered."
+
+scheduler-linux-stop: ## Remove cron scheduler (Linux)
+	bash scheduler/uninstall-linux.sh
 
 clean: ## Remove all generated files
 	rm -rf backend/.venv frontend/node_modules frontend/.next
