@@ -3,6 +3,7 @@
 ## Project Overview
 Daily Scheduler: AI-powered daily news & trading report system with self-improving retrospective.
 Open-source (Apache 2.0) monorepo with Python backend and Next.js frontend.
+- **Intent Specification**: See [SPEC.md](SPEC.md) for system behaviors and acceptance criteria
 
 ## Architecture
 - **Backend**: Hexagonal Architecture (Ports & Adapters) with Python + FastAPI + uv
