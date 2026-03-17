@@ -5,7 +5,7 @@ Edit this file to adjust behavior without touching .env or Settings.
 """
 
 # ── Claude CLI ───────────────────────────────────────────────
-CLAUDE_TIMEOUT_SECONDS = 600  # Max wait for a single Claude CLI call
+CLAUDE_TIMEOUT_SECONDS = 1200  # Max wait for a single Claude CLI call (20 min)
 CLAUDE_RETRY_COUNT = 2  # Number of attempts (1 = no retry)
 CLAUDE_RETRY_DELAY_SECONDS = 30  # Wait between retries
 
