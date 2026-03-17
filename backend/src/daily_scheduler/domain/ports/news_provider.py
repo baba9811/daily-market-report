@@ -16,6 +16,7 @@ class NewsProviderPort(ABC):
         retrospective_context: str,
         weekly_lessons: str = "",
         market_data: str = "",
+        screening_data: str = "",
     ) -> tuple[str, float]:
         """Generate a daily report.
 
@@ -24,6 +25,7 @@ class NewsProviderPort(ABC):
             retrospective_context: Past recommendation performance data.
             weekly_lessons: Weekly analysis text (Mondays only).
             market_data: Pre-fetched real-time market data text.
+            screening_data: Pre-screened stock universe with fundamentals/technicals.
 
         Returns (raw_response, generation_time_seconds).
         """

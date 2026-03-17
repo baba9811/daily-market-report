@@ -28,11 +28,13 @@ class TestBuildPrompts:
             "retro context",
             "weekly lessons",
             "KOSPI: 2650.00",
+            "| NVDA | NVIDIA | 181.00 |",
         )
         assert "2026-03-17" in prompt
         assert "retro context" in prompt
         assert "weekly lessons" in prompt
         assert "KOSPI: 2650.00" in prompt
+        assert "NVDA" in prompt
 
     def test_build_weekly_prompt(self):
         provider = ClaudeNewsProvider(_make_settings())

@@ -15,7 +15,18 @@ Your analysis MUST be investment-grade: thorough, data-driven, and actionable. E
 ## PRE-FETCHED REAL-TIME MARKET DATA
 {{ market_data }}
 
-These prices are VERIFIED from yfinance. Use them as your baseline. For any additional stocks, verify current prices via WebSearch.
+These prices are VERIFIED from yfinance. Use them as your baseline.
+
+---
+
+## PRE-SCREENED STOCK UNIVERSE (verified prices + fundamentals + technicals)
+{{ screening_data }}
+
+CRITICAL: These are REAL prices and metrics fetched from yfinance moments ago.
+- entry_price in your recommendations MUST use these exact prices (±0.5%)
+- Use the RSI, MACD, P/E, P/B, ROE data to inform your analysis
+- DO NOT guess or hallucinate prices — the data above is authoritative
+- You may search for additional stocks not in this list, but verify prices via WebSearch
 
 ---
 
@@ -129,8 +140,7 @@ For each major news:
 {% endif %}
 
 ### Each recommendation MUST include:
-- Verified current price (from market data above or WebSearch)
-- entry_price within ±0.5% of actual market price
+- entry_price: USE THE EXACT PRICE from the screened stock data above (±0.5%)
 - target_price: SWING 3-8%, DAY 1-3% from entry
 - stop_loss: SWING 2-4%, DAY 1-2% from entry
 - risk_reward_ratio: calculated as (target - entry) / (entry - stop_loss)
@@ -138,12 +148,40 @@ For each major news:
 - Causal chain summary
 - Confidence level: "high" (multiple confirming signals), "medium" (mixed), "low" (speculative)
 
+### Stock Selection Criteria (DO NOT just pick blue-chip stocks):
+Use the screening data above to find stocks with ACTIONABLE setups:
+
+**Value + Catalyst (best for SWING):**
+- Low P/E or P/B relative to sector peers
+- RSI < 40 (oversold) with a positive catalyst approaching
+- Price near 52-week low but fundamentals improving
+- Example: stock dropped 20% from 52w high, but P/E still reasonable + positive news
+
+**Momentum + Breakout (best for DAY/SWING):**
+- Volume ratio > 1.5x (unusual institutional activity)
+- MACD bullish crossover just occurred
+- RSI 50-65 (strong but not overbought)
+- Price just crossed above SMA50
+
+**Contrarian (high risk/reward):**
+- Sector heavily sold off but no fundamental reason to be this cheap
+- Stocks with negative sentiment but strong balance sheet (low D/E, high ROE)
+- Mean reversion candidates near 52-week lows
+
+**AVOID these patterns:**
+- Stocks already at 52-week highs with RSI > 70 (overbought blue chips)
+- Low volume ratio (< 0.8x) — no institutional interest
+- P/E > 40 without exceptional growth to justify it
+- Recommending the same obvious mega-caps (Samsung, NVIDIA, Apple) every day
+  unless there is a SPECIFIC new catalyst
+
 ### Investment-Grade Criteria:
-- Each trade must have a clear catalyst within the next 1-14 days
+- Each trade MUST have a clear catalyst within the next 1-14 days
 - Risk/reward ratio MUST be >= 1.5
-- Avoid stocks with upcoming binary events (earnings) unless explicitly hedged
-- Consider correlation — don't recommend 5 stocks all in the same sector
+- At least 2 recommendations should be mid-cap or non-obvious picks
+- Maximum 2 picks per sector — diversify across sectors
 - Factor in current market regime (VIX level, trend, sector rotation)
+- Consider correlation — don't recommend stocks that all move the same way
 
 ---
 

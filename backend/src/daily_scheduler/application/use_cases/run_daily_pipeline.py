@@ -98,30 +98,36 @@ class RunDailyPipeline:
             return False
 
     def _run(self, today: date) -> bool:
-        # Step 1: Check recommendations (expiry, target/stop)
-        logger.info("Step 1/8: Checking recommendations...")
-        checker = CheckRecommendations(
-            self._rec_repo,
-            self._finance,
-        )
-        checker.execute()
+        steps = [
+            "Check recommendations",
+            "Update prices",
+            "Build retrospective",
+            "Fetch market data",
+            "Screen stock universe",
+            "Generate report",
+            "Parse report",
+            "Save report",
+            "Send email",
+        ]
+        total = len(steps)
 
-        # Step 2: Update prices for open recommendations
-        logger.info("Step 2/8: Updating prices...")
-        updater = UpdatePrices(
-            self._rec_repo,
-            self._price_repo,
-            self._finance,
-        )
-        updated = updater.execute()
+        def _step(idx: int) -> str:
+            return f"Step {idx}/{total}: {steps[idx - 1]}"
+
+        # 1. Check recommendations (expiry, target/stop)
+        logger.info(_step(1))
+        CheckRecommendations(self._rec_repo, self._finance).execute()
+
+        # 2. Update prices for open recommendations
+        logger.info(_step(2))
+        updated = UpdatePrices(self._rec_repo, self._price_repo, self._finance).execute()
         logger.info("Updated %d recommendations", updated)
 
-        # Step 3: Build retrospective context
-        logger.info("Step 3/8: Building retrospective context...")
+        # 3. Build retrospective context
+        logger.info(_step(3))
         retro_builder = BuildRetrospective(self._rec_repo)
         retro_context, _retro = retro_builder.build_daily_context(today)
 
-        # Step 3b: Weekly lessons on Monday
         weekly_lessons = ""
         if today.weekday() == 0:
             analysis = retro_builder.build_weekly_analysis(today)
@@ -129,13 +135,12 @@ class RunDailyPipeline:
                 weekly_lessons = analysis.analysis_text
                 logger.info("Weekly analysis built for week of %s", analysis.week_start)
 
-        # Step 4: Fetch real-time market data
-        logger.info("Step 4/8: Fetching real-time market data...")
-        market_fetcher = FetchMarketData(self._finance)
-        market_ctx = market_fetcher.execute()
+        # 4. Fetch real-time market data
+        logger.info(_step(4))
+        market_ctx = FetchMarketData(self._finance).execute()
         market_data_text = market_ctx.to_prompt_text()
         logger.info(
-            "Market data: %d indices, %d FX, %d commodities, %d futures, VIX=%s, %d sector ETFs",
+            "Market data: %d indices, %d FX, %d commodities, %d futures, VIX=%s, %d ETFs",
             len(market_ctx.indices),
             len(market_ctx.fx_rates),
             len(market_ctx.commodities),
@@ -144,13 +149,27 @@ class RunDailyPipeline:
             len(market_ctx.sector_etfs),
         )
 
-        # Step 5: Generate report via Claude (JSON output)
-        logger.info("Step 5/8: Generating report via Claude...")
+        # 5. Screen stock universe
+        logger.info(_step(5))
+        from daily_scheduler.application.use_cases.screen_stocks import ScreenStocks
+
+        screening_result = ScreenStocks().execute()
+        screening_text = screening_result.to_prompt_text()
+        logger.info(
+            "Screened %d KR + %d US stocks (%d errors)",
+            len(screening_result.kr_stocks),
+            len(screening_result.us_stocks),
+            screening_result.screening_errors,
+        )
+
+        # 6. Generate report via Claude (JSON output)
+        logger.info(_step(6))
         raw_response, gen_time = self._news.generate_daily_report(
             today,
             retro_context,
             weekly_lessons,
             market_data=market_data_text,
+            screening_data=screening_text,
         )
 
         if not raw_response:
@@ -158,18 +177,18 @@ class RunDailyPipeline:
             self._email.send_error("Claude CLI returned empty response for daily report.")
             return False
 
-        # Step 6: Parse response (JSON → HTML, with legacy fallback)
-        logger.info("Step 6/8: Parsing report...")
+        # 7. Parse response (JSON → HTML, with legacy fallback)
+        logger.info(_step(7))
         html_content, summary, rec_data = self._parse_response(raw_response, market_ctx)
 
-        # Step 7: Save report + recommendations
-        logger.info("Step 7/8: Saving report...")
+        # 8. Save report + recommendations
+        logger.info(_step(8))
         saved_report = self._save_report(today, html_content, summary, raw_response, gen_time)
         self._save_recommendations(saved_report.id, rec_data)  # type: ignore[arg-type]
         self._save_html(today, html_content)
 
-        # Step 8: Send email
-        logger.info("Step 8/8: Sending email...")
+        # 9. Send email
+        logger.info(_step(9))
         email_sent = self._email.send(
             f"[{today}] Daily News & Trading Report",
             html_content,
