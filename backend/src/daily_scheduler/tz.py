@@ -35,3 +35,13 @@ def combine(d: date, t: time | None = None) -> datetime:
     """
     t = t or time.min
     return datetime.combine(d, t, tzinfo=_tz())
+
+
+def localize(dt: datetime) -> datetime:
+    """Attach configured timezone to a naive datetime.
+
+    If already timezone-aware, return as-is.
+    """
+    if dt.tzinfo is not None:
+        return dt
+    return dt.replace(tzinfo=_tz())

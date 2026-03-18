@@ -32,6 +32,7 @@ from daily_scheduler.domain.entities.retrospective import (
 from daily_scheduler.domain.entities.retrospective import (
     WeeklyAnalysis as WeeklyEntity,
 )
+from daily_scheduler.tz import localize as _localize
 
 
 class ReportModel(Base):
@@ -88,7 +89,7 @@ class ReportModel(Base):
             prompt_used=self.prompt_used,
             raw_response=self.raw_response,
             generation_time_s=self.generation_time_s,
-            created_at=self.created_at,
+            created_at=_localize(self.created_at),
         )
 
     @staticmethod
@@ -191,10 +192,10 @@ class RecommendationModel(Base):
             sector=self.sector,
             current_price=self.current_price,
             status=self.status,
-            closed_at=self.closed_at,
+            closed_at=_localize(self.closed_at) if self.closed_at else None,
             closed_price=self.closed_price,
             pnl_percent=self.pnl_percent,
-            created_at=self.created_at,
+            created_at=_localize(self.created_at),
         )
 
     @staticmethod
@@ -284,7 +285,7 @@ class PriceSnapshotModel(Base):
             high=self.high,
             low=self.low,
             volume=self.volume,
-            created_at=self.created_at,
+            created_at=_localize(self.created_at),
         )
 
     @staticmethod
@@ -356,7 +357,7 @@ class RetrospectiveModel(Base):
             stops_hit=self.stops_hit,
             expired_count=self.expired_count,
             context_block=self.context_block,
-            created_at=self.created_at,
+            created_at=_localize(self.created_at),
         )
 
     @staticmethod
@@ -449,7 +450,7 @@ class WeeklyAnalysisModel(Base):
             sector_breakdown=self.sector_breakdown,
             analysis_text=self.analysis_text,
             lessons=self.lessons,
-            created_at=self.created_at,
+            created_at=_localize(self.created_at),
         )
 
     @staticmethod
