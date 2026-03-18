@@ -61,7 +61,7 @@ echo ""
 # Unload existing job if present
 if launchctl list | grep -q "com.dailyscheduler.report"; then
     echo "Unloading existing job..."
-    launchctl unload "$PLIST_DEST" 2>/dev/null || true
+    launchctl bootout "gui/$(id -u)/com.dailyscheduler.report" 2>/dev/null || true
 fi
 
 # Generate plist from template
@@ -80,7 +80,7 @@ mkdir -p "$PROJECT_DIR/logs"
 
 # Load the job
 echo "Loading launchd job..."
-launchctl load "$PLIST_DEST"
+launchctl bootstrap "gui/$(id -u)" "$PLIST_DEST"
 
 # Verify
 echo ""
@@ -94,7 +94,7 @@ if launchctl list | grep -q "com.dailyscheduler.report"; then
     echo ""
     echo "Commands:"
     echo "   Start now:  launchctl start com.dailyscheduler.report"
-    echo "   Unload:     launchctl unload $PLIST_DEST"
+    echo "   Unload:     launchctl bootout gui/\$(id -u)/com.dailyscheduler.report"
     echo "   View logs:  tail -f $PROJECT_DIR/logs/scheduler.log"
 else
     echo "❌ Failed to install scheduler. Check the logs."

@@ -24,7 +24,7 @@ dev: ## Start backend + frontend + scheduler
 	@echo "Starting scheduler (launchd)..."
 	@bash scheduler/install.sh
 	@trap 'echo ""; echo "Stopping scheduler..."; \
-		launchctl unload $(HOME)/Library/LaunchAgents/com.dailyscheduler.report.plist 2>/dev/null; \
+		launchctl bootout gui/$$(id -u)/com.dailyscheduler.report 2>/dev/null; \
 		echo "All services stopped."' INT TERM; \
 		$(MAKE) -j2 dev-backend dev-frontend; \
 		wait
@@ -88,7 +88,7 @@ scheduler-install: ## Install & load launchd scheduler
 	bash scheduler/install.sh
 
 scheduler-uninstall: ## Unload & remove launchd scheduler
-	launchctl unload $(HOME)/Library/LaunchAgents/com.dailyscheduler.report.plist 2>/dev/null || true
+	launchctl bootout gui/$$(id -u)/com.dailyscheduler.report 2>/dev/null || true
 	rm -f $(HOME)/Library/LaunchAgents/com.dailyscheduler.report.plist
 	@echo "Scheduler uninstalled."
 
@@ -100,7 +100,7 @@ scheduler-start: ## Manually trigger scheduler now
 	@echo "Scheduler triggered."
 
 scheduler-stop: ## Unload scheduler (stop scheduled runs)
-	launchctl unload $(HOME)/Library/LaunchAgents/com.dailyscheduler.report.plist 2>/dev/null || true
+	launchctl bootout gui/$$(id -u)/com.dailyscheduler.report 2>/dev/null || true
 	@echo "Scheduler stopped."
 
 scheduler-linux-install: ## Install & load cron scheduler (Linux)
