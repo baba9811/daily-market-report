@@ -14,7 +14,7 @@ from daily_scheduler.application.use_cases.run_daily_pipeline import (
     RunDailyPipeline,
 )
 from daily_scheduler.application.use_cases.run_news_pipeline import (
-    RunNewsPipeline,
+    RunNewsBriefingPipeline,
 )
 from daily_scheduler.application.use_cases.run_weekly_pipeline import (
     RunWeeklyPipeline,
@@ -131,12 +131,29 @@ def get_check_recommendations(
     )
 
 
-def get_news_pipeline(db: Session) -> RunNewsPipeline:
-    """Wire adapters into the news briefing pipeline use case."""
-    return RunNewsPipeline(
+def get_news_pipeline(db: Session) -> RunNewsBriefingPipeline:
+    """Wire adapters into the Korean news briefing pipeline use case."""
+    news_provider = get_news_provider()
+    return RunNewsBriefingPipeline(
         report_repo=get_report_repo(db),
-        news=get_news_provider(),
+        generate_briefing=news_provider.generate_news_briefing,
         email=get_email_sender(),
+        report_type="news",
+        email_subject_label="Korean News Briefing",
+        html_filename_suffix="news",
+    )
+
+
+def get_global_news_pipeline(db: Session) -> RunNewsBriefingPipeline:
+    """Wire adapters into the global news briefing pipeline use case."""
+    news_provider = get_news_provider()
+    return RunNewsBriefingPipeline(
+        report_repo=get_report_repo(db),
+        generate_briefing=news_provider.generate_global_news_briefing,
+        email=get_email_sender(),
+        report_type="global_news",
+        email_subject_label="Global News Briefing",
+        html_filename_suffix="global_news",
     )
 
 

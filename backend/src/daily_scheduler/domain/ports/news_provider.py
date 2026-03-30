@@ -51,3 +51,13 @@ class NewsProviderPort(ABC):
 
         Returns (raw_response, generation_time_seconds).
         """
+
+    @abstractmethod
+    def generate_global_news_briefing(
+        self,
+        report_date: date,
+    ) -> tuple[str, float]:
+        """Generate an international/global news briefing.
+
+        Returns (raw_response, generation_time_seconds).
+        """

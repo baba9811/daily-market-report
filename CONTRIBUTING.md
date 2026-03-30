@@ -15,8 +15,8 @@
 ### 설치
 
 ```bash
-git clone https://github.com/baba9811/daily-market-report.git
-cd daily-market-report
+git clone https://github.com/baba9811/daily-news-report.git
+cd daily-news-report
 cp .env.example .env    # 인증 정보 입력
 make setup              # 전체 의존성 설치 + DB 초기화
 ```
