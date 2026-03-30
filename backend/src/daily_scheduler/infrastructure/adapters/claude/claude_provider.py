@@ -67,6 +67,14 @@ class ClaudeNewsProvider(NewsProviderPort):
         )
         return self._call_claude(prompt)
 
+    def generate_news_briefing(
+        self,
+        report_date: date,
+    ) -> tuple[str, float]:
+        """Generate a Korean domestic news/events briefing via Claude CLI."""
+        prompt = self._build_news_prompt(report_date)
+        return self._call_claude(prompt)
+
     def _build_daily_prompt(
         self,
         report_date: date,
@@ -84,6 +92,18 @@ class ClaudeNewsProvider(NewsProviderPort):
             weekly_lessons=weekly_lessons,
             market_data=market_data,
             screening_data=screening_data,
+            language=self._settings.report_language,
+        )
+
+    def _build_news_prompt(
+        self,
+        report_date: date,
+    ) -> str:
+        template = self._jinja.get_template(
+            "korean_news.j2",
+        )
+        return template.render(
+            date=report_date.isoformat(),
             language=self._settings.report_language,
         )
 

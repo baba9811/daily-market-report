@@ -13,6 +13,9 @@ from daily_scheduler.application.use_cases.check_recommendations import (
 from daily_scheduler.application.use_cases.run_daily_pipeline import (
     RunDailyPipeline,
 )
+from daily_scheduler.application.use_cases.run_news_pipeline import (
+    RunNewsPipeline,
+)
 from daily_scheduler.application.use_cases.run_weekly_pipeline import (
     RunWeeklyPipeline,
 )
@@ -125,6 +128,15 @@ def get_check_recommendations(
     return CheckRecommendations(
         rec_repo=get_rec_repo(db),
         finance=get_finance_provider(),
+    )
+
+
+def get_news_pipeline(db: Session) -> RunNewsPipeline:
+    """Wire adapters into the news briefing pipeline use case."""
+    return RunNewsPipeline(
+        report_repo=get_report_repo(db),
+        news=get_news_provider(),
+        email=get_email_sender(),
     )
 
 

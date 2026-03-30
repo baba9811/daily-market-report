@@ -105,13 +105,15 @@ class TestBuildWeeklyAnalysis:
 
     def test_builds_weekly_analysis_with_data(self):
         rec_repo = MagicMock()
-        last_week = tz.now() - timedelta(days=10)
+        monday = date(2026, 3, 16)
+        # created_at must fall within the previous week (3/9 ~ 3/16)
+        prev_week_date = tz.combine(monday - timedelta(days=4))
         recs = [
             _make_rec(
                 ticker="AAPL",
                 status="TARGET_HIT",
                 pnl_percent=10.0,
-                created_at=last_week,
+                created_at=prev_week_date,
                 sector="Tech",
             ),
             _make_rec(
@@ -119,14 +121,13 @@ class TestBuildWeeklyAnalysis:
                 ticker="TSLA",
                 status="STOP_HIT",
                 pnl_percent=-5.0,
-                created_at=last_week,
+                created_at=prev_week_date,
                 sector="Auto",
             ),
         ]
         rec_repo.get_by_period.return_value = recs
 
         builder = BuildRetrospective(rec_repo)
-        monday = date(2026, 3, 16)
         result = builder.build_weekly_analysis(monday)
 
         assert result is not None
