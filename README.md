@@ -18,7 +18,7 @@
 
 <br/>
 
-<img src="dashboard-screenshot.png" alt="Daily Scheduler 대시보드" width="720" />
+<img src="docs/assets/dashboard-screenshot.png" alt="Daily Scheduler 대시보드" width="720" />
 
 </div>
 

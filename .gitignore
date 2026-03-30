@@ -34,6 +34,7 @@ frontend/next-env.d.ts
 
 # === Screenshots ===
 *.png
+!docs/assets/*.png
 
 # === Logs ===
 logs/
