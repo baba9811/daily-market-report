@@ -12,6 +12,6 @@ class FinanceProviderPort(ABC):
     def fetch_price(self, ticker: str) -> dict[str, float | int] | None:
         """Fetch latest price data for a ticker.
 
-        Returns dict with keys: price, open_price, high, low, volume.
+        Returns dict with keys: price, open_price, prev_close, high, low, volume.
         Returns None on failure.
         """

@@ -28,9 +28,14 @@ class YFinanceProvider(FinanceProviderPort):
                 )
                 return None
             latest = hist.iloc[-1]
+            if len(hist) >= 2:
+                prev_close = float(hist.iloc[-2]["Close"])
+            else:
+                prev_close = float(latest["Open"])
             return {
                 "price": float(latest["Close"]),
                 "open_price": float(latest["Open"]),
+                "prev_close": prev_close,
                 "high": float(latest["High"]),
                 "low": float(latest["Low"]),
                 "volume": int(latest["Volume"]),

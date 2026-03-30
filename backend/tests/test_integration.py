@@ -64,6 +64,8 @@ class TestYFinanceIntegration:
         assert data is not None
         assert "price" in data
         assert data["price"] > 0
+        assert "prev_close" in data
+        assert data["prev_close"] > 0
         assert "volume" in data
 
     @pytest.mark.integration
@@ -74,6 +76,8 @@ class TestYFinanceIntegration:
 
         assert data is not None
         assert data["price"] > 0
+        assert "prev_close" in data
+        assert data["prev_close"] > 0
 
     @pytest.mark.integration
     def test_fetch_invalid_ticker_returns_none(self):

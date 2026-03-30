@@ -77,15 +77,15 @@ class FetchMarketData:
                 logger.warning("Failed to fetch index: %s (%s)", name, ticker)
                 continue
             price = data["price"]
-            open_price = data["open_price"]
-            change_pct = ((price - open_price) / open_price * 100) if open_price else 0.0
+            prev_close = data["prev_close"]
+            change_pct = ((price - prev_close) / prev_close * 100) if prev_close else 0.0
             ctx.indices.append(
                 IndexData(
                     name=name,
                     ticker=ticker,
                     price=round(price, 2),
                     change_percent=round(change_pct, 2),
-                    prev_close=round(open_price, 2),
+                    prev_close=round(prev_close, 2),
                 )
             )
 
@@ -112,8 +112,8 @@ class FetchMarketData:
                 logger.warning("Failed to fetch futures: %s (%s)", name, ticker)
                 continue
             price = data["price"]
-            open_price = data["open_price"]
-            change_pct = ((price - open_price) / open_price * 100) if open_price else 0.0
+            prev_close = data["prev_close"]
+            change_pct = ((price - prev_close) / prev_close * 100) if prev_close else 0.0
             ctx.futures.append(
                 FuturesData(
                     name=name,
@@ -137,8 +137,8 @@ class FetchMarketData:
                 logger.warning("Failed to fetch sector ETF: %s (%s)", name, ticker)
                 continue
             price = data["price"]
-            open_price = data["open_price"]
-            change_pct = ((price - open_price) / open_price * 100) if open_price else 0.0
+            prev_close = data["prev_close"]
+            change_pct = ((price - prev_close) / prev_close * 100) if prev_close else 0.0
             ctx.sector_etfs.append(
                 SectorETFData(
                     name=name,
