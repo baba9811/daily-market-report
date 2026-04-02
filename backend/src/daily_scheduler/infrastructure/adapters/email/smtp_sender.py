@@ -51,7 +51,6 @@ class SmtpEmailSender(EmailSenderPort):
             MIMEText(html_content, "html", "utf-8"),
         )
 
-
         for attempt in range(EMAIL_MAX_RETRIES):
             try:
                 with smtplib.SMTP(
