@@ -10,31 +10,34 @@
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688.svg)](https://fastapi.tiangolo.com)
 [![Claude](https://img.shields.io/badge/Powered_by-Claude_Code-cc785c.svg)](https://claude.ai)
 
-매일 아침 AI가 **국내 뉴스**, **해외 뉴스**, **트레이딩 리포트** 세 가지 파이프라인을 자동 실행합니다.<br/>
-실시간 웹 검색 기반 뉴스 브리핑과 시장 분석 리포트를 생성하여 이메일로 발송하고,<br/>
-과거 추천 성과를 추적하며 **스스로 학습하고 개선**합니다.
+바쁜 아침, 뉴스와 시장을 직접 확인할 시간이 부족하신가요?<br/>
+매일 아침 AI가 **국내 뉴스**, **해외 뉴스**, **트레이딩 리포트** 세 가지 파이프라인을 자동으로 실행하여<br/>
+실시간 웹 검색 기반 뉴스 브리핑과 시장 분석 리포트를 이메일로 보내드립니다.<br/>
+과거 추천 성과를 추적하며 **스스로 학습하고 개선**하는 시스템입니다.
 
 [주요 기능](#주요-기능) · [빠른 시작](#빠른-시작) · [대시보드](#대시보드) · [아키텍처](#아키텍처) · [기여하기](#기여하기)
 
 <br/>
 
-<img src="dashboard-screenshot.png" alt="Daily News Report Dashboard" width="720" />
+<img src="docs/assets/dashboard-screenshot.png" alt="Daily News Report Dashboard" width="720" />
 
 </div>
 
 ---
 
-## 주요 기능
+<a id="주요-기능"></a>
 
-### Triple Pipeline
+## 🚀 주요 기능
 
-| Pipeline | Schedule | Description |
+### 📋 트리플 파이프라인
+
+| 파이프라인 | 스케줄 | 설명 |
 |----------|----------|-------------|
-| **Global News Briefing** | 07:00 KST | 세계 정치, 글로벌 경제, 기술, 과학, 기후, 분쟁, 문화 등 7개 카테고리 해외 뉴스 |
-| **Korean News Briefing** | 07:15 KST | 정치, 경제, 사회, 기술, 문화, 국제, 오늘의 일정 등 7개 카테고리 국내 뉴스 |
-| **Trading Report** | 07:30 KST | 뉴스 기반 인과관계 분석 + 한국/미국 시장 트레이딩 추천 |
+| **해외 뉴스 브리핑** | 07:00 KST | 세계 정치, 글로벌 경제, 기술, 과학, 기후, 분쟁, 문화 등 7개 카테고리 해외 뉴스 |
+| **국내 뉴스 브리핑** | 07:15 KST | 정치, 경제, 사회, 기술, 문화, 국제, 오늘의 일정 등 7개 카테고리 국내 뉴스 |
+| **트레이딩 리포트** | 07:30 KST | 뉴스 기반 인과관계 분석 + 한국/미국 시장 트레이딩 추천 |
 
-### Core Features
+### ✨ 핵심 기능
 
 - **AI 뉴스 분석** — Claude Code CLI가 20+ 웹 검색으로 국내외 뉴스를 심층 분석
 - **트레이딩 리포트** — 인과관계 분석 (뉴스 → 직접 영향 → 파생 효과 → 투자 기회)
@@ -47,7 +50,7 @@
 - **다국어 지원** — 한국어, 영어, 일본어 (`REPORT_LANGUAGE`)
 
 <details>
-<summary><b>Features (English)</b></summary>
+<summary><b>🌏 Features (English)</b></summary>
 
 - **AI News Analysis** — Claude Code CLI performs 20+ web searches for in-depth news analysis
 - **Triple Pipeline** — Global news (07:00) → Korean news (07:15) → Trading report (07:30)
@@ -62,9 +65,11 @@
 
 </details>
 
-## 빠른 시작
+<a id="빠른-시작"></a>
 
-### 사전 요구사항
+## ⚡ 빠른 시작
+
+### 📌 사전 요구사항
 
 - Python 3.11+
 - [uv](https://docs.astral.sh/uv/) (Python 패키지 매니저)
@@ -182,7 +187,9 @@ make global-news-scheduler-linux-start
 | `NEWS_SCHEDULE_TIME` | `07:15` | 한국 뉴스 브리핑 (KST) |
 | `GLOBAL_NEWS_SCHEDULE_TIME` | `07:00` | 해외 뉴스 브리핑 (KST) |
 
-## 대시보드
+<a id="대시보드"></a>
+
+## 📊 대시보드
 
 `http://localhost:3000` 에서 웹 대시보드를 확인할 수 있습니다:
 
@@ -194,7 +201,9 @@ make global-news-scheduler-linux-start
 | **Retrospective** | 주간 종합 회고, 전략 조정 제안 |
 | **Settings** | 이메일, Claude 모델, 언어 설정, 시스템 상태 확인 |
 
-## 아키텍처
+<a id="아키텍처"></a>
+
+## 🏗️ 아키텍처
 
 ```mermaid
 graph TB
@@ -249,7 +258,7 @@ backend/src/daily_scheduler/
 └── constants.py      # 튜닝 가능한 상수 (타임아웃, 만료 기간 등)
 ```
 
-## 회고 시스템 동작 방식
+## 🔄 회고 시스템
 
 자기 개선 피드백 루프는 매일 실행됩니다:
 
@@ -268,7 +277,7 @@ backend/src/daily_scheduler/
 - 섹터별/전략별 승률 비교
 - 전략 조정 제안 및 교훈 도출
 
-## 프로젝트 구조
+## 📁 프로젝트 구조
 
 ```
 daily-news-report/
@@ -297,7 +306,7 @@ daily-news-report/
 └── DISCLAIMER.md            # 금융 데이터 & AI 면책 조항
 ```
 
-## 설정
+## ⚙️ 설정
 
 ### 환경 변수 (`.env`) — 시크릿 & 환경별 설정
 
@@ -327,7 +336,7 @@ daily-news-report/
 | `SWING_TRADE_EXPIRY_DAYS` | SWING 트레이드 자동 만료 | `14` |
 | `RETROSPECTIVE_LOOKBACK_DAYS` | 회고 분석 기간 | `30` |
 
-## 기술 스택
+## 🛠️ 기술 스택
 
 | 레이어 | 기술 |
 |--------|------|
@@ -339,7 +348,7 @@ daily-news-report/
 | **패키지 매니저** | uv (Python), Yarn Berry v4 (Frontend) |
 | **코드 품질** | ruff, pylint, pyrefly, mypy, ESLint, oxlint, pytest, Playwright |
 
-## 면책 조항
+## ⚠️ 면책 조항
 
 > **이 소프트웨어는 교육 및 연구 목적으로만 제공됩니다.**
 > AI가 생성한 트레이딩 추천은 투자 조언이 아니며, 금융 손실에 대한 책임은 사용자에게 있습니다.
@@ -347,21 +356,26 @@ daily-news-report/
 
 금융 데이터는 [yfinance](https://github.com/ranaroussi/yfinance)를 통해 수집됩니다. [Yahoo Finance 이용약관](https://legal.yahoo.com/us/en/yahoo/terms/product-atos/apitnc/index.html)을 준수해야 합니다.
 
-## 기여하기
+<a id="기여하기"></a>
 
-기여를 환영합니다! 개발 환경 설정 및 가이드라인은 [CONTRIBUTING.md](CONTRIBUTING.md)를 참조하세요.
+## 🤝 기여하기
 
-## 보안
+이 프로젝트에 관심을 가져주셔서 감사합니다!
+버그 리포트, 기능 제안, 코드 기여 등 어떤 형태의 참여든 큰 도움이 됩니다.
+개발 환경 설정 및 가이드라인은 [CONTRIBUTING.md](CONTRIBUTING.md)를 참조해 주세요.
+
+## 🔒 보안
 
 보안 취약점을 발견하셨다면 [SECURITY.md](SECURITY.md)를 참조하세요.
 
-## 라이선스
+## 📄 라이선스
 
 이 프로젝트는 [Apache License 2.0](LICENSE) 하에 배포됩니다.
 
 ---
 
 <div align="center">
+  <sub>이 프로젝트가 도움이 되셨다면 ⭐️ Star를 눌러주세요!</sub><br/>
   <sub>Built with Claude Code · FastAPI · Next.js · yfinance</sub>
 </div>
 
