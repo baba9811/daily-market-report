@@ -14,7 +14,7 @@ export default function ReportCard({ report }: ReportCardProps) {
       className="card card-hover flex items-center justify-between"
     >
       <div className="flex items-center gap-4">
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/20">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-500/20">
           <FileText size={20} className="text-blue-400" />
         </div>
         <div>
