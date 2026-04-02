@@ -1,19 +1,16 @@
-<div align="center">
-
 # Daily News Report
 
-**AI-powered daily news briefing & trading report system with self-improving retrospective**
+AI 기반 일일 뉴스 브리핑 및 트레이딩 리포트 시스템.
+과거 추천 성과를 추적하며 스스로 학습하고 개선합니다.
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Python](https://img.shields.io/badge/Python-3.11+-3776ab.svg)](https://www.python.org)
 [![Next.js](https://img.shields.io/badge/Next.js-15-000000.svg)](https://nextjs.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688.svg)](https://fastapi.tiangolo.com)
-[![Claude](https://img.shields.io/badge/Powered_by-Claude_Code-cc785c.svg)](https://claude.ai)
 
-바쁜 아침, 뉴스와 시장을 직접 확인할 시간이 부족하신가요?<br/>
-매일 아침 AI가 **국내 뉴스**, **해외 뉴스**, **트레이딩 리포트** 세 가지 파이프라인을 자동으로 실행하여<br/>
-실시간 웹 검색 기반 뉴스 브리핑과 시장 분석 리포트를 이메일로 보내드립니다.<br/>
-과거 추천 성과를 추적하며 **스스로 학습하고 개선**하는 시스템입니다.
+바쁜 아침, 뉴스와 시장을 직접 확인할 시간이 부족할 때를 위해 만들었습니다.
+매일 아침 AI가 국내 뉴스, 해외 뉴스, 트레이딩 리포트 세 가지 파이프라인을 자동 실행해서
+웹 검색 기반 뉴스 브리핑과 시장 분석 리포트를 이메일로 보내줍니다.
 
 [주요 기능](#주요-기능) · [빠른 시작](#빠른-시작) · [대시보드](#대시보드) · [아키텍처](#아키텍처) · [기여하기](#기여하기)
 
@@ -21,15 +18,13 @@
 
 <img src="docs/assets/dashboard-screenshot.png" alt="Daily News Report Dashboard" width="720" />
 
-</div>
-
 ---
 
 <a id="주요-기능"></a>
 
-## 🚀 주요 기능
+## 주요 기능
 
-### 📋 트리플 파이프라인
+### 트리플 파이프라인
 
 | 파이프라인 | 스케줄 | 설명 |
 |----------|----------|-------------|
@@ -37,9 +32,9 @@
 | **국내 뉴스 브리핑** | 07:15 KST | 정치, 경제, 사회, 기술, 문화, 국제, 오늘의 일정 등 7개 카테고리 국내 뉴스 |
 | **트레이딩 리포트** | 07:30 KST | 뉴스 기반 인과관계 분석 + 한국/미국 시장 트레이딩 추천 |
 
-### ✨ 핵심 기능
+### 핵심 기능
 
-- **AI 뉴스 분석** — Claude Code CLI가 20+ 웹 검색으로 국내외 뉴스를 심층 분석
+- **AI 뉴스 분석** — 20건 이상의 웹 검색으로 국내외 뉴스를 심층 분석
 - **트레이딩 리포트** — 인과관계 분석 (뉴스 → 직접 영향 → 파생 효과 → 투자 기회)
 - **듀얼 마켓** — 한국 (KOSPI/KOSDAQ) + 미국 (NYSE/NASDAQ) 주식 추천
 - **실시간 시세** — yfinance로 주요 지수/환율/원자재를 사전 수집
@@ -50,9 +45,9 @@
 - **다국어 지원** — 한국어, 영어, 일본어 (`REPORT_LANGUAGE`)
 
 <details>
-<summary><b>🌏 Features (English)</b></summary>
+<summary><b>Features (English)</b></summary>
 
-- **AI News Analysis** — Claude Code CLI performs 20+ web searches for in-depth news analysis
+- **AI News Analysis** — 20+ web searches for in-depth news analysis
 - **Triple Pipeline** — Global news (07:00) → Korean news (07:15) → Trading report (07:30)
 - **Causal Chain Analysis** — News → Direct Impact → Derived Effects → Investment Opportunities
 - **Dual Market Coverage** — Korean (KOSPI/KOSDAQ) + US (NYSE/NASDAQ)
@@ -67,14 +62,13 @@
 
 <a id="빠른-시작"></a>
 
-## ⚡ 빠른 시작
+## 빠른 시작
 
-### 📌 사전 요구사항
+### 사전 요구사항
 
 - Python 3.11+
 - [uv](https://docs.astral.sh/uv/) (Python 패키지 매니저)
 - Node.js 20+ & [Yarn Berry](https://yarnpkg.com/) (v4+)
-- [Claude Code CLI](https://claude.ai/code)
 - Gmail 계정 + [앱 비밀번호](https://myaccount.google.com/apppasswords)
 
 ### 1. 클론 & 설정
@@ -189,7 +183,7 @@ make global-news-scheduler-linux-start
 
 <a id="대시보드"></a>
 
-## 📊 대시보드
+## 대시보드
 
 `http://localhost:3000` 에서 웹 대시보드를 확인할 수 있습니다:
 
@@ -199,11 +193,11 @@ make global-news-scheduler-linux-start
 | **Reports** | 일일/주간/뉴스 리포트 열람 (검색 + 페이지네이션) |
 | **Performance** | 승률, P&L 타임시리즈 차트, 섹터별 성과 분석 |
 | **Retrospective** | 주간 종합 회고, 전략 조정 제안 |
-| **Settings** | 이메일, Claude 모델, 언어 설정, 시스템 상태 확인 |
+| **Settings** | 이메일, AI 모델, 언어 설정, 시스템 상태 확인 |
 
 <a id="아키텍처"></a>
 
-## 🏗️ 아키텍처
+## 아키텍처
 
 ```mermaid
 graph TB
@@ -218,15 +212,15 @@ graph TB
         R2 --> KN[Korean News Pipeline]
         R3 --> O[Trading Pipeline]
 
-        GN --> C1[Claude CLI<br/>해외 뉴스 검색]
-        KN --> C2[Claude CLI<br/>국내 뉴스 검색]
+        GN --> C1[AI 분석<br/>해외 뉴스 검색]
+        KN --> C2[AI 분석<br/>국내 뉴스 검색]
 
         O --> CK[Check Recommendations<br/>만료 + 목표가/손절가]
         O --> UP[Update Prices<br/>yfinance]
         O --> RT[Build Retrospective<br/>성과 추적]
         O --> MD[Fetch Market Data<br/>지수/환율/원자재]
         O --> SC[Screen Stocks<br/>펀더멘털 + 기술적 분석]
-        O --> C3[Claude CLI<br/>뉴스 검색 + 분석]
+        O --> C3[AI 분석<br/>뉴스 검색 + 리포트 생성]
 
         C1 --> PR[Parser + Save]
         C2 --> PR
@@ -246,19 +240,19 @@ graph TB
     Frontend -->|REST API| Backend
 ```
 
-**백엔드**는 [헥사고날 아키텍처](https://alistair.cockburn.us/hexagonal-architecture/) (Ports & Adapters)를 따릅니다:
+백엔드는 [헥사고날 아키텍처](https://alistair.cockburn.us/hexagonal-architecture/) (Ports & Adapters)를 따릅니다:
 
 ```
 backend/src/daily_scheduler/
 ├── domain/           # 엔티티, 포트(인터페이스) — 순수 비즈니스 로직
 ├── application/      # 유스케이스 (파이프라인, 회고, 시장 데이터)
-├── infrastructure/   # 어댑터 (yfinance, Claude CLI, SMTP, SQLAlchemy)
+├── infrastructure/   # 어댑터 (yfinance, AI, SMTP, SQLAlchemy)
 ├── entrypoints/      # API 라우트 (FastAPI), CLI 커맨드 (Typer)
 ├── templates/        # Jinja2 프롬프트 템플릿
 └── constants.py      # 튜닝 가능한 상수 (타임아웃, 만료 기간 등)
 ```
 
-## 🔄 회고 시스템
+## 회고 시스템
 
 자기 개선 피드백 루프는 매일 실행됩니다:
 
@@ -267,8 +261,8 @@ backend/src/daily_scheduler/
 2. 목표가/손절가 도달 여부 자동 체크 → 손익(P&L) 계산
 3. 30일 통계 생성: 승률, 섹터별 성과, 전략별(DAY/SWING) 비교
 4. 실시간 시세 수집 (지수, 환율, 원자재)
-5. 모든 컨텍스트를 Claude 프롬프트에 주입
-6. Claude가 뉴스 검색 → 인과관계 분석 → 파생효과 분석 → 추천 생성
+5. 모든 컨텍스트를 AI 프롬프트에 주입
+6. AI가 뉴스 검색 → 인과관계 분석 → 파생효과 분석 → 추천 생성
 7. 새 추천 → 다음날 성과 추적 → 피드백 루프 반복
 ```
 
@@ -277,7 +271,7 @@ backend/src/daily_scheduler/
 - 섹터별/전략별 승률 비교
 - 전략 조정 제안 및 교훈 도출
 
-## 📁 프로젝트 구조
+## 프로젝트 구조
 
 ```
 daily-news-report/
@@ -285,7 +279,7 @@ daily-news-report/
 │   ├── src/daily_scheduler/
 │   │   ├── domain/          # 엔티티, 포트 (인터페이스)
 │   │   ├── application/     # 유스케이스 (파이프라인, 회고, 시장 데이터)
-│   │   ├── infrastructure/  # 어댑터 (yfinance, Claude CLI, SMTP, SQLAlchemy)
+│   │   ├── infrastructure/  # 어댑터 (yfinance, AI, SMTP, SQLAlchemy)
 │   │   ├── entrypoints/     # API 라우트, CLI 커맨드
 │   │   ├── templates/       # Jinja2 프롬프트 템플릿 (korean_news, global_news, daily_report)
 │   │   └── constants.py     # 튜닝 가능한 상수
@@ -306,7 +300,7 @@ daily-news-report/
 └── DISCLAIMER.md            # 금융 데이터 & AI 면책 조항
 ```
 
-## ⚙️ 설정
+## 설정
 
 ### 환경 변수 (`.env`) — 시크릿 & 환경별 설정
 
@@ -317,8 +311,8 @@ daily-news-report/
 | `SMTP_USER` | Gmail 주소 | — |
 | `SMTP_PASSWORD` | Gmail 앱 비밀번호 | — |
 | `EMAIL_TO` | 수신자 (JSON 배열) | — |
-| `CLAUDE_CLI_PATH` | Claude CLI 바이너리 경로 | `claude` |
-| `CLAUDE_MODEL` | Claude 모델 (opus / sonnet / haiku) | `opus` |
+| `CLAUDE_CLI_PATH` | AI CLI 바이너리 경로 | `claude` |
+| `CLAUDE_MODEL` | AI 모델 (opus / sonnet / haiku) | `opus` |
 | `REPORT_LANGUAGE` | 리포트 언어 (`ko`, `en`, `ja`) | `ko` |
 | `TIMEZONE` | IANA 타임존 | `Asia/Seoul` |
 | `SCHEDULE_TIME` | 트레이딩 리포트 시간 KST (HH:MM) | `07:30` |
@@ -330,25 +324,25 @@ daily-news-report/
 
 | 상수 | 설명 | 기본값 |
 |------|------|--------|
-| `CLAUDE_TIMEOUT_SECONDS` | Claude CLI 호출 타임아웃 | `1200` |
+| `CLAUDE_TIMEOUT_SECONDS` | AI 호출 타임아웃 | `1200` |
 | `CLAUDE_RETRY_COUNT` | 실패 시 재시도 횟수 | `2` |
 | `DAY_TRADE_EXPIRY_DAYS` | DAY 트레이드 자동 만료 | `1` |
 | `SWING_TRADE_EXPIRY_DAYS` | SWING 트레이드 자동 만료 | `14` |
 | `RETROSPECTIVE_LOOKBACK_DAYS` | 회고 분석 기간 | `30` |
 
-## 🛠️ 기술 스택
+## 기술 스택
 
 | 레이어 | 기술 |
 |--------|------|
 | **백엔드** | Python 3.11+, FastAPI, SQLAlchemy, SQLite, Alembic, Pydantic, Jinja2, aiosmtplib |
 | **프론트엔드** | Next.js 15, React 19, TypeScript 5.7, Tailwind CSS 4, Recharts, TanStack Query |
-| **AI** | Claude Code CLI (Anthropic) |
+| **AI** | Claude (Anthropic) |
 | **시장 데이터** | yfinance (Yahoo Finance) |
 | **스케줄러** | macOS launchd, Linux cron |
 | **패키지 매니저** | uv (Python), Yarn Berry v4 (Frontend) |
 | **코드 품질** | ruff, pylint, pyrefly, mypy, ESLint, oxlint, pytest, Playwright |
 
-## ⚠️ 면책 조항
+## 면책 조항
 
 > **이 소프트웨어는 교육 및 연구 목적으로만 제공됩니다.**
 > AI가 생성한 트레이딩 추천은 투자 조언이 아니며, 금융 손실에 대한 책임은 사용자에게 있습니다.
@@ -358,30 +352,22 @@ daily-news-report/
 
 <a id="기여하기"></a>
 
-## 🤝 기여하기
+## 기여하기
 
-이 프로젝트에 관심을 가져주셔서 감사합니다!
-버그 리포트, 기능 제안, 코드 기여 등 어떤 형태의 참여든 큰 도움이 됩니다.
+버그 리포트, 기능 제안, 코드 기여 모두 환영합니다.
 개발 환경 설정 및 가이드라인은 [CONTRIBUTING.md](CONTRIBUTING.md)를 참조해 주세요.
 
-## 🔒 보안
+## 보안
 
 보안 취약점을 발견하셨다면 [SECURITY.md](SECURITY.md)를 참조하세요.
 
-## 📄 라이선스
+## 라이선스
 
-이 프로젝트는 [Apache License 2.0](LICENSE) 하에 배포됩니다.
-
----
-
-<div align="center">
-  <sub>이 프로젝트가 도움이 되셨다면 ⭐️ Star를 눌러주세요!</sub><br/>
-  <sub>Built with Claude Code · FastAPI · Next.js · yfinance</sub>
-</div>
+[Apache License 2.0](LICENSE)
 
 <!--
   GitHub Topics (Settings → Topics):
-  ai, trading, stock-market, daily-report, news-briefing, claude, fastapi, nextjs,
+  ai, trading, stock-market, daily-report, news-briefing, fastapi, nextjs,
   python, typescript, kospi, nasdaq, retrospective, email-automation,
   hexagonal-architecture, yfinance, global-news
 -->
