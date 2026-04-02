@@ -41,6 +41,9 @@ from daily_scheduler.domain.ports.report_renderer import (
 from daily_scheduler.domain.ports.report_repository import (
     ReportRepositoryPort,
 )
+from daily_scheduler.domain.ports.retrospective_repository import (
+    RetrospectiveRepositoryPort,
+)
 from daily_scheduler.infrastructure.adapters.claude.parser import (
     extract_html_report,
     extract_recommendations,
@@ -59,6 +62,7 @@ class RunDailyPipeline:
         self,
         report_repo: ReportRepositoryPort,
         rec_repo: RecommendationRepositoryPort,
+        retro_repo: RetrospectiveRepositoryPort,
         price_repo: PriceRepositoryPort,
         finance: FinanceProviderPort,
         news: NewsProviderPort,
@@ -67,6 +71,7 @@ class RunDailyPipeline:
     ) -> None:
         self._report_repo = report_repo
         self._rec_repo = rec_repo
+        self._retro_repo = retro_repo
         self._price_repo = price_repo
         self._finance = finance
         self._news = news
@@ -123,15 +128,17 @@ class RunDailyPipeline:
         updated = UpdatePrices(self._rec_repo, self._price_repo, self._finance).execute()
         logger.info("Updated %d recommendations", updated)
 
-        # 3. Build retrospective context
+        # 3. Build retrospective context and persist
         logger.info(_step(3))
         retro_builder = BuildRetrospective(self._rec_repo)
-        retro_context, _retro = retro_builder.build_daily_context(today)
+        retro_context, retro = retro_builder.build_daily_context(today)
+        self._retro_repo.save(retro)
 
         weekly_lessons = ""
         if today.weekday() == 0:
             analysis = retro_builder.build_weekly_analysis(today)
             if analysis:
+                self._retro_repo.save_weekly(analysis)
                 weekly_lessons = analysis.analysis_text
                 logger.info("Weekly analysis built for week of %s", analysis.week_start)
 

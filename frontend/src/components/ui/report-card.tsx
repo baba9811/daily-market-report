@@ -19,7 +19,14 @@ export default function ReportCard({ report }: ReportCardProps) {
         </div>
         <div>
           <h3 className="text-sm font-semibold text-[var(--text-primary)]">
-            {report.report_type === "daily" ? "Daily Report" : "Weekly Report"} —{" "}
+            {
+              {
+                daily: "Daily Report",
+                news: "News Briefing",
+                global_news: "Global News",
+              }[report.report_type] ?? "Weekly Report"
+            }{" "}
+            —{" "}
             {formatDate(report.report_date)}
           </h3>
           <p className="text-xs text-[var(--text-secondary)] line-clamp-1">

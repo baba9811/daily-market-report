@@ -41,9 +41,19 @@ from daily_scheduler.infrastructure.adapters.persistence.recommendation_reposito
 from daily_scheduler.infrastructure.adapters.persistence.report_repository import (
     SQLAlchemyReportRepository,
 )
+from daily_scheduler.infrastructure.adapters.persistence.retrospective_repository import (
+    SQLAlchemyRetrospectiveRepository,
+)
 from daily_scheduler.infrastructure.adapters.template.renderer import (
     Jinja2ReportRenderer,
 )
+
+
+def get_retro_repo(
+    db: Session,
+) -> SQLAlchemyRetrospectiveRepository:
+    """Create a retrospective repository."""
+    return SQLAlchemyRetrospectiveRepository(db)
 
 
 def get_report_repo(
@@ -92,6 +102,7 @@ def get_daily_pipeline(db: Session) -> RunDailyPipeline:
     return RunDailyPipeline(
         report_repo=get_report_repo(db),
         rec_repo=get_rec_repo(db),
+        retro_repo=get_retro_repo(db),
         price_repo=get_price_repo(db),
         finance=get_finance_provider(),
         news=get_news_provider(),

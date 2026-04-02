@@ -22,6 +22,7 @@ def _make_finance_mock() -> MagicMock:
 def _make_pipeline(
     report_repo: MagicMock | None = None,
     rec_repo: MagicMock | None = None,
+    retro_repo: MagicMock | None = None,
     price_repo: MagicMock | None = None,
     finance: MagicMock | None = None,
     news: MagicMock | None = None,
@@ -31,6 +32,7 @@ def _make_pipeline(
     return RunDailyPipeline(
         report_repo=report_repo or MagicMock(),
         rec_repo=rec_repo or MagicMock(),
+        retro_repo=retro_repo or MagicMock(),
         price_repo=price_repo or MagicMock(),
         finance=finance or _make_finance_mock(),
         news=news or MagicMock(),
