@@ -11,6 +11,11 @@ Write the report in {{ language_name }}.
 ## Detailed Sector Performance
 {{ detailed_performance }}
 
+{% if closed_trade_rationales %}
+## Closed Trade Rationales (Original Reasoning)
+{{ closed_trade_rationales }}
+{% endif %}
+
 ## Analysis Requirements
 
 ### 1. Performance Summary
@@ -18,21 +23,51 @@ Write the report in {{ language_name }}.
 - Analyze best/worst performing picks
 - Compare day trading vs swing trading results
 
-### 2. Pattern Analysis
-- Which sectors/markets had successful recommendations
-- What types of recommendations failed
+### 2. Macroeconomic Impact Analysis
+- How did central bank policy (Fed, BOK, BOJ) and interest rate expectations affect picks this week?
+- Did geopolitical events (trade tensions, conflicts, sanctions, tariffs) impact any sectors?
+- How did inflation data, employment numbers, GDP, or PMI reports influence outcomes?
+- Currency movements: did USD/KRW, USD/JPY, or EUR/USD trends help or hurt picks?
+- Commodity price movements: did oil, gold, copper, or agricultural prices affect sector picks?
+- For each losing trade, identify the macro factor MOST responsible for the loss
+
+### 3. Microeconomic Impact Analysis
+- For each closed trade, compare the original rationale (above) to the actual outcome
+- Were any picks affected by unexpected earnings, guidance changes, or analyst revisions?
+- Did supply chain disruptions, regulatory changes, or competitive dynamics impact picks?
+- Management actions (buybacks, dividends, restructuring, insider transactions) that affected outcomes
+- Were there sector-specific micro trends (e.g., chip inventory cycles, EV adoption rates) missed?
+
+### 4. Root Cause Analysis — Why Did Losses Happen?
+For each losing trade, categorize into exactly ONE of these buckets:
+1. **Wrong Thesis**: The fundamental investment thesis was incorrect
+2. **Wrong Timing**: The thesis was right but entry/exit timing was poor
+3. **External Shock**: An unpredictable macro event overrode the thesis
+4. **Execution Error**: Entry price, stop loss, or target was poorly calibrated
+
+Summarize the distribution: how many losses fall into each category?
+
+### 5. Pattern Analysis (Quantitative)
+- Which sectors/markets had successful recommendations and why?
+- What types of recommendations failed — are there common characteristics?
 - Correlation between macro events and recommendation performance
+- Day trading vs swing trading: which performed better and in what conditions?
 
-### 3. Strategy Adjustment Proposals
-- Sectors to focus on next week
-- Patterns/sectors to avoid
-- Target price/stop loss range adjustments needed
-- Day/swing allocation adjustment proposals
+### 6. Strategy Adjustment Proposals
+Based on the macro/micro/root-cause analysis above:
+- Sectors to focus on next week, justified by macro outlook (e.g., rate path, policy)
+- Sectors to AVOID next week, justified by macro/micro headwinds
+- Target price/stop loss range adjustments — should stops be tighter or wider?
+- Day/swing allocation adjustments — should timeframe mix change?
+- Specific macro events next week (earnings, Fed, data releases) that should influence allocation
+- If "Wrong Timing" was a major loss category, propose specific timing adjustments
 
-### 4. Self-Assessment
-- Evaluate accuracy of news analysis
+### 7. Self-Assessment
+- Evaluate accuracy of macroeconomic analysis (were rate/inflation/geopolitical calls correct?)
+- Evaluate accuracy of microeconomic analysis (were earnings/competitive/supply chain calls correct?)
 - Evaluate accuracy of market direction predictions
-- Areas needing improvement
+- Grade yourself: Macro accuracy (A-F), Micro accuracy (A-F), Overall (A-F)
+- Top 3 specific improvements for next week
 
 ## HTML Report Output
 

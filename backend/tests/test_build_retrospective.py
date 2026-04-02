@@ -156,6 +156,76 @@ class TestWinRate:
         assert BuildRetrospective._win_rate(recs) == 50.0
 
 
+class TestClosedTradeRationales:
+    def test_context_includes_closed_trade_rationales(self):
+        rec_repo = MagicMock()
+        now = tz.now()
+        recs = [
+            _make_rec(
+                status="TARGET_HIT",
+                pnl_percent=8.0,
+                rationale="Strong AI demand + MACD bullish crossover",
+                created_at=now - timedelta(days=2),
+            ),
+            _make_rec(
+                id=2,
+                ticker="TSLA",
+                name="Tesla",
+                status="STOP_HIT",
+                pnl_percent=-3.0,
+                rationale="EV sector recovery after oversold RSI",
+                created_at=now - timedelta(days=3),
+            ),
+        ]
+        rec_repo.get_by_period.return_value = recs
+
+        builder = BuildRetrospective(rec_repo)
+        context, _ = builder.build_daily_context()
+
+        assert "Recently Closed Trades" in context
+        assert "Original Rationale" in context
+        assert "Strong AI demand" in context
+        assert "EV sector recovery" in context
+
+    def test_empty_rationale_shows_na(self):
+        rec_repo = MagicMock()
+        now = tz.now()
+        recs = [
+            _make_rec(
+                status="STOP_HIT",
+                pnl_percent=-2.0,
+                rationale="",
+                created_at=now - timedelta(days=1),
+            ),
+        ]
+        rec_repo.get_by_period.return_value = recs
+
+        builder = BuildRetrospective(rec_repo)
+        context, _ = builder.build_daily_context()
+
+        assert "N/A" in context
+
+    def test_long_rationale_is_truncated(self):
+        rec_repo = MagicMock()
+        now = tz.now()
+        long_rationale = "A" * 300
+        recs = [
+            _make_rec(
+                status="TARGET_HIT",
+                pnl_percent=5.0,
+                rationale=long_rationale,
+                created_at=now - timedelta(days=1),
+            ),
+        ]
+        rec_repo.get_by_period.return_value = recs
+
+        builder = BuildRetrospective(rec_repo)
+        context, _ = builder.build_daily_context()
+
+        assert "A" * 200 + "..." in context
+        assert "A" * 300 not in context
+
+
 class TestLessons:
     def test_low_sector_win_rate_warning(self):
         lines: list[str] = []
@@ -175,3 +245,8 @@ class TestLessons:
         swing_recs = [_make_rec(id=2)]
         BuildRetrospective._add_lessons(lines, {}, day_recs, swing_recs, 30.0, 60.0)
         assert any("Swing" in line for line in lines)
+
+    def test_macro_micro_reflection_always_present(self):
+        lines: list[str] = []
+        BuildRetrospective._add_lessons(lines, {}, [], [], 0.0, 0.0)
+        assert any("macroeconomic" in line and "microeconomic" in line for line in lines)

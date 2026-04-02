@@ -58,12 +58,14 @@ class ClaudeNewsProvider(NewsProviderPort):
         report_date: date,
         weekly_stats: str,
         detailed_performance: str,
+        closed_rationales: str = "",
     ) -> tuple[str, float]:
         """Generate a weekly retrospective via Claude CLI."""
         prompt = self._build_weekly_prompt(
             report_date,
             weekly_stats,
             detailed_performance,
+            closed_rationales,
         )
         return self._call_claude(prompt)
 
@@ -132,6 +134,7 @@ class ClaudeNewsProvider(NewsProviderPort):
         report_date: date,
         weekly_stats: str,
         detailed_performance: str,
+        closed_rationales: str = "",
     ) -> str:
         template = self._jinja.get_template(
             "weekly_retro.j2",
@@ -140,6 +143,7 @@ class ClaudeNewsProvider(NewsProviderPort):
             date=report_date.isoformat(),
             weekly_stats=weekly_stats,
             detailed_performance=detailed_performance,
+            closed_trade_rationales=closed_rationales,
             language=self._settings.report_language,
         )
 

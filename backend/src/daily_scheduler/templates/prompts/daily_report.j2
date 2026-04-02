@@ -116,14 +116,56 @@ For each major news:
 
 ---
 
-## STEP 3: TRADING RECOMMENDATIONS
+## STEP 2.5: RETROSPECTIVE ANALYSIS — LEARN BEFORE YOU RECOMMEND
 
-### Past Performance Context
+Before generating new recommendations, you MUST deeply analyze past performance
+through macro and micro economic lenses. This step is MANDATORY — do not skip it.
+
+### Past Performance Data
 {{ retrospective }}
 {% if weekly_lessons %}
 ### Weekly Lessons
 {{ weekly_lessons }}
 {% endif %}
+
+### A. Macroeconomic Reflection
+Review the closed trades in the data above. For each losing trade, ask yourself:
+1. Did I misjudge the macro environment? (e.g., interest rate expectations,
+   inflation trend, trade policy shifts, currency movements, commodity prices)
+2. Was there a macro catalyst I missed or underweighted? (e.g., Fed statement,
+   CPI release, geopolitical escalation, tariff announcement)
+3. Are current macro conditions similar to conditions when past trades failed?
+4. Did sector rotation driven by macro shifts invalidate my thesis?
+
+### B. Microeconomic Reflection
+For each losing trade, ask:
+1. Did company-specific fundamentals change after the recommendation?
+   (earnings miss/beat, guidance revision, analyst downgrade/upgrade)
+2. Were supply chain disruptions, regulatory changes, or competitive dynamics
+   different than assumed?
+3. Were there management actions (buybacks, dilution, restructuring, M&A)
+   that I didn't account for?
+4. Was the technical setup invalidated by company-specific news?
+
+### C. Pattern Recognition
+1. Are there recurring macro themes in losses? (e.g., consistently wrong on
+   rate-sensitive sectors, misjudging geopolitical impact on energy)
+2. Are there recurring micro patterns? (e.g., poor timing on pre-earnings picks,
+   overestimating recovery in beaten-down stocks)
+3. What macro/micro conditions are present TODAY that match past failure patterns?
+
+### D. Strategic Recalibration
+Based on your analysis in A-C above, explicitly state:
+1. Which sectors/themes to AVOID today based on macro/micro lessons
+2. Which sectors/themes are FAVORED by current macro/micro conditions
+3. How today's recommendations will differ from past failed patterns
+4. Any adjustments to risk parameters (tighter stops, smaller position sizing)
+
+Include your recalibration insights in the `past_performance_commentary` field.
+
+---
+
+## STEP 3: TRADING RECOMMENDATIONS
 
 ### Rules:
 {% if language == "ko" %}

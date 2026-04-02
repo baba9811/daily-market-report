@@ -61,10 +61,16 @@ class RunWeeklyPipeline:
                 f" Avg return:"
                 f" {analysis.avg_return_pct:.1f}%"
             )
+
+            closed_rationales = self._build_closed_rationales(
+                analysis.week_start,
+            )
+
             raw_response, _ = self._news.generate_weekly_report(
                 today,
                 weekly_stats,
                 analysis.sector_breakdown,
+                closed_rationales,
             )
             if not raw_response:
                 logger.error("Claude returned empty response for weekly report")
@@ -92,3 +98,28 @@ class RunWeeklyPipeline:
         except Exception:  # pylint: disable=broad-exception-caught
             logger.exception("Weekly pipeline failed")
             return False
+
+    def _build_closed_rationales(
+        self,
+        week_start: date,
+    ) -> str:
+        """Build formatted rationale text for closed trades in the previous week."""
+        from datetime import timedelta
+
+        since = tz.combine(week_start)
+        until = tz.combine(week_start + timedelta(days=7))
+
+        closed = self._rec_repo.get_closed_by_period(since)
+        closed = [r for r in closed if r.created_at and r.created_at < until]
+
+        if not closed:
+            return ""
+
+        lines: list[str] = []
+        for r in closed:
+            outcome = "WIN" if r.status == "TARGET_HIT" else "LOSS"
+            pnl = f"{r.pnl_percent:+.1f}%" if r.pnl_percent is not None else "N/A"
+            rationale = r.rationale.strip()[:200] if r.rationale else "N/A"
+            lines.append(f"- {r.ticker} ({r.name}): {outcome} ({pnl}) | Rationale: {rationale}")
+
+        return "\n".join(lines)

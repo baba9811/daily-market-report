@@ -245,6 +245,8 @@ class BuildRetrospective:
                 f" | {pnl_str} | {status} |"
             )
 
+        self._add_closed_rationales(lines, recent_recs)
+
         lines.extend(["", "### Lessons (Auto-derived)"])
         self._add_lessons(
             lines,
@@ -265,6 +267,35 @@ class BuildRetrospective:
             return 0.0
         wins = sum(1 for r in recs if r.status == "TARGET_HIT")
         return wins / len(recs) * 100
+
+    @staticmethod
+    def _add_closed_rationales(
+        lines: list[str],
+        recent_recs: list[Recommendation],
+    ) -> None:
+        """Append closed trade rationale table to context lines."""
+        recently_closed = [r for r in recent_recs if r.status in ("TARGET_HIT", "STOP_HIT")]
+        if not recently_closed:
+            return
+        lines.extend(
+            [
+                "",
+                "### Recently Closed Trades — Original Rationale",
+                "| Stock | Direction | Outcome | P&L | Original Rationale |",
+                "|-------|-----------|---------|-----|--------------------|",
+            ]
+        )
+        max_rationale_len = 200
+        for r in recently_closed:
+            pnl_str = f"{r.pnl_percent:+.1f}%" if r.pnl_percent is not None else "N/A"
+            outcome = "Target Hit" if r.status == "TARGET_HIT" else "Stop Hit"
+            direction = "Buy" if r.direction == "LONG" else "Sell"
+            rationale = r.rationale.strip() if r.rationale else "N/A"
+            if len(rationale) > max_rationale_len:
+                rationale = rationale[:max_rationale_len] + "..."
+            lines.append(
+                f"| {r.name} ({r.ticker}) | {direction} | {outcome} | {pnl_str} | {rationale} |"
+            )
 
     @staticmethod
     def _build_sector_stats(
@@ -362,3 +393,11 @@ class BuildRetrospective:
                     f" outperforms swing trading"
                     f" ({swing_wr:.0f}%)."
                 )
+
+        lines.append(
+            "- Reflect: For each closed trade above, consider what"
+            " macroeconomic conditions (interest rates, inflation,"
+            " geopolitics, currency) or microeconomic factors"
+            " (earnings, competitive position, supply chain)"
+            " actually drove the outcome vs. what was predicted."
+        )
